@@ -1,0 +1,19 @@
+group 'net.quedex.client'
+version '0.1-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+wrapper {
+    gradleVersion '2.14'
+}
