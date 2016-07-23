@@ -130,11 +130,6 @@ public class WebsocketMarketStream implements MarketStream {
     }
 
     @Override
-    public void unsubscribeGlobalSessionStateListener() {
-
-    }
-
-    @Override
     public void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
         this.streamFailureListener = streamFailureListener;
     }
