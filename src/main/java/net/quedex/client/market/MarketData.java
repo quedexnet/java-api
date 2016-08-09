@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface MarketData {
 
-    Map<Integer, Instrument> getInstruments();
+    Map<Integer, Instrument> getInstruments() throws CommunicationException;
 }

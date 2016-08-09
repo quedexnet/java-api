@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 class MessageProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessor.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private final BcSignatureVerifier bcSignatureVerifier;
@@ -67,7 +67,7 @@ class MessageProcessor {
 
     void processMessage(String message) {
         try {
-            JsonNode metaJson = MAPPER.readTree(message);
+            JsonNode metaJson = OBJECT_MAPPER.readTree(message);
 
             switch (metaJson.get("type").asText()) {
                 case "data":
@@ -92,17 +92,17 @@ class MessageProcessor {
         LOGGER.trace("processData({})", data);
 
         String verified = bcSignatureVerifier.verifySignature(data);
-        JsonNode dataJson = MAPPER.readTree(verified);
+        JsonNode dataJson = OBJECT_MAPPER.readTree(verified);
 
         switch (dataJson.get("type").asText()) {
             case "order_book":
-                onOrderBook(MAPPER.treeToValue(dataJson, OrderBook.class));
+                onOrderBook(OBJECT_MAPPER.treeToValue(dataJson, OrderBook.class));
                 break;
             case "quotes":
-                onQuotes(MAPPER.treeToValue(dataJson, Quotes.class));
+                onQuotes(OBJECT_MAPPER.treeToValue(dataJson, Quotes.class));
                 break;
             case "trade":
-                onTrade(MAPPER.treeToValue(dataJson, Trade.class));
+                onTrade(OBJECT_MAPPER.treeToValue(dataJson, Trade.class));
                 break;
             case "session_state":
                 onSessionState(SessionState.valueOf(dataJson.get("state").textValue().toUpperCase()));
