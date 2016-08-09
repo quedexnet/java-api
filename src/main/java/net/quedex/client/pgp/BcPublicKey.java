@@ -1,13 +1,12 @@
 package net.quedex.client.pgp;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 
 import java.io.ByteArrayInputStream;
@@ -15,8 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class BcPublicKey {
 
@@ -26,11 +23,11 @@ public final class BcPublicKey {
     private final String fingerprint;
     private final String mainKeyIdentity;
 
-    public BcPublicKey(String armoredKeyString) throws PGPKeyInitialisationException {
+    public static BcPublicKey fromArmored(String armoredKeyString) throws PGPKeyInitialisationException {
 
         try {
             PGPPublicKeyRing pubKeyRing = new PGPPublicKeyRing(
-                    PGPUtil.getDecoderStream(new ByteArrayInputStream(armoredKeyString.getBytes(StandardCharsets.UTF_8))),
+                    new ArmoredInputStream(new ByteArrayInputStream(armoredKeyString.getBytes(StandardCharsets.UTF_8))),
                     new BcKeyFingerprintCalculator()
             );
 
@@ -38,7 +35,8 @@ public final class BcPublicKey {
                 throw new PGPKeyInitialisationException("No keys in keyring");
             }
 
-            signingKey = pubKeyRing.getPublicKey();
+            PGPPublicKey signingKey = pubKeyRing.getPublicKey();
+            PGPPublicKey encryptionKey;
 
             @SuppressWarnings("unchecked")
             List<PGPPublicKey> keys = Lists.newArrayList(pubKeyRing.getPublicKeys());
@@ -53,14 +51,11 @@ public final class BcPublicKey {
                 throw new PGPKeyInitialisationException("Error instatiating public key: sign-only key.");
             }
 
+            return new BcPublicKey(signingKey, encryptionKey);
+
         } catch (RuntimeException | IOException e) {
             throw new PGPKeyInitialisationException("Error instantiating a public key", e);
         }
-        checkNotNull(signingKey);
-        checkNotNull(encryptionKey);
-
-        fingerprint = hexFingerprint(signingKey);
-        mainKeyIdentity = (String) signingKey.getUserIDs().next();
     }
 
     BcPublicKey(PGPPublicKey signingKey, PGPPublicKey encryptionKey) {
@@ -86,7 +81,7 @@ public final class BcPublicKey {
         return mainKeyIdentity;
     }
 
-    public String getArmored() {
+    public String armored() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ArmoredOutputStream armored = new ArmoredOutputStream(out);
         try {
@@ -96,10 +91,10 @@ public final class BcPublicKey {
         } catch (IOException e) {
             throw new IllegalStateException("Error writing armored public key", e);
         }
-        return new String(out.toByteArray(), Charsets.UTF_8);
+        return new String(out.toByteArray(), StandardCharsets.US_ASCII);
     }
 
-    private static String hexFingerprint(PGPPublicKey publicKey) {
+    static String hexFingerprint(PGPPublicKey publicKey) {
         byte[] bytes = publicKey.getFingerprint();
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {

@@ -44,7 +44,7 @@ public class WebsocketMarketStreamIT {
 
         Properties props = new Properties();
         props.load(Resources.getResource("market.properties").openStream());
-        BcPublicKey pubKey = new BcPublicKey(props.getProperty("pubKey"));
+        BcPublicKey pubKey = BcPublicKey.fromArmored(props.getProperty("pubKey"));
         marketStream = new WebsocketMarketStream(props.getProperty("wsUrl"), pubKey);
         marketData = new HttpMarketData(props.getProperty("instrumentsUrl"), pubKey);
     }

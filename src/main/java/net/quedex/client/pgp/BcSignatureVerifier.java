@@ -39,7 +39,7 @@ public final class BcSignatureVerifier {
 
             JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(aIn);
             PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
-            checkState(p3.size() >= 1, "No signatures");
+            checkState(p3 != null && p3.size() >= 1, "No signatures");
             PGPSignature sig = p3.get(0);
 
             sig.init(new BcPGPContentVerifierBuilderProvider(), publicKey.getSigningKey());

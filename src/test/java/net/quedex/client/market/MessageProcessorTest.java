@@ -30,7 +30,7 @@ public class MessageProcessorTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        messageProcessor = new MessageProcessor(new BcPublicKey(Fixtures.PUB_KEY));
+        messageProcessor = new MessageProcessor(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
         messageProcessor.registerStreamFailureListener(streamFailureListener);
     }
 
