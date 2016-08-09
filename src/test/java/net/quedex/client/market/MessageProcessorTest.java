@@ -80,7 +80,7 @@ public class MessageProcessorTest {
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
-        verify(quotesListener).onQuotes(new Quotes(1, $("0.0025"), 0, $("0.00142858"), 1, $("0.00166666"), 1, 0, 0));
+        verify(quotesListener).onQuotes(new Quotes(1, $("0.00142858"), 1, null, null, $("0.00166944"), 3, 2, 0));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class MessageProcessorTest {
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(tradeListener).onTrade(argThat(isFieldByFiledEqual(
-                new Trade(1, 70, 1470681720788L, $("0.00166666"), 1, "seller")
+                new Trade(1, 70, 1470681720788L, $("0.00166666"), 1, Trade.LiquidityProvider.SELLER)
         )));
     }
 

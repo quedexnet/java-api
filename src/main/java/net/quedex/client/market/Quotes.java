@@ -14,11 +14,11 @@ public class Quotes {
 
     private final int instrumentId;
     private final BigDecimal last;
-    private final int lastSize;
+    private final int lastQuantity;
     private final BigDecimal bid;
-    private final Integer bidSize;
+    private final Integer bidQuantity;
     private final BigDecimal ask;
-    private final Integer askSize;
+    private final Integer askQuantity;
     private final int volume;
     private final int openInterest;
 
@@ -26,29 +26,29 @@ public class Quotes {
     public Quotes(
             @JsonProperty("instrument_id") int instrumentId,
             @JsonProperty("last") BigDecimal last,
-            @JsonProperty("last_size") int lastSize,
+            @JsonProperty("last_quantity") int lastQuantity,
             @JsonProperty("bid") BigDecimal bid,
-            @JsonProperty("bid_size") Integer bidSize,
+            @JsonProperty("bid_quantity") Integer bidQuantity,
             @JsonProperty("ask") BigDecimal ask,
-            @JsonProperty("ask_size") Integer askSize,
+            @JsonProperty("ask_quantity") Integer askQuantity,
             @JsonProperty("volume") int volume,
             @JsonProperty("open_interest") int openInterest
     ) {
         checkArgument(last.compareTo(BigDecimal.ZERO) > 0, "last=%s <= 0", last);
-        checkArgument(lastSize >= 0, "lastSize=%s < 0", lastSize); // may be 0 when reference trade
+        checkArgument(lastQuantity >= 0, "lastQuantity=%s < 0", lastQuantity); // may be 0 when reference trade
         checkArgument(volume >= 0, "volume=%s < 0", volume);
         checkArgument(bid == null || bid.compareTo(BigDecimal.ZERO) > 0, "bid=%s <= 0", bid);
-        checkArgument(bidSize == null || bidSize > 0, "bidSize=%s <= 0", bidSize);
+        checkArgument(bidQuantity == null || bidQuantity > 0, "bidQuantity=%s <= 0", bidQuantity);
         checkArgument(ask == null || ask.compareTo(BigDecimal.ZERO) > 0, "ask=%s <= 0", ask);
-        checkArgument(askSize == null || askSize > 0, "askSize=%s <= 0", askSize);
+        checkArgument(askQuantity == null || askQuantity > 0, "askQuantity=%s <= 0", askQuantity);
         checkArgument(openInterest >= 0, "openInterest=%s < 0", openInterest);
         this.instrumentId = instrumentId;
         this.last = last;
-        this.lastSize = lastSize;
+        this.lastQuantity = lastQuantity;
         this.bid = bid;
-        this.bidSize = bidSize;
+        this.bidQuantity = bidQuantity;
         this.ask = ask;
-        this.askSize = askSize;
+        this.askQuantity = askQuantity;
         this.volume = volume;
         this.openInterest = openInterest;
     }
@@ -58,15 +58,15 @@ public class Quotes {
     }
 
     public PriceQuantity getLast() {
-        return new PriceQuantity(last, lastSize);
+        return new PriceQuantity(last, lastQuantity);
     }
 
     public Optional<PriceQuantity> getBid() {
-        return bidSize == null ? Optional.empty() : Optional.of(new PriceQuantity(bid, bidSize));
+        return bidQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(bid, bidQuantity));
     }
 
     public Optional<PriceQuantity> getAsk() {
-        return askSize == null ? Optional.empty() : Optional.of(new PriceQuantity(ask, askSize));
+        return askQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(ask, askQuantity));
     }
 
     public int getVolume() {
@@ -83,19 +83,19 @@ public class Quotes {
         if (o == null || getClass() != o.getClass()) return false;
         Quotes quotes = (Quotes) o;
         return instrumentId == quotes.instrumentId &&
-                lastSize == quotes.lastSize &&
+                lastQuantity == quotes.lastQuantity &&
                 volume == quotes.volume &&
                 openInterest == quotes.openInterest &&
                 Objects.equal(last, quotes.last) &&
                 Objects.equal(bid, quotes.bid) &&
-                Objects.equal(bidSize, quotes.bidSize) &&
+                Objects.equal(bidQuantity, quotes.bidQuantity) &&
                 Objects.equal(ask, quotes.ask) &&
-                Objects.equal(askSize, quotes.askSize);
+                Objects.equal(askQuantity, quotes.askQuantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(instrumentId, last, lastSize, bid, bidSize, ask, askSize, volume, openInterest);
+        return Objects.hashCode(instrumentId, last, lastQuantity, bid, bidQuantity, ask, askQuantity, volume, openInterest);
     }
 
     @Override
@@ -103,11 +103,11 @@ public class Quotes {
         return MoreObjects.toStringHelper(this)
                 .add("instrumentId", instrumentId)
                 .add("last", last)
-                .add("lastSize", lastSize)
+                .add("lastQuantity", lastQuantity)
                 .add("bid", bid)
-                .add("bidSize", bidSize)
+                .add("bidQuantity", bidQuantity)
                 .add("ask", ask)
-                .add("askSize", askSize)
+                .add("askQuantity", askQuantity)
                 .add("volume", volume)
                 .add("openInterest", openInterest)
                 .toString();

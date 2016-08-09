@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
@@ -52,6 +53,7 @@ public class WebsocketMarketStreamIT {
     public void testIntegrationWithLiveWS() throws Exception {
 
         Collection<Integer> instrumentIds = marketData.getInstruments().keySet();
+        assertThat(instrumentIds).isNotEmpty();
 
         System.out.println("instrumentIds = " + instrumentIds); // for debugging
 

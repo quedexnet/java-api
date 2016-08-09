@@ -8,13 +8,7 @@ public interface Registration {
 
     Registration unsubscribe(int instrumentId);
 
-    default Registration subscribe(Collection<Integer> instrumentIds) {
-        instrumentIds.forEach(this::subscribe);
-        return this;
-    }
+    Registration subscribe(Collection<Integer> instrumentIds);
 
-    default Registration unsubscribe(Collection<Integer> instrumentIds) {
-        instrumentIds.forEach(this::unsubscribe);
-        return this;
-    }
+    Registration unsubscribe(Collection<Integer> instrumentIds);
 }

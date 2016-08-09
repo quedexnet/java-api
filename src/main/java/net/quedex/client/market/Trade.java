@@ -13,7 +13,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class Trade {
 
     public enum LiquidityProvider {
-        BUYER, SELLER, AUCTION
+        BUYER, SELLER, AUCTION;
+
+        @JsonCreator
+        private static LiquidityProvider deserialize(String value) {
+            return valueOf(value.toUpperCase());
+        }
     }
 
     private final int instrumentId;
@@ -31,7 +36,7 @@ public final class Trade {
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("price") BigDecimal price,
             @JsonProperty("quantity") int quantity,
-            @JsonProperty("liquidity_provider") String liquidityProvider
+            @JsonProperty("liquidity_provider") LiquidityProvider liquidityProvider
     ) {
         checkArgument(quantity > 0, "quantity=%s <= 0", quantity);
         this.instrumentId = instrumentId;
@@ -39,8 +44,7 @@ public final class Trade {
         this.timestamp = timestamp;
         this.price = checkNotNull(price, "null price");
         this.quantity = quantity;
-        this.liquidityProvider =
-                LiquidityProvider.valueOf(checkNotNull(liquidityProvider, "null liquidityProvider").toUpperCase());
+        this.liquidityProvider = checkNotNull(liquidityProvider, "null liquidityProvider");
     }
 
     public int getInstrumentId() {

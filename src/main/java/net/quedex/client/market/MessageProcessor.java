@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -165,14 +166,26 @@ class MessageProcessor {
         }
 
         @Override
-        public Registration subscribe(int instrumentId) {
+        public DefaultRegistration subscribe(int instrumentId) {
             subscriptions.add(instrumentId);
             return this;
         }
 
         @Override
-        public Registration unsubscribe(int instrumentId) {
+        public DefaultRegistration subscribe(Collection<Integer> instrumentIds) {
+            instrumentIds.forEach(this::subscribe);
+            return this;
+        }
+
+        @Override
+        public DefaultRegistration unsubscribe(int instrumentId) {
             subscriptions.remove(instrumentId);
+            return this;
+        }
+
+        @Override
+        public DefaultRegistration unsubscribe(Collection<Integer> instrumentIds) {
+            instrumentIds.forEach(this::unsubscribe);
             return this;
         }
     }

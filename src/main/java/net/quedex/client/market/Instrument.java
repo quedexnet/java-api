@@ -12,9 +12,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class Instrument {
 
-    public enum InstrumentType { FUTURES, OPTION }
+    private static final int SETTLEMENT_HOUR_UTC_MILLIS = 8 * 60 * 60 * 1000;
 
-    public enum OptionType { CALL_EUROPEAN, PUT_EUROPEAN }
+    public enum InstrumentType {
+        FUTURES,
+        OPTION;
+
+        @JsonCreator
+        private static InstrumentType deserialize(String value) {
+            return valueOf(value.toUpperCase());
+        }
+    }
+
+    public enum OptionType {
+        CALL_EUROPEAN,
+        PUT_EUROPEAN;
+
+        @JsonCreator
+        private static OptionType deserialize(String value) {
+            return valueOf(value.toUpperCase());
+        }
+    }
 
     private final int instrumentId;
     private final String symbol;
@@ -35,8 +53,8 @@ public final class Instrument {
     public Instrument(
             @JsonProperty("symbol") String symbol,
             @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("type") String instrumentType,
-            @JsonProperty("option_type") String optionType,
+            @JsonProperty("type") InstrumentType instrumentType,
+            @JsonProperty("option_type") OptionType optionType,
             @JsonProperty("tick_size") BigDecimal tickSize,
             @JsonProperty("issue_date") long issueDate,
             @JsonProperty("expiration_date") long expirationDate,
@@ -67,8 +85,7 @@ public final class Instrument {
 
         this.symbol = symbol;
         this.instrumentId = instrumentId;
-        this.instrumentType =
-                InstrumentType.valueOf(checkNotNull(instrumentType, "null instrumentType").toUpperCase());
+        this.instrumentType = checkNotNull(instrumentType, "null instrumentType");
         this.tickSize = tickSize;
         this.issueDate = issueDate;
         this.expirationDate = expirationDate;
@@ -87,7 +104,7 @@ public final class Instrument {
         } else {
             checkArgument(strike.compareTo(BigDecimal.ZERO) > 0, "strike=%s <= 0", strike);
             this.strike = strike;
-            this.optionType = OptionType.valueOf(checkNotNull(optionType, "null optionType").toUpperCase());
+            this.optionType = checkNotNull(optionType, "null optionType");
         }
     }
 
@@ -166,7 +183,7 @@ public final class Instrument {
     }
 
     public boolean isTraded(long currentTimeMillis) {
-        return issueDate < currentTimeMillis && currentTimeMillis < expirationDate; // TODO: expirationDate bound is wrong
+        return issueDate < currentTimeMillis && currentTimeMillis < expirationDate + SETTLEMENT_HOUR_UTC_MILLIS;
     }
 
     @Override
