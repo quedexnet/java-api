@@ -1,7 +1,6 @@
 package net.quedex.client.market;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -11,9 +10,9 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Quotes {
 
+    private final int instrumentId;
     private final BigDecimal last;
     private final int lastSize;
     private final BigDecimal bid;
@@ -25,6 +24,7 @@ public class Quotes {
 
     @JsonCreator
     public Quotes(
+            @JsonProperty("instrument_id") int instrumentId,
             @JsonProperty("last") BigDecimal last,
             @JsonProperty("last_size") int lastSize,
             @JsonProperty("bid") BigDecimal bid,
@@ -35,13 +35,14 @@ public class Quotes {
             @JsonProperty("open_interest") int openInterest
     ) {
         checkArgument(last.compareTo(BigDecimal.ZERO) > 0, "last=%s <= 0", last);
-        checkArgument(lastSize > 0, "lastSize=%s <= 0", lastSize);
+        checkArgument(lastSize >= 0, "lastSize=%s < 0", lastSize); // may be 0 when reference trade
         checkArgument(volume >= 0, "volume=%s < 0", volume);
         checkArgument(bid == null || bid.compareTo(BigDecimal.ZERO) > 0, "bid=%s <= 0", bid);
         checkArgument(bidSize == null || bidSize > 0, "bidSize=%s <= 0", bidSize);
         checkArgument(ask == null || ask.compareTo(BigDecimal.ZERO) > 0, "ask=%s <= 0", ask);
         checkArgument(askSize == null || askSize > 0, "askSize=%s <= 0", askSize);
         checkArgument(openInterest >= 0, "openInterest=%s < 0", openInterest);
+        this.instrumentId = instrumentId;
         this.last = last;
         this.lastSize = lastSize;
         this.bid = bid;
@@ -50,6 +51,10 @@ public class Quotes {
         this.askSize = askSize;
         this.volume = volume;
         this.openInterest = openInterest;
+    }
+
+    public int getInstrumentId() {
+        return instrumentId;
     }
 
     public PriceQuantity getLast() {
@@ -77,7 +82,8 @@ public class Quotes {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Quotes quotes = (Quotes) o;
-        return lastSize == quotes.lastSize &&
+        return instrumentId == quotes.instrumentId &&
+                lastSize == quotes.lastSize &&
                 volume == quotes.volume &&
                 openInterest == quotes.openInterest &&
                 Objects.equal(last, quotes.last) &&
@@ -89,12 +95,13 @@ public class Quotes {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(last, lastSize, bid, bidSize, ask, askSize, volume, openInterest);
+        return Objects.hashCode(instrumentId, last, lastSize, bid, bidSize, ask, askSize, volume, openInterest);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("instrumentId", instrumentId)
                 .add("last", last)
                 .add("lastSize", lastSize)
                 .add("bid", bid)

@@ -72,12 +72,24 @@ public final class Trade {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trade trade = (Trade) o;
-        return instrumentId == trade.instrumentId;
+        return tradeId == trade.tradeId;
+    }
+
+    public boolean equalsFieldByField(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Trade trade = (Trade) o;
+        return instrumentId == trade.instrumentId &&
+                tradeId == trade.tradeId &&
+                timestamp == trade.timestamp &&
+                quantity == trade.quantity &&
+                Objects.equal(price, trade.price) &&
+                liquidityProvider == trade.liquidityProvider;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(instrumentId);
+        return Objects.hashCode(tradeId);
     }
 
     @Override

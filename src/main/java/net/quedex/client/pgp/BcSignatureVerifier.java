@@ -24,11 +24,11 @@ public final class BcSignatureVerifier {
         this.publicKey = checkNotNull(publicKey, "null publicKey");
     }
 
-    public SignedCleartext verifySignature(byte[] message)
+    public String verifySignature(String message)
             throws PGPInvalidSignatureException, PGPSignatureVerificationException {
 
         try {
-            ArmoredInputStream aIn = new ArmoredInputStream(new ByteArrayInputStream(message));
+            ArmoredInputStream aIn = new ArmoredInputStream(new ByteArrayInputStream(message.getBytes()));
 
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
             int ch;
@@ -41,7 +41,6 @@ public final class BcSignatureVerifier {
             PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
             checkState(p3.size() >= 1, "No signatures");
             PGPSignature sig = p3.get(0);
-
 
             sig.init(new BcPGPContentVerifierBuilderProvider(), publicKey.getSigningKey());
 
@@ -64,10 +63,12 @@ public final class BcSignatureVerifier {
             }
 
             if (sig.verify()) {
-                return new SignedCleartext(new String(content, StandardCharsets.UTF_8), publicKey.getFingerprint());
+                return new String(content, StandardCharsets.UTF_8);
             }
 
-            throw new PGPInvalidSignatureException("Invalid signature");
+            throw new PGPInvalidSignatureException(
+                    "Invalid signature, received keyId=" + Long.toHexString(sig.getKeyID()).toUpperCase()
+            );
 
         } catch (IOException | PGPException e) {
             throw new PGPSignatureVerificationException("Error verifying message", e);

@@ -1,5 +1,6 @@
 package net.quedex.client.market;
 
+import net.quedex.client.pgp.BcPublicKey;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
@@ -8,33 +9,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * TODO: Java-Websockets holds infinitely growing queues
+ */
 public class WebsocketMarketStream implements MarketStream {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketMarketStream.class);
 
     private final WebSocketClient webSocketClient;
     private final ExecutorService webSocketClientFactoryExec;
-
-    private volatile OrderBookListener orderBookListener;
-    private final Set<Integer> orderBookSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>(64, 0.75f, 2));
-
-    private volatile TradeListener tradeListener;
-    private final Set<Integer> tradeSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>(64, 0.75f, 2));
+    private final MessageProcessor messageProcessor;
 
     private volatile StreamFailureListener streamFailureListener;
 
-    public WebsocketMarketStream(String marketStreamUrl) {
+    public WebsocketMarketStream(String marketStreamUrl, BcPublicKey publicKey) {
 
         webSocketClient = new WebSocketClient(URI.create(marketStreamUrl), new Draft_17()) {
             @Override
@@ -77,61 +71,34 @@ public class WebsocketMarketStream implements MarketStream {
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new IllegalStateException("Error initialising SSL", e);
         }
+
+        messageProcessor = new MessageProcessor(publicKey);
     }
 
     @Override
-    public void registerOrderBookListener(OrderBookListener orderBookListener) {
-        this.orderBookListener = orderBookListener;
+    public Registration registerOrderBookListener(OrderBookListener orderBookListener) {
+        return messageProcessor.registerOrderBookListener(orderBookListener);
     }
 
     @Override
-    public void subscribeOrderBookListener(int instrumentId) {
-        orderBookSubscriptions.add(instrumentId);
+    public Registration registerTradeListener(TradeListener tradeListener) {
+        return messageProcessor.registerTradeListener(tradeListener);
     }
 
     @Override
-    public void unsubscribeOrderBookListener(int instrumentId) {
-        orderBookSubscriptions.remove(instrumentId);
-    }
-
-    @Override
-    public void registerTradeListener(TradeListener tradeListener) {
-
-    }
-
-    @Override
-    public void subscribeTradeListener(int instrumentId) {
-
-    }
-
-    @Override
-    public void unsubscribeTradeListener(int instrumentId) {
-
-    }
-
-    @Override
-    public void registerQuotesListener(QuotesListener quotesListener) {
-
-    }
-
-    @Override
-    public void subscribeQuotesListener(int instrumentId) {
-
-    }
-
-    @Override
-    public void unsubscribeQuotesListener(int instrumentId) {
-
+    public Registration registerQuotesListener(QuotesListener quotesListener) {
+        return messageProcessor.registerQuotesListener(quotesListener);
     }
 
     @Override
     public void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener) {
-
+        messageProcessor.registerAndSubscribeSessionStateListener(sessionStateListener);
     }
 
     @Override
     public void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
         this.streamFailureListener = streamFailureListener;
+        messageProcessor.registerStreamFailureListener(streamFailureListener);
     }
 
     @Override
@@ -148,7 +115,7 @@ public class WebsocketMarketStream implements MarketStream {
     @Override
     public void stop() throws CommunicationException {
         LOGGER.trace("Stopping");
-        // TODO: comment
+        // has to be closed this way because of incompatibilities in WS protocol
         webSocketClient.close();
         webSocketClient.getConnection().closeConnection(1000, "");
         try {
@@ -161,7 +128,7 @@ public class WebsocketMarketStream implements MarketStream {
     }
 
     private void processMessage(String message) {
-        System.out.println("message = " + message);
+        messageProcessor.processMessage(message);
     }
 
     private void onError(Exception e) {
@@ -169,17 +136,5 @@ public class WebsocketMarketStream implements MarketStream {
         if (streamFailureListener != null) {
             streamFailureListener.onStreamFailure(e);
         }
-    }
-
-    // TODO: remove
-    public static void main(String... args) throws Exception {
-
-        MarketStream ms = new WebsocketMarketStream("wss://quedex.net:63002/market_stream");
-
-        ms.start();
-
-        new BufferedReader(new InputStreamReader(System.in)).readLine();
-
-        ms.stop();
     }
 }
