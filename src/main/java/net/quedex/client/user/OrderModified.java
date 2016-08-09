@@ -1,4 +1,4 @@
-package net.quedex.client.account;
+package net.quedex.client.user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

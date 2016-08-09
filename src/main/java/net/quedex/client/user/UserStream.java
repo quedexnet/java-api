@@ -1,11 +1,11 @@
-package net.quedex.client.account;
+package net.quedex.client.user;
 
 import net.quedex.client.market.CommunicationException;
 import net.quedex.client.market.StreamFailureListener;
 
 import java.util.List;
 
-public interface AccountStream {
+public interface UserStream {
 
     void registerStreamFailureListener(StreamFailureListener streamFailureListener);
 

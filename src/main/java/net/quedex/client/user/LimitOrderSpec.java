@@ -1,4 +1,4 @@
-package net.quedex.client.account;
+package net.quedex.client.user;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;

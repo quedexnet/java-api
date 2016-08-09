@@ -1,4 +1,4 @@
-package net.quedex.client.account;
+package net.quedex.client.user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,18 +7,16 @@ import com.google.common.base.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class OrderModificationFailed {
+public class OrderPlaceFailed {
 
-    enum Cause {
+    public enum Cause {
         INVALID_ORDER_ID,
         INVALID_INSTRUMENT_ID,
         NONPOSITIVE_QUANTITY,
         NONPOSITIVE_PRICE,
         SESSION_NOT_ACTIVE,
         INVALID_TICK_SIZE,
-        INSUFFICIENT_FUNDS,
-        MARGIN_CALL,
-        NOT_FOUND;
+        INSUFFICIENT_FUNDS;
 
         @JsonCreator
         private static Cause deserialize(String value) {
@@ -29,12 +27,10 @@ public class OrderModificationFailed {
     private final long clientOrderId;
     private final Cause cause;
 
-    public OrderModificationFailed(
-            @JsonProperty("client_order_id") long clientOrderId,
-            @JsonProperty("cause") Cause cause
-    ) {
+    @JsonCreator
+    public OrderPlaceFailed(@JsonProperty("client_order_id") long clientOrderId, @JsonProperty("cause") Cause cause) {
         this.clientOrderId = clientOrderId;
-        this.cause = checkNotNull(cause, "null cause");
+        this.cause = checkNotNull(cause, "Null cause");
     }
 
     public long getClientOrderId() {
@@ -49,7 +45,7 @@ public class OrderModificationFailed {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OrderModificationFailed that = (OrderModificationFailed) o;
+        OrderPlaceFailed that = (OrderPlaceFailed) o;
         return clientOrderId == that.clientOrderId &&
                 cause == that.cause;
     }
