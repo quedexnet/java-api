@@ -1,4 +1,4 @@
-package net.quedex.client.market;
+package net.quedex.client.commons;
 
 import java.io.IOException;
 

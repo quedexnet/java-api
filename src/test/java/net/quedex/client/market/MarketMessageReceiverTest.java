@@ -1,6 +1,8 @@
 package net.quedex.client.market;
 
 import com.google.common.collect.ImmutableList;
+import net.quedex.client.commons.CommunicationException;
+import net.quedex.client.commons.SessionStateListener;
 import net.quedex.client.pgp.BcPublicKey;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -10,13 +12,12 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.math.BigDecimal;
-
+import static net.quedex.client.testcommons.Utils.$;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public class MessageProcessorTest {
+public class MarketMessageReceiverTest {
 
     @Mock private OrderBookListener orderBookListener;
     @Mock private QuotesListener quotesListener;
@@ -24,13 +25,13 @@ public class MessageProcessorTest {
     @Mock private TradeListener tradeListener;
     @Mock private StreamFailureListener streamFailureListener;
 
-    private MessageProcessor messageProcessor;
+    private MarketMessageReceiver messageProcessor;
 
     @BeforeMethod
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        messageProcessor = new MessageProcessor(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
+        messageProcessor = new MarketMessageReceiver(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
         messageProcessor.registerStreamFailureListener(streamFailureListener);
     }
 
@@ -174,10 +175,6 @@ public class MessageProcessorTest {
 
     private static PriceQuantity pq(String price, int qty) {
         return new PriceQuantity($(price), qty);
-    }
-
-    private static BigDecimal $(String price) {
-        return new BigDecimal(price);
     }
 
     private static Matcher<Trade> isFieldByFiledEqual(Trade trade) {

@@ -21,7 +21,7 @@ import java.util.Hashtable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class BcEncryptor {
+public class BcEncryptor {
 
     private static final int BUFFER_SIZE = 2 << 7;
 

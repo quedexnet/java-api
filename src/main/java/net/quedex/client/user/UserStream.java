@@ -1,6 +1,6 @@
 package net.quedex.client.user;
 
-import net.quedex.client.market.CommunicationException;
+import net.quedex.client.commons.CommunicationException;
 import net.quedex.client.market.StreamFailureListener;
 
 import java.util.List;
@@ -21,10 +21,13 @@ public interface UserStream {
 
     void placeOrder(LimitOrderSpec limitOrderSpec);
 
-    void cancelOrder(long clientOrderId);
+    void cancelOrder(OrderCancelSpec orderCancelSpec);
 
     void modifyOrder(OrderModificationSpec orderModificationSpec);
 
+    /**
+     * MEMO: the returned object is not thread-safe
+     */
     Batch batch();
 
     void stop() throws CommunicationException;
@@ -35,14 +38,14 @@ public interface UserStream {
 
         Batch placeOrders(List<LimitOrderSpec> limitOrderSpecs);
 
-        Batch cancelOrder(long clientOrderId);
+        Batch cancelOrder(OrderCancelSpec orderCancelSpec);
 
-        Batch cancelOrders(List<Long> clientOrderIds);
+        Batch cancelOrders(List<OrderCancelSpec> orderCancelSpecs);
 
         Batch modifyOrder(OrderModificationSpec orderModificationSpec);
 
         Batch modifyOrders(List<OrderModificationSpec> orderModificationSpec);
 
-        void execute();
+        void send();
     }
 }

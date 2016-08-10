@@ -15,7 +15,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class BcDecryptor {
+public class BcDecryptor {
 
     private static final long HIDDEN_RECIPIENT_KEY_ID = 0;
 

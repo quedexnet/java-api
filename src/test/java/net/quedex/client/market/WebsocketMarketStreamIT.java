@@ -1,7 +1,8 @@
 package net.quedex.client.market;
 
-import com.google.common.io.Resources;
-import net.quedex.client.pgp.BcPublicKey;
+import net.quedex.client.commons.Config;
+import net.quedex.client.commons.SessionStateListener;
+import net.quedex.client.testcommons.Utils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -11,7 +12,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collection;
-import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -29,6 +29,8 @@ import static org.mockito.Mockito.*;
  */
 public class WebsocketMarketStreamIT {
 
+    private static final boolean TEST_ENABLED = false; // enable to run
+
     @Mock private OrderBookListener orderBookListener;
     @Mock private QuotesListener quotesListener;
     @Mock private SessionStateListener sessionStateListener;
@@ -42,14 +44,12 @@ public class WebsocketMarketStreamIT {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Properties props = new Properties();
-        props.load(Resources.getResource("market.properties").openStream());
-        BcPublicKey pubKey = BcPublicKey.fromArmored(props.getProperty("pubKey"));
-        marketStream = new WebsocketMarketStream(props.getProperty("wsUrl"), pubKey);
-        marketData = new HttpMarketData(props.getProperty("instrumentsUrl"), pubKey);
+        Config config = Config.fromResource(Utils.getKeyPassphraseFromProps());
+        marketStream = new WebsocketMarketStream(config);
+        marketData = new HttpMarketData(config);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = TEST_ENABLED)
     public void testIntegrationWithLiveWS() throws Exception {
 
         Collection<Integer> instrumentIds = marketData.getInstruments().keySet();

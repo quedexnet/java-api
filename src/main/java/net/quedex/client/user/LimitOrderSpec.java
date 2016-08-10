@@ -1,5 +1,6 @@
 package net.quedex.client.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
@@ -8,7 +9,7 @@ import java.math.BigDecimal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class LimitOrderSpec {
+public class LimitOrderSpec implements OrderSpec {
 
     private final long clientOrderId;
     private final int instrumentId;
@@ -35,24 +36,40 @@ public class LimitOrderSpec {
         this.limitPrice = limitPrice;
     }
 
+    @JsonProperty("client_order_id")
+    @Override
     public long getClientOrderId() {
         return clientOrderId;
     }
 
+    @JsonProperty("instrument_id")
     public int getInstrumentId() {
         return instrumentId;
     }
 
+    @JsonProperty("side")
     public OrderSide getSide() {
         return side;
     }
 
+    @JsonProperty("quantity")
     public int getQuantity() {
         return quantity;
     }
 
+    @JsonProperty("price")
     public BigDecimal getLimitPrice() {
         return limitPrice;
+    }
+
+    @JsonProperty("order_type")
+    public OrderPlaced.OrderType getOrderType() {
+        return OrderPlaced.OrderType.LIMIT;
+    }
+
+    @JsonProperty("type")
+    private String getType() {
+        return "place_order";
     }
 
     @Override

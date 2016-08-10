@@ -1,5 +1,8 @@
 package net.quedex.client.market;
 
+import net.quedex.client.commons.CommunicationException;
+import net.quedex.client.commons.SessionStateListener;
+
 public interface MarketStream {
 
     void registerStreamFailureListener(StreamFailureListener streamFailureListener);

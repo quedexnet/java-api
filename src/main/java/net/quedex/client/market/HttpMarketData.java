@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import net.quedex.client.commons.CommunicationException;
+import net.quedex.client.commons.Config;
+import net.quedex.client.commons.MessageReceiver;
 import net.quedex.client.pgp.BcPublicKey;
 import net.quedex.client.pgp.BcSignatureVerifier;
 import net.quedex.client.pgp.PGPExceptionBase;
@@ -16,7 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public class HttpMarketData implements MarketData {
 
-    private static final ObjectMapper OBJECT_MAPPER = MessageProcessor.OBJECT_MAPPER;
+    private static final ObjectMapper OBJECT_MAPPER = MessageReceiver.OBJECT_MAPPER;
 
     static {
         Unirest.setTimeouts(10_000, 10_000);
@@ -29,6 +32,10 @@ public class HttpMarketData implements MarketData {
         checkArgument(!instrumentDataUrl.isEmpty(), "Empty instrumentDataUrl");
         this.instrumentDataUrl = instrumentDataUrl;
         this.signatureVerifier = new BcSignatureVerifier(publicKey);
+    }
+
+    public HttpMarketData(Config config) {
+        this(config.getInstrumentDataUrl(), config.getQdxPublicKey());
     }
 
     @Override

@@ -31,7 +31,7 @@ public class OpenPosition {
     private final BigDecimal averageOpeningPrice; // any number for a closed position
 
     @JsonCreator
-    private OpenPosition(
+    public OpenPosition(
             @JsonProperty("instrument_id") int instrumentId,
             @JsonProperty("pnl") BigDecimal pnl,
             @JsonProperty("maintenance_margin") BigDecimal maintenanceMargin,

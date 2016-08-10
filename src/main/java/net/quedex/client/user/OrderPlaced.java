@@ -1,6 +1,7 @@
 package net.quedex.client.user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -18,6 +19,7 @@ public class OrderPlaced {
 
     private final long clientOrderId;
     private final int instrumentId;
+    @JsonIgnore
     private final OrderType type;
     private final BigDecimal price;
     private final OrderSide side;
