@@ -186,4 +186,14 @@ public class UserMessageReceiverTest {
         // then
         verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
     }
+
+    @Test
+    public void testKeepaliveProcessing() throws Exception {
+
+        // when
+        userMessageReceiver.processMessage("keepalive");
+
+        // then
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
 }

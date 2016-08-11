@@ -57,8 +57,12 @@ public class Quotes {
         return instrumentId;
     }
 
-    public PriceQuantity getLast() {
-        return new PriceQuantity(last, lastQuantity);
+    public BigDecimal getLast() {
+        return last;
+    }
+
+    public int getLastQuantity() {
+        return lastQuantity;
     }
 
     public Optional<PriceQuantity> getBid() {

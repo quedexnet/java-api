@@ -25,24 +25,24 @@ public class MarketMessageReceiverTest {
     @Mock private TradeListener tradeListener;
     @Mock private StreamFailureListener streamFailureListener;
 
-    private MarketMessageReceiver messageProcessor;
+    private MarketMessageReceiver messageReceiver;
 
     @BeforeMethod
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        messageProcessor = new MarketMessageReceiver(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
-        messageProcessor.registerStreamFailureListener(streamFailureListener);
+        messageReceiver = new MarketMessageReceiver(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
+        messageReceiver.registerStreamFailureListener(streamFailureListener);
     }
 
     @Test
     public void testOrderBookProcessing() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerOrderBookListener(orderBookListener);
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
 
         // when
-        messageProcessor.processMessage(Fixtures.ORDER_BOOK_STR);
+        messageReceiver.processMessage(Fixtures.ORDER_BOOK_STR);
         reg.subscribe(1);
 
         // then
@@ -58,11 +58,11 @@ public class MarketMessageReceiverTest {
     public void testOrderBookIsNoProcessedIfNotSubscribedForInstrument() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerOrderBookListener(orderBookListener);
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
-        messageProcessor.processMessage(Fixtures.ORDER_BOOK_STR);
+        messageReceiver.processMessage(Fixtures.ORDER_BOOK_STR);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -73,11 +73,11 @@ public class MarketMessageReceiverTest {
     public void testQuotesProcessing() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerQuotesListener(quotesListener);
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
 
         // when
         reg.subscribe(1);
-        messageProcessor.processMessage(Fixtures.QUOTES_STR);
+        messageReceiver.processMessage(Fixtures.QUOTES_STR);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -88,11 +88,11 @@ public class MarketMessageReceiverTest {
     public void testQuotesAreNotProcessedIfNotSubscribedForInstrument() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerQuotesListener(quotesListener);
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
-        messageProcessor.processMessage(Fixtures.QUOTES_STR);
+        messageReceiver.processMessage(Fixtures.QUOTES_STR);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -103,10 +103,10 @@ public class MarketMessageReceiverTest {
     public void testTradeProcessing() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerTradeListener(tradeListener);
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
 
         // when
-        messageProcessor.processMessage(Fixtures.TRADE_STR);
+        messageReceiver.processMessage(Fixtures.TRADE_STR);
         reg.subscribe(1);
 
         // then
@@ -120,11 +120,11 @@ public class MarketMessageReceiverTest {
     public void testTradeIsNoProcessedIfNotSubscribedForInstrument() throws Exception {
 
         // given
-        Registration reg = messageProcessor.registerTradeListener(tradeListener);
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
-        messageProcessor.processMessage(Fixtures.TRADE_STR);
+        messageReceiver.processMessage(Fixtures.TRADE_STR);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -135,8 +135,8 @@ public class MarketMessageReceiverTest {
     public void testSessionStateProcessing() throws Exception {
 
         // when
-        messageProcessor.registerAndSubscribeSessionStateListener(sessionStateListener);
-        messageProcessor.processMessage(Fixtures.SESSION_STATE_STR);
+        messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
+        messageReceiver.processMessage(Fixtures.SESSION_STATE_STR);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -147,7 +147,7 @@ public class MarketMessageReceiverTest {
     public void testStreamFailureJsonProcessingError() throws Exception {
 
         // when
-        messageProcessor.processMessage("BOMBA");
+        messageReceiver.processMessage("BOMBA");
 
         // then
         verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
@@ -157,7 +157,7 @@ public class MarketMessageReceiverTest {
     public void testStreamFailureSignatureError() throws Exception {
 
         // when
-        messageProcessor.processMessage(Fixtures.SESSION_STATE_STR_WRONG_SIG);
+        messageReceiver.processMessage(Fixtures.SESSION_STATE_STR_WRONG_SIG);
 
         // then
         verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
@@ -167,10 +167,20 @@ public class MarketMessageReceiverTest {
     public void testMaintenanceErrorProcessing() throws Exception {
 
         // when
-        messageProcessor.processMessage(Fixtures.ERROR_MAINTENANCE_STR);
+        messageReceiver.processMessage(Fixtures.ERROR_MAINTENANCE_STR);
 
         // then
         verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
+    }
+
+    @Test
+    public void testKeepaliveProcessing() throws Exception {
+
+        // when
+        messageReceiver.processMessage("keepalive");
+
+        // then
+        verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
     private static PriceQuantity pq(String price, int qty) {
