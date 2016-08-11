@@ -14,12 +14,12 @@ public final class Instrument {
 
     private static final int SETTLEMENT_HOUR_UTC_MILLIS = 8 * 60 * 60 * 1000;
 
-    public enum InstrumentType {
+    public enum Type {
         FUTURES,
         OPTION;
 
         @JsonCreator
-        private static InstrumentType deserialize(String value) {
+        private static Type deserialize(String value) {
             return valueOf(value.toUpperCase());
         }
     }
@@ -36,7 +36,7 @@ public final class Instrument {
 
     private final int instrumentId;
     private final String symbol;
-    private final InstrumentType instrumentType;
+    private final Type type;
     private final BigDecimal tickSize;
     private final long issueDate;
     private final long expirationDate;
@@ -53,7 +53,7 @@ public final class Instrument {
     public Instrument(
             @JsonProperty("symbol") String symbol,
             @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("type") InstrumentType instrumentType,
+            @JsonProperty("type") Type type,
             @JsonProperty("option_type") OptionType optionType,
             @JsonProperty("tick_size") BigDecimal tickSize,
             @JsonProperty("issue_date") long issueDate,
@@ -85,7 +85,7 @@ public final class Instrument {
 
         this.symbol = symbol;
         this.instrumentId = instrumentId;
-        this.instrumentType = checkNotNull(instrumentType, "null instrumentType");
+        this.type = checkNotNull(type, "null instrumentType");
         this.tickSize = tickSize;
         this.issueDate = issueDate;
         this.expirationDate = expirationDate;
@@ -96,7 +96,7 @@ public final class Instrument {
         this.initialMarginFraction = initialMarginFraction;
         this.maintenanceMarginFraction = maintenanceMarginFraction;
 
-        if (this.instrumentType == InstrumentType.FUTURES) {
+        if (this.type == Type.FUTURES) {
             checkArgument(strike == null, "Expected null strike");
             checkArgument(optionType == null, "Expected null optionType");
             this.strike = null;
@@ -116,8 +116,8 @@ public final class Instrument {
         return instrumentId;
     }
 
-    public InstrumentType getInstrumentType() {
-        return instrumentType;
+    public Type getType() {
+        return type;
     }
 
     public BigDecimal getTickSize() {
@@ -179,7 +179,7 @@ public final class Instrument {
     }
 
     public boolean isFutures() {
-        return instrumentType == InstrumentType.FUTURES;
+        return type == Type.FUTURES;
     }
 
     public boolean isTraded(long currentTimeMillis) {
@@ -204,7 +204,7 @@ public final class Instrument {
         return MoreObjects.toStringHelper(this)
                 .add("instrumentId", instrumentId)
                 .add("symbol", symbol)
-                .add("instrumentType", instrumentType)
+                .add("instrumentType", type)
                 .add("tickSize", tickSize)
                 .add("issueDate", issueDate)
                 .add("expirationDate", expirationDate)

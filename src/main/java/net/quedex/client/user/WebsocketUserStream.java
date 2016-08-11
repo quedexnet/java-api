@@ -103,6 +103,11 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
+    public void batch(List<OrderSpec> batch) {
+        sender.sendBatch(batch);
+    }
+
+    @Override
     public void stop() throws CommunicationException {
         super.stop();
         sender.stop();
@@ -159,7 +164,7 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
         public void send() {
             checkState(!sent, "Batch already sent");
             sent = true;
-            sender.sendBatch(batch);
+            WebsocketUserStream.this.batch(batch);
         }
     }
 }

@@ -30,6 +30,8 @@ public interface UserStream {
      */
     Batch batch();
 
+    void batch(List<OrderSpec> batch);
+
     void stop() throws CommunicationException;
 
     interface Batch {

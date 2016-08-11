@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import net.quedex.client.market.Instrument;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -58,7 +59,7 @@ public class OpenPosition {
     }
 
     /**
-     * @return PnL of this position, present only for {@link net.quedex.client.market.Instrument.InstrumentType#FUTURES}
+     * @return PnL of this position, present only for {@link Instrument.Type#FUTURES}
      *         position
      */
     public Optional<BigDecimal> getPnl() {
@@ -85,6 +86,10 @@ public class OpenPosition {
      */
     public int getQuantity() {
         return quantity;
+    }
+
+    public int getQuantitySigned() {
+        return side == PositionSide.LONG ? quantity : -quantity;
     }
 
     /**
