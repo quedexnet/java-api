@@ -10,29 +10,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class MarketMessageReceiver extends MessageReceiver {
+class MarketMessageReceiver extends MessageReceiver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
 
     private final BcSignatureVerifier bcSignatureVerifier;
 
     private volatile OrderBookListener orderBookListener;
-    private final Set<Integer> orderBookSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>(64, 0.75f, 2));
+    private final Set<Integer> orderBookSubscriptions = new HashSet<>(64, 0.75f);
+    private final Map<Integer, OrderBook> orderBookCache = new HashMap<>(64, 0.75f);
 
     private volatile TradeListener tradeListener;
-    private final Set<Integer> tradeSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>(64, 0.75f, 2));
+    private final Set<Integer> tradeSubscriptions = new HashSet<>(64, 0.75f);
+    private final Map<Integer, Trade> tradeCache = new HashMap<>(64, 0.75f);
 
     private volatile QuotesListener quotesListener;
-    private final Set<Integer> quotesSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>(64, 0.75f, 2));
+    private final Set<Integer> quotesSubscriptions = new HashSet<>(64, 0.75f);
+    private final Map<Integer, Quotes> quotesCache = new HashMap<>(64, 0.75f);
 
     private volatile SessionStateListener sessionStateListener;
+    private final Object sessionStateMonitor = new Object();
+    private SessionState sessionStateCached;
 
     MarketMessageReceiver(BcPublicKey qdxPublicKey) {
         super(LOGGER);
@@ -41,21 +43,48 @@ public class MarketMessageReceiver extends MessageReceiver {
 
     Registration registerOrderBookListener(OrderBookListener orderBookListener) {
         this.orderBookListener = orderBookListener;
-        return new RegistrationImpl(orderBookSubscriptions);
+        return new CachedRegistration<OrderBook>(orderBookSubscriptions, orderBookCache) {
+            @Override
+            void onSubscribe(OrderBook element) {
+                if (orderBookListener != null) {
+                    orderBookListener.onOrderBook(element);
+                }
+            }
+        };
     }
 
     Registration registerTradeListener(TradeListener tradeListener) {
         this.tradeListener = tradeListener;
-        return new RegistrationImpl(tradeSubscriptions);
+        return new CachedRegistration<Trade>(tradeSubscriptions, tradeCache) {
+            @Override
+            void onSubscribe(Trade element) {
+                if (tradeListener != null) {
+                    tradeListener.onTrade(element);
+                }
+            }
+        };
     }
 
     Registration registerQuotesListener(QuotesListener quotesListener) {
         this.quotesListener = quotesListener;
-        return new RegistrationImpl(quotesSubscriptions);
+        return new CachedRegistration<Quotes>(quotesSubscriptions, quotesCache) {
+            @Override
+            void onSubscribe(Quotes element) {
+                if (quotesListener != null) {
+                    quotesListener.onQuotes(element);
+                }
+            }
+        };
     }
 
     void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener) {
         this.sessionStateListener = sessionStateListener;
+        synchronized (sessionStateMonitor) {
+            SessionState sessionStateCached = this.sessionStateCached;
+            if (sessionStateListener != null && sessionStateCached != null) {
+                sessionStateListener.onSessionState(sessionStateCached);
+            }
+        }
     }
 
     @Override
@@ -85,62 +114,90 @@ public class MarketMessageReceiver extends MessageReceiver {
     }
 
     private void onOrderBook(OrderBook orderBook) {
-        OrderBookListener orderBookListener = this.orderBookListener;
-        if (orderBookListener != null && orderBookSubscriptions.contains(orderBook.getInstrumentId())) {
-            orderBookListener.onOrderBook(orderBook);
+        synchronized (orderBookCache) {
+            orderBookCache.put(orderBook.getInstrumentId(), orderBook);
+            OrderBookListener orderBookListener = this.orderBookListener;
+            if (orderBookListener != null && orderBookSubscriptions.contains(orderBook.getInstrumentId())) {
+                orderBookListener.onOrderBook(orderBook);
+            }
         }
     }
 
     private void onQuotes(Quotes quotes) {
-        QuotesListener quotesListener = this.quotesListener;
-        if (quotesListener != null && quotesSubscriptions.contains(quotes.getInstrumentId())) {
-            quotesListener.onQuotes(quotes);
+        synchronized (quotesCache) {
+            quotesCache.put(quotes.getInstrumentId(), quotes);
+            QuotesListener quotesListener = this.quotesListener;
+            if (quotesListener != null && quotesSubscriptions.contains(quotes.getInstrumentId())) {
+                quotesListener.onQuotes(quotes);
+            }
         }
     }
 
     private void onTrade(Trade trade) {
-        TradeListener tradeListener = this.tradeListener;
-        if (tradeListener != null && tradeSubscriptions.contains(trade.getInstrumentId())) {
-            tradeListener.onTrade(trade);
+        synchronized (tradeCache) {
+            tradeCache.put(trade.getInstrumentId(), trade);
+            TradeListener tradeListener = this.tradeListener;
+            if (tradeListener != null && tradeSubscriptions.contains(trade.getInstrumentId())) {
+                tradeListener.onTrade(trade);
+            }
         }
     }
 
     private void onSessionState(SessionState sessionState) {
-        SessionStateListener sessionStateListener = this.sessionStateListener;
-        if (sessionStateListener != null) {
-            sessionStateListener.onSessionState(sessionState);
+        synchronized (sessionStateMonitor) {
+            sessionStateCached = sessionState;
+            SessionStateListener sessionStateListener = this.sessionStateListener;
+            if (sessionStateListener != null) {
+                sessionStateListener.onSessionState(sessionState);
+            }
         }
     }
 
-    private static class RegistrationImpl implements Registration {
+    private abstract static class CachedRegistration<T> implements Registration {
 
-        private final Set<Integer> subscriptions;
+        final Set<Integer> subscriptions;
+        final Map<Integer, T> cache;
 
-        private RegistrationImpl(Set<Integer> subscriptions) {
+        CachedRegistration(Set<Integer> subscriptions, Map<Integer, T> cache) {
             this.subscriptions = checkNotNull(subscriptions, "null subscriptions");
+            this.cache = checkNotNull(cache, "null cache");
         }
 
+        abstract void onSubscribe(T element);
+
         @Override
-        public RegistrationImpl subscribe(int instrumentId) {
-            subscriptions.add(instrumentId);
+        public CachedRegistration subscribe(int instrumentId) {
+            synchronized (cache) {
+                subscriptions.add(instrumentId);
+                T element = cache.get(instrumentId);
+                if (element != null) {
+                    onSubscribe(element);
+                }
+            }
             return this;
         }
 
         @Override
-        public RegistrationImpl subscribe(Collection<Integer> instrumentIds) {
+        public CachedRegistration subscribe(Collection<Integer> instrumentIds) {
             instrumentIds.forEach(this::subscribe);
             return this;
         }
 
         @Override
-        public RegistrationImpl unsubscribe(int instrumentId) {
+        public CachedRegistration unsubscribe(int instrumentId) {
             subscriptions.remove(instrumentId);
             return this;
         }
 
         @Override
-        public RegistrationImpl unsubscribe(Collection<Integer> instrumentIds) {
+        public CachedRegistration unsubscribe(Collection<Integer> instrumentIds) {
             instrumentIds.forEach(this::unsubscribe);
+            return this;
+        }
+
+        @Override
+        public Registration unsubscribeAll() {
+            subscriptions.clear();
             return this;
         }
     }

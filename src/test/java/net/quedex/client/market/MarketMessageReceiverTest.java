@@ -42,8 +42,8 @@ public class MarketMessageReceiverTest {
         Registration reg = messageProcessor.registerOrderBookListener(orderBookListener);
 
         // when
-        reg.subscribe(1);
         messageProcessor.processMessage(Fixtures.ORDER_BOOK_STR);
+        reg.subscribe(1);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -106,8 +106,8 @@ public class MarketMessageReceiverTest {
         Registration reg = messageProcessor.registerTradeListener(tradeListener);
 
         // when
-        reg.subscribe(1);
         messageProcessor.processMessage(Fixtures.TRADE_STR);
+        reg.subscribe(1);
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());

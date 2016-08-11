@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class UserMessageReceiver extends MessageReceiver {
+class UserMessageReceiver extends MessageReceiver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMessageReceiver.class);
 
@@ -32,15 +32,15 @@ public class UserMessageReceiver extends MessageReceiver {
         this.decryptor = new BcDecryptor(qdxPublicKey, userPrivateKey);
     }
 
-    public void registerOrderListener(OrderListener orderListener) {
+    void registerOrderListener(OrderListener orderListener) {
         this.orderListener = orderListener;
     }
 
-    public void registerOpenPositionListener(OpenPositionListener openPositionListener) {
+    void registerOpenPositionListener(OpenPositionListener openPositionListener) {
         this.openPositionListener = openPositionListener;
     }
 
-    public void registerAccountStateListener(AccountStateListener accountStateListener) {
+    void registerAccountStateListener(AccountStateListener accountStateListener) {
         this.accountStateListener = accountStateListener;
     }
 

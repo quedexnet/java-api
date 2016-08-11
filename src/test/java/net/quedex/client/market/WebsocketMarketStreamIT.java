@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
  */
 public class WebsocketMarketStreamIT {
 
-    private static final boolean TEST_ENABLED = false; // enable to run
+    private static final boolean TEST_ENABLED = true; // enable to run
 
     @Mock private OrderBookListener orderBookListener;
     @Mock private QuotesListener quotesListener;
@@ -57,13 +57,13 @@ public class WebsocketMarketStreamIT {
 
         System.out.println("instrumentIds = " + instrumentIds); // for debugging
 
+        marketStream.start();
+
         marketStream.registerStreamFailureListener(streamFailureListener);
         marketStream.registerAndSubscribeSessionStateListener(sessionStateListener);
         marketStream.registerOrderBookListener(orderBookListener).subscribe(instrumentIds);
         marketStream.registerQuotesListener(quotesListener).subscribe(instrumentIds);
         marketStream.registerTradeListener(tradeListener).subscribe(instrumentIds);
-
-        marketStream.start();
 
         instrumentIds
                 .forEach(id -> verify(orderBookListener, timeout(1000)).onOrderBook(argThat(obHasInstrumentId(id))));

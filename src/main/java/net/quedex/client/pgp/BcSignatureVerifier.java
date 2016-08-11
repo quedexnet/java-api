@@ -28,7 +28,7 @@ public final class BcSignatureVerifier {
             throws PGPInvalidSignatureException, PGPSignatureVerificationException {
 
         try {
-            ArmoredInputStream aIn = new ArmoredInputStream(new ByteArrayInputStream(message.getBytes()));
+            ArmoredInputStream aIn = new ArmoredInputStream(new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8)));
 
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
             int ch;

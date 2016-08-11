@@ -11,4 +11,6 @@ public interface Registration {
     Registration subscribe(Collection<Integer> instrumentIds);
 
     Registration unsubscribe(Collection<Integer> instrumentIds);
+
+    Registration unsubscribeAll();
 }
