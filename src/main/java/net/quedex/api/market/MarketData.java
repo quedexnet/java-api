@@ -6,5 +6,8 @@ import java.util.Map;
 
 public interface MarketData {
 
+    /**
+     * @return a map from instrument ids to instruments
+     */
     Map<Integer, Instrument> getInstruments() throws CommunicationException;
 }

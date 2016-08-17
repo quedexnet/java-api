@@ -17,6 +17,21 @@ public interface UserStream {
 
     void registerAccountStateListener(AccountStateListener accountStateListener);
 
+    /**
+     * Subscribes previously registered listeners. Causes a welcome package to be sent to the listeners. The welcome
+     * package includes:
+     * <ul>
+     *     <li> an {@link OrderPlaced} item for each pending order </li>
+     *     <li> an {@link OpenPosition} item for each opened position </li>
+     *     <li> an initial {@link AccountState} </li>
+     * </ul>
+     *
+     * The welcome package constitutes an initial state that will be modified by the subsequent events received by the
+     * listeners.
+     * <p>
+     * The first received {@link AccountState} marks the end of the welcome package and may be used to detect the end
+     * of initialisation.
+     */
     void subscribeListeners();
 
     void placeOrder(LimitOrderSpec limitOrderSpec);
