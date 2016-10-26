@@ -19,8 +19,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class BcPrivateKey {
-
+public final class BcPrivateKey
+{
     private static final char[] EMPTY_CHAR_ARRAY = new char[0];
 
     private final PGPSecretKey secretKey;
@@ -29,30 +29,35 @@ public final class BcPrivateKey {
     private final ImmutableMap<Long, PGPPrivateKey> privateKeys;
     private final BcPublicKey publicKey;
 
-    public static BcPrivateKey fromArmored(String armoredKeyString) throws PGPKeyInitialisationException {
+    public static BcPrivateKey fromArmored(final String armoredKeyString) throws PGPKeyInitialisationException
+    {
         return fromArmored(armoredKeyString, EMPTY_CHAR_ARRAY);
     }
 
-    public static BcPrivateKey fromArmored(String armoredKeyString, char[] passphrase)
-            throws PGPKeyInitialisationException {
+    public static BcPrivateKey fromArmored(final String armoredKeyString, final char[] passphrase)
+        throws PGPKeyInitialisationException
+    {
         return new BcPrivateKey(armoredKeyString, passphrase);
     }
 
-    BcPrivateKey(String armoredKeyString, char[] passphrase) throws PGPKeyInitialisationException {
-        try {
-            PGPSecretKeyRing secKeyRing = new PGPSecretKeyRing(
-                    new ArmoredInputStream(new ByteArrayInputStream(armoredKeyString.getBytes(StandardCharsets.US_ASCII))),
-                    new BcKeyFingerprintCalculator());
+    BcPrivateKey(final String armoredKeyString, final char[] passphrase) throws PGPKeyInitialisationException
+    {
+        try
+        {
+            final PGPSecretKeyRing secKeyRing = new PGPSecretKeyRing(
+                new ArmoredInputStream(new ByteArrayInputStream(armoredKeyString.getBytes(StandardCharsets.US_ASCII))),
+                new BcKeyFingerprintCalculator());
 
-            PBESecretKeyDecryptor decryptor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider())
-                    .build(passphrase);
+            final PBESecretKeyDecryptor decryptor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider())
+                .build(passphrase);
 
-            ImmutableMap.Builder<Long, PGPPrivateKey> builder = ImmutableMap.builder();
-            List<PGPPublicKey> pubKeys = new ArrayList<>(2);
+            final ImmutableMap.Builder<Long, PGPPrivateKey> builder = ImmutableMap.builder();
+            final List<PGPPublicKey> pubKeys = new ArrayList<>(2);
 
-            for (Iterator iterator = secKeyRing.getSecretKeys(); iterator.hasNext(); ) {
-                PGPSecretKey secretKey = (PGPSecretKey) iterator.next();
-                PGPPrivateKey privateKey = secretKey.extractPrivateKey(decryptor);
+            for (final Iterator iterator = secKeyRing.getSecretKeys(); iterator.hasNext(); )
+            {
+                final PGPSecretKey secretKey = (PGPSecretKey) iterator.next();
+                final PGPPrivateKey privateKey = secretKey.extractPrivateKey(decryptor);
                 builder.put(privateKey.getKeyID(), privateKey);
                 pubKeys.add(secretKey.getPublicKey());
             }
@@ -60,13 +65,19 @@ public final class BcPrivateKey {
             this.secretKey = secKeyRing.getSecretKey();
             this.privateKeys = builder.build();
             this.privateKey = this.secretKey.extractPrivateKey(decryptor);
-            if (pubKeys.size() >= 2) {
+
+            if (pubKeys.size() >= 2)
+            {
                 this.publicKey = new BcPublicKey(pubKeys.get(0), pubKeys.get(1));
-            } else {
+            }
+            else
+            {
                 this.publicKey = new BcPublicKey(pubKeys.get(0), pubKeys.get(0));
             }
 
-        } catch (PGPException | RuntimeException | IOException e) {
+        }
+        catch (PGPException | RuntimeException | IOException e)
+        {
             throw new PGPKeyInitialisationException("Error instantiating a private key", e);
         }
         checkNotNull(this.secretKey);
@@ -75,52 +86,63 @@ public final class BcPrivateKey {
         this.fingerprint = BcPublicKey.hexFingerprint(secretKey.getPublicKey());
     }
 
-    PGPSecretKey getSecretKey() {
+    PGPSecretKey getSecretKey()
+    {
         return secretKey;
     }
 
-    PGPPrivateKey getPrivateKey() {
+    PGPPrivateKey getPrivateKey()
+    {
         return privateKey;
     }
 
-    public String getFingerprint() {
+    public String getFingerprint()
+    {
         return fingerprint;
     }
 
-    PGPPrivateKey getPrivateKeyWithId(long keyId) throws PGPKeyNotFoundException {
-        if (!privateKeys.containsKey(keyId)) {
+    PGPPrivateKey getPrivateKeyWithId(final long keyId) throws PGPKeyNotFoundException
+    {
+        if (!privateKeys.containsKey(keyId))
+        {
             throw new PGPKeyNotFoundException(
-                    String.format("Key with id: %s not found", Long.toHexString(keyId).toUpperCase())
+                String.format("Key with id: %s not found", Long.toHexString(keyId).toUpperCase())
             );
         }
         return privateKeys.get(keyId);
     }
 
-    public Collection<PGPPrivateKey> getPrivateKeys() {
+    public Collection<PGPPrivateKey> getPrivateKeys()
+    {
         return privateKeys.values();
     }
 
-    public BcPublicKey getPublicKey() {
+    public BcPublicKey getPublicKey()
+    {
         return publicKey;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
             return true;
         }
 
-        if (o == null || o.getClass() != getClass()) {
+        if (o == null || o.getClass() != getClass())
+        {
             return false;
         }
 
-        BcPrivateKey that = (BcPrivateKey) o;
+        final BcPrivateKey that = (BcPrivateKey) o;
 
         return Objects.equal(fingerprint, that.fingerprint);
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return fingerprint.hashCode();
     }
 }

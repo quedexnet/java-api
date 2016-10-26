@@ -21,71 +21,79 @@ import java.util.Hashtable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class BcEncryptor {
-
+public class BcEncryptor
+{
     private static final int BUFFER_SIZE = 2 << 7;
 
     private final BcPGPDataEncryptorBuilder dataEncryptor;
     private final BcPublicKey publicKey;
     private final BcPrivateKey ourKey;
 
-    public BcEncryptor(BcPublicKey publicKey, BcPrivateKey ourKey) {
+    public BcEncryptor(final BcPublicKey publicKey, final BcPrivateKey ourKey)
+    {
         this.publicKey = checkNotNull(publicKey);
         this.ourKey = checkNotNull(ourKey);
 
         Security.addProvider(new BouncyCastleProvider());
 
-        dataEncryptor = new BcPGPDataEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_256);
+        dataEncryptor = new BcPGPDataEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_128);
         dataEncryptor.setWithIntegrityPacket(true);
         dataEncryptor.setSecureRandom(new SecureRandom());
     }
 
-    public String encrypt(String message, boolean sign) throws PGPEncryptionException, PGPKeyNotFoundException {
+    public String encrypt(final String message, final boolean sign) throws PGPEncryptionException
+    {
+        try
+        {
+            final PGPSecretKey secretKey = ourKey.getSecretKey();
+            final PGPPrivateKey privateKey = ourKey.getPrivateKey();
 
-        try {
-            PGPSecretKey secretKey = ourKey.getSecretKey();
-            PGPPrivateKey privateKey = ourKey.getPrivateKey();
+            final byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
 
-            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-
-            PGPLiteralDataGenerator literalDataGenerator = new PGPLiteralDataGenerator();
-            PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(dataEncryptor);
+            final PGPLiteralDataGenerator literalDataGenerator = new PGPLiteralDataGenerator();
+            final PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(dataEncryptor);
             encryptedDataGenerator.addMethod(new BcPublicKeyKeyEncryptionMethodGenerator(publicKey.getEncryptionKey()));
-            PGPCompressedDataGenerator compressedDataGenerator = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
-            PGPContentSignerBuilder signerBuilder = new BcPGPContentSignerBuilder(
-                    secretKey.getPublicKey().getAlgorithm(),
-                    HashAlgorithmTags.SHA256
+            final PGPCompressedDataGenerator compressedDataGenerator = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
+            final PGPContentSignerBuilder signerBuilder = new BcPGPContentSignerBuilder(
+                secretKey.getPublicKey().getAlgorithm(),
+                HashAlgorithmTags.SHA256
             );
-            PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(signerBuilder);
+            final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(signerBuilder);
             signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
-            PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
+            final PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
             spGen.setSignerUserID(false, (String) secretKey.getPublicKey().getUserIDs().next());
             signatureGenerator.setHashedSubpackets(spGen.generate());
-            if (sign) {
+
+            if (sign)
+            {
                 signatureGenerator.update(messageBytes);
             }
 
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            Hashtable<String, String> headers = new Hashtable<>();
+            final ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            final Hashtable<String, String> headers = new Hashtable<>();
             headers.put("Version", "QPG");
-            ArmoredOutputStream armoredOut = new ArmoredOutputStream(bOut, headers);
+            final ArmoredOutputStream armoredOut = new ArmoredOutputStream(bOut, headers);
 
-            OutputStream encryptedOut = encryptedDataGenerator.open(armoredOut, new byte[BUFFER_SIZE]);
-            OutputStream compressedOut = compressedDataGenerator.open(encryptedOut);
-            if (sign) {
+            final OutputStream encryptedOut = encryptedDataGenerator.open(armoredOut, new byte[BUFFER_SIZE]);
+            final OutputStream compressedOut = compressedDataGenerator.open(encryptedOut);
+
+            if (sign)
+            {
                 signatureGenerator.generateOnePassVersion(false).encode(compressedOut);
             }
-            OutputStream literalOut = literalDataGenerator.open(
-                    compressedOut,
-                    PGPLiteralData.UTF8,
-                    PGPLiteralData.CONSOLE,
-                    messageBytes.length,
-                    new Date()
+
+            final OutputStream literalOut = literalDataGenerator.open(
+                compressedOut,
+                PGPLiteralData.UTF8,
+                PGPLiteralData.CONSOLE,
+                messageBytes.length,
+                new Date()
             );
             literalOut.write(messageBytes);
             literalDataGenerator.close();
 
-            if (sign) {
+            if (sign)
+            {
                 signatureGenerator.generate().encode(compressedOut);
             }
 
@@ -95,7 +103,9 @@ public class BcEncryptor {
 
             return new String(bOut.toByteArray(), StandardCharsets.UTF_8);
 
-        } catch (PGPException | RuntimeException | IOException e) {
+        }
+        catch (PGPException | RuntimeException | IOException e)
+        {
             throw new PGPEncryptionException("Error encrypting message", e);
         }
     }

@@ -16,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-class UserMessageReceiver extends MessageReceiver {
-
+class UserMessageReceiver extends MessageReceiver
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMessageReceiver.class);
 
     private final BcDecryptor decryptor;
@@ -27,42 +27,53 @@ class UserMessageReceiver extends MessageReceiver {
     private volatile OpenPositionListener openPositionListener;
     private volatile AccountStateListener accountStateListener;
 
-    UserMessageReceiver(BcPublicKey qdxPublicKey, BcPrivateKey userPrivateKey) {
+    UserMessageReceiver(final BcPublicKey qdxPublicKey, final BcPrivateKey userPrivateKey)
+    {
         super(LOGGER);
         this.decryptor = new BcDecryptor(qdxPublicKey, userPrivateKey);
     }
 
-    void registerOrderListener(OrderListener orderListener) {
+    void registerOrderListener(final OrderListener orderListener)
+    {
         this.orderListener = orderListener;
     }
 
-    void registerOpenPositionListener(OpenPositionListener openPositionListener) {
+    void registerOpenPositionListener(final OpenPositionListener openPositionListener)
+    {
         this.openPositionListener = openPositionListener;
     }
 
-    void registerAccountStateListener(AccountStateListener accountStateListener) {
+    void registerAccountStateListener(final AccountStateListener accountStateListener)
+    {
         this.accountStateListener = accountStateListener;
     }
 
-    long getLastNonce() throws TimeoutException, InterruptedException {
-        try {
+    long getLastNonce() throws TimeoutException, InterruptedException
+    {
+        try
+        {
             return lastNonceFuture.get(5, TimeUnit.SECONDS);
-        } catch (ExecutionException e) {
+        }
+        catch (final ExecutionException e)
+        {
             throw new IllegalStateException("Cannot happen", e);
         }
     }
 
     @Override
-    protected void processData(String data) throws IOException, PGPExceptionBase {
-
-        String decrypted = decryptor.decrypt(data);
+    protected void processData(final String data) throws IOException, PGPExceptionBase
+    {
+        final String decrypted = decryptor.decrypt(data);
 
         LOGGER.trace("processData(data={}, decrypted={})", data, decrypted);
-        try {
-            JsonNode dataJsonArray = OBJECT_MAPPER.readTree(decrypted);
+        try
+        {
+            final JsonNode dataJsonArray = OBJECT_MAPPER.readTree(decrypted);
 
-            for (final JsonNode dataJson : dataJsonArray) {
-                switch (dataJson.get("type").asText()) {
+            for (final JsonNode dataJson : dataJsonArray)
+            {
+                switch (dataJson.get("type").asText())
+                {
                     case "account_state":
                         onAccountState(OBJECT_MAPPER.treeToValue(dataJson, AccountState.class));
                         break;
@@ -101,75 +112,105 @@ class UserMessageReceiver extends MessageReceiver {
                         break;
                 }
             }
-        } catch (IOException e) {
+        }
+        catch (final IOException e)
+        {
             throw new CommunicationException("Error parsing json on decrypted=" + decrypted, e);
         }
     }
 
-    private void onAccountState(AccountState accountState) {
-        AccountStateListener accountStateListener = this.accountStateListener;
-        if (accountStateListener != null) {
+    private void onAccountState(final AccountState accountState)
+    {
+        final AccountStateListener accountStateListener = this.accountStateListener;
+
+        if (accountStateListener != null)
+        {
             accountStateListener.onAccountState(accountState);
         }
     }
 
-    private void onOpenPosition(OpenPosition openPosition) {
-        OpenPositionListener openPositionListener = this.openPositionListener;
-        if (openPositionListener != null) {
+    private void onOpenPosition(final OpenPosition openPosition)
+    {
+        final OpenPositionListener openPositionListener = this.openPositionListener;
+
+        if (openPositionListener != null)
+        {
             openPositionListener.onOpenPosition(openPosition);
         }
     }
 
-    private void onOrderCanceled(OrderCanceled orderCanceled) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderCanceled(final OrderCanceled orderCanceled)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderCanceled(orderCanceled);
         }
     }
 
-    private void onOrderCancelFailed(OrderCancelFailed orderCancelFailed) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderCancelFailed(final OrderCancelFailed orderCancelFailed)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderCancelFailed(orderCancelFailed);
         }
     }
 
-    private void onOrderFilled(OrderFilled orderFilled) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderFilled(final OrderFilled orderFilled)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderFilled(orderFilled);
         }
     }
 
-    private void onOrderModificationFailed(OrderModificationFailed orderModificationFailed) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderModificationFailed(final OrderModificationFailed orderModificationFailed)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderModificationFailed(orderModificationFailed);
         }
     }
 
-    private void onOrderModified(OrderModified orderModified) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderModified(final OrderModified orderModified)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderModified(orderModified);
         }
     }
 
-    private void onOrderPlaced(OrderPlaced orderPlaced) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderPlaced(final OrderPlaced orderPlaced)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderPlaced(orderPlaced);
         }
     }
 
-    private void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed) {
-        OrderListener orderListener = this.orderListener;
-        if (orderListener != null) {
+    private void onOrderPlaceFailed(final OrderPlaceFailed orderPlaceFailed)
+    {
+        final OrderListener orderListener = this.orderListener;
+
+        if (orderListener != null)
+        {
             orderListener.onOrderPlaceFailed(orderPlaceFailed);
         }
     }
 
-    private void onLastNonce(JsonNode dataJson) {
+    private void onLastNonce(final JsonNode dataJson)
+    {
         lastNonceFuture.complete(dataJson.get("last_nonce").asLong());
     }
 }

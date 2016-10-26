@@ -7,35 +7,41 @@ import net.quedex.api.pgp.BcPublicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebsocketMarketStream extends WebsocketStream<MarketMessageReceiver> implements MarketStream {
-
+public class WebsocketMarketStream extends WebsocketStream<MarketMessageReceiver> implements MarketStream
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketMarketStream.class);
 
-    public WebsocketMarketStream(String marketStreamUrl, BcPublicKey qdxPublicKey) {
+    public WebsocketMarketStream(final String marketStreamUrl, final BcPublicKey qdxPublicKey)
+    {
         super(LOGGER, marketStreamUrl, new MarketMessageReceiver(qdxPublicKey));
     }
 
-    public WebsocketMarketStream(Config config) {
+    public WebsocketMarketStream(final Config config)
+    {
         this(config.getMarketStreamUrl(), config.getQdxPublicKey());
     }
 
     @Override
-    public Registration registerOrderBookListener(OrderBookListener orderBookListener) {
+    public Registration registerOrderBookListener(final OrderBookListener orderBookListener)
+    {
         return messageReceiver.registerOrderBookListener(orderBookListener);
     }
 
     @Override
-    public Registration registerTradeListener(TradeListener tradeListener) {
+    public Registration registerTradeListener(final TradeListener tradeListener)
+    {
         return messageReceiver.registerTradeListener(tradeListener);
     }
 
     @Override
-    public Registration registerQuotesListener(QuotesListener quotesListener) {
+    public Registration registerQuotesListener(final QuotesListener quotesListener)
+    {
         return messageReceiver.registerQuotesListener(quotesListener);
     }
 
     @Override
-    public void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener) {
+    public void registerAndSubscribeSessionStateListener(final SessionStateListener sessionStateListener)
+    {
         messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
     }
 }

@@ -2,20 +2,24 @@ package net.quedex.api.common;
 
 import java.io.IOException;
 
-public class CommunicationException extends IOException {
-
-    public CommunicationException() {
+public class CommunicationException extends IOException
+{
+    public CommunicationException()
+    {
     }
 
-    public CommunicationException(String message) {
+    public CommunicationException(final String message)
+    {
         super(message);
     }
 
-    public CommunicationException(String message, Throwable cause) {
+    public CommunicationException(final String message, final Throwable cause)
+    {
         super(message, cause);
     }
 
-    public CommunicationException(Throwable cause) {
+    public CommunicationException(final Throwable cause)
+    {
         super(cause);
     }
 }

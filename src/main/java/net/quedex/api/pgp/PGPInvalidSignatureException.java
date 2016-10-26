@@ -1,19 +1,23 @@
 package net.quedex.api.pgp;
 
-public final class PGPInvalidSignatureException extends PGPExceptionBase {
-
-    public PGPInvalidSignatureException() {
+public final class PGPInvalidSignatureException extends PGPExceptionBase
+{
+    public PGPInvalidSignatureException()
+    {
     }
 
-    public PGPInvalidSignatureException(String message) {
+    public PGPInvalidSignatureException(final String message)
+    {
         super(message);
     }
 
-    public PGPInvalidSignatureException(String message, Throwable cause) {
+    public PGPInvalidSignatureException(final String message, final Throwable cause)
+    {
         super(message, cause);
     }
 
-    public PGPInvalidSignatureException(Throwable cause) {
+    public PGPInvalidSignatureException(final Throwable cause)
+    {
         super(cause);
     }
 }

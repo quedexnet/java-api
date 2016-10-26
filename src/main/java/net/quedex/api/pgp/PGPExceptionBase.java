@@ -1,19 +1,23 @@
 package net.quedex.api.pgp;
 
-public class PGPExceptionBase extends Exception {
-
-    PGPExceptionBase() {
+public class PGPExceptionBase extends Exception
+{
+    PGPExceptionBase()
+    {
     }
 
-    PGPExceptionBase(String message) {
+    PGPExceptionBase(final String message)
+    {
         super(message);
     }
 
-    PGPExceptionBase(String message, Throwable cause) {
+    PGPExceptionBase(final String message, final Throwable cause)
+    {
         super(message, cause);
     }
 
-    PGPExceptionBase(Throwable cause) {
+    PGPExceptionBase(final Throwable cause)
+    {
         super(cause);
     }
 }

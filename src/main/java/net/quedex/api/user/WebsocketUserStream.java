@@ -15,153 +15,178 @@ import java.util.concurrent.TimeoutException;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> implements UserStream {
-
+public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> implements UserStream
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketUserStream.class);
 
     private final UserMessageSender sender;
 
     public WebsocketUserStream(
-            String streamUrl,
-            long accountId,
-            int nonceGroup,
-            BcPublicKey qdxPublicKey,
-            BcPrivateKey userPrivateKey
-    ) {
+        final String streamUrl,
+        final long accountId,
+        final int nonceGroup,
+        final BcPublicKey qdxPublicKey,
+        final BcPrivateKey userPrivateKey)
+    {
         super(LOGGER, streamUrl, new UserMessageReceiver(qdxPublicKey, userPrivateKey));
         this.sender = new UserMessageSender(webSocketClient, accountId, nonceGroup, qdxPublicKey, userPrivateKey);
     }
 
-    public WebsocketUserStream(Config config) {
+    public WebsocketUserStream(final Config config)
+    {
         this(
-                config.getUserStreamUrl(),
-                config.getAccountId(),
-                config.getNonceGroup(),
-                config.getQdxPublicKey(),
-                config.getUserPrivateKey()
+            config.getUserStreamUrl(),
+            config.getAccountId(),
+            config.getNonceGroup(),
+            config.getQdxPublicKey(),
+            config.getUserPrivateKey()
         );
     }
 
     @Override
-    public void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
+    public void registerStreamFailureListener(final StreamFailureListener streamFailureListener)
+    {
         super.registerStreamFailureListener(streamFailureListener);
         sender.registerStreamFailureListener(streamFailureListener);
     }
 
     @Override
-    public void start() throws CommunicationException {
+    public void start() throws CommunicationException
+    {
         super.start();
 
         sender.sendGetLastNonce();
-        try {
+        try
+        {
             sender.setStartNonce(messageReceiver.getLastNonce());
-        } catch (TimeoutException e) {
+        }
+        catch (final TimeoutException e)
+        {
             throw new CommunicationException("Timeout waiting for last nonce", e);
-        } catch (InterruptedException e) {
+        }
+        catch (final InterruptedException e)
+        {
             Thread.currentThread().interrupt();
         }
     }
 
     @Override
-    public void registerOrderListener(OrderListener orderListener) {
+    public void registerOrderListener(final OrderListener orderListener)
+    {
         messageReceiver.registerOrderListener(orderListener);
     }
 
     @Override
-    public void registerOpenPositionListener(OpenPositionListener openPositionListener) {
+    public void registerOpenPositionListener(final OpenPositionListener openPositionListener)
+    {
         messageReceiver.registerOpenPositionListener(openPositionListener);
     }
 
     @Override
-    public void registerAccountStateListener(AccountStateListener accountStateListener) {
+    public void registerAccountStateListener(final AccountStateListener accountStateListener)
+    {
         messageReceiver.registerAccountStateListener(accountStateListener);
     }
 
     @Override
-    public void subscribeListeners() {
+    public void subscribeListeners()
+    {
         sender.sendSubscribe();
     }
 
     @Override
-    public void placeOrder(LimitOrderSpec limitOrderSpec) {
+    public void placeOrder(final LimitOrderSpec limitOrderSpec)
+    {
         sender.sendOrderSpec(limitOrderSpec);
     }
 
     @Override
-    public void cancelOrder(OrderCancelSpec orderCancelSpec) {
+    public void cancelOrder(final OrderCancelSpec orderCancelSpec)
+    {
         sender.sendOrderSpec(orderCancelSpec);
     }
 
     @Override
-    public void modifyOrder(OrderModificationSpec orderModificationSpec) {
+    public void modifyOrder(final OrderModificationSpec orderModificationSpec)
+    {
         sender.sendOrderSpec(orderModificationSpec);
     }
 
     @Override
-    public Batch batch() {
+    public Batch batch()
+    {
         return new BatchImpl();
     }
 
     @Override
-    public void batch(List<OrderSpec> batch) {
+    public void batch(final List<OrderSpec> batch)
+    {
         sender.sendBatch(batch);
     }
 
     @Override
-    public void stop() throws CommunicationException {
+    public void stop() throws CommunicationException
+    {
         super.stop();
         sender.stop();
     }
 
-    private class BatchImpl implements Batch {
-
+    private class BatchImpl implements Batch
+    {
         private final List<OrderSpec> batch = new ArrayList<>();
         private boolean sent;
 
         @Override
-        public Batch placeOrder(LimitOrderSpec limitOrderSpec) {
+        public Batch placeOrder(final LimitOrderSpec limitOrderSpec)
+        {
             checkState(!sent, "Batch already sent");
             batch.add(limitOrderSpec);
             return this;
         }
 
         @Override
-        public Batch placeOrders(List<LimitOrderSpec> limitOrderSpecs) {
+        public Batch placeOrders(final List<LimitOrderSpec> limitOrderSpecs)
+        {
             checkState(!sent, "Batch already sent");
             batch.addAll(limitOrderSpecs);
             return this;
         }
 
         @Override
-        public Batch cancelOrder(OrderCancelSpec orderCancelSpec) {
+        public Batch cancelOrder(final OrderCancelSpec orderCancelSpec)
+        {
             checkState(!sent, "Batch already sent");
             batch.add(orderCancelSpec);
             return this;
         }
 
         @Override
-        public Batch cancelOrders(List<OrderCancelSpec> orderCancelSpecs) {
+        public Batch cancelOrders(final List<OrderCancelSpec> orderCancelSpecs)
+        {
             checkState(!sent, "Batch already sent");
             batch.addAll(orderCancelSpecs);
             return this;
         }
 
         @Override
-        public Batch modifyOrder(OrderModificationSpec orderModificationSpec) {
+        public Batch modifyOrder(final OrderModificationSpec orderModificationSpec)
+        {
             checkState(!sent, "Batch already sent");
             batch.add(orderModificationSpec);
             return this;
         }
 
         @Override
-        public Batch modifyOrders(List<OrderModificationSpec> orderModificationSpec) {
+        public Batch modifyOrders(final List<OrderModificationSpec> orderModificationSpec)
+        {
             checkState(!sent, "Batch already sent");
             batch.addAll(orderModificationSpec);
             return this;
         }
 
         @Override
-        public void send() {
+        public void send()
+        {
             checkState(!sent, "Batch already sent");
             sent = true;
             WebsocketUserStream.this.batch(batch);

@@ -10,8 +10,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class Quotes {
-
+public class Quotes
+{
     private final int instrumentId;
     private final BigDecimal last;
     private final int lastQuantity;
@@ -24,16 +24,16 @@ public class Quotes {
 
     @JsonCreator
     public Quotes(
-            @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("last") BigDecimal last,
-            @JsonProperty("last_quantity") int lastQuantity,
-            @JsonProperty("bid") BigDecimal bid,
-            @JsonProperty("bid_quantity") Integer bidQuantity,
-            @JsonProperty("ask") BigDecimal ask,
-            @JsonProperty("ask_quantity") Integer askQuantity,
-            @JsonProperty("volume") int volume,
-            @JsonProperty("open_interest") int openInterest
-    ) {
+        @JsonProperty("instrument_id") final int instrumentId,
+        @JsonProperty("last") final BigDecimal last,
+        @JsonProperty("last_quantity") final int lastQuantity,
+        @JsonProperty("bid") final BigDecimal bid,
+        @JsonProperty("bid_quantity") final Integer bidQuantity,
+        @JsonProperty("ask") final BigDecimal ask,
+        @JsonProperty("ask_quantity") final Integer askQuantity,
+        @JsonProperty("volume") final int volume,
+        @JsonProperty("open_interest") final int openInterest)
+    {
         checkArgument(last.compareTo(BigDecimal.ZERO) > 0, "last=%s <= 0", last);
         checkArgument(lastQuantity >= 0, "lastQuantity=%s < 0", lastQuantity); // may be 0 when reference trade
         checkArgument(volume >= 0, "volume=%s < 0", volume);
@@ -53,67 +53,83 @@ public class Quotes {
         this.openInterest = openInterest;
     }
 
-    public int getInstrumentId() {
+    public int getInstrumentId()
+    {
         return instrumentId;
     }
 
-    public BigDecimal getLast() {
+    public BigDecimal getLast()
+    {
         return last;
     }
 
-    public int getLastQuantity() {
+    public int getLastQuantity()
+    {
         return lastQuantity;
     }
 
-    public Optional<PriceQuantity> getBid() {
+    public Optional<PriceQuantity> getBid()
+    {
         return bidQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(bid, bidQuantity));
     }
 
-    public Optional<PriceQuantity> getAsk() {
+    public Optional<PriceQuantity> getAsk()
+    {
         return askQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(ask, askQuantity));
     }
 
-    public int getVolume() {
+    public int getVolume()
+    {
         return volume;
     }
 
-    public int getOpenInterest() {
+    public int getOpenInterest()
+    {
         return openInterest;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Quotes quotes = (Quotes) o;
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final Quotes quotes = (Quotes) o;
         return instrumentId == quotes.instrumentId &&
-                lastQuantity == quotes.lastQuantity &&
-                volume == quotes.volume &&
-                openInterest == quotes.openInterest &&
-                Objects.equal(last, quotes.last) &&
-                Objects.equal(bid, quotes.bid) &&
-                Objects.equal(bidQuantity, quotes.bidQuantity) &&
-                Objects.equal(ask, quotes.ask) &&
-                Objects.equal(askQuantity, quotes.askQuantity);
+            lastQuantity == quotes.lastQuantity &&
+            volume == quotes.volume &&
+            openInterest == quotes.openInterest &&
+            Objects.equal(last, quotes.last) &&
+            Objects.equal(bid, quotes.bid) &&
+            Objects.equal(bidQuantity, quotes.bidQuantity) &&
+            Objects.equal(ask, quotes.ask) &&
+            Objects.equal(askQuantity, quotes.askQuantity);
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Objects.hashCode(instrumentId, last, lastQuantity, bid, bidQuantity, ask, askQuantity, volume, openInterest);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return MoreObjects.toStringHelper(this)
-                .add("instrumentId", instrumentId)
-                .add("last", last)
-                .add("lastQuantity", lastQuantity)
-                .add("bid", bid)
-                .add("bidQuantity", bidQuantity)
-                .add("ask", ask)
-                .add("askQuantity", askQuantity)
-                .add("volume", volume)
-                .add("openInterest", openInterest)
-                .toString();
+            .add("instrumentId", instrumentId)
+            .add("last", last)
+            .add("lastQuantity", lastQuantity)
+            .add("bid", bid)
+            .add("bidQuantity", bidQuantity)
+            .add("ask", ask)
+            .add("askQuantity", askQuantity)
+            .add("volume", volume)
+            .add("openInterest", openInterest)
+            .toString();
     }
 }

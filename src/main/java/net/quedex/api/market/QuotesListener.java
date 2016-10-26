@@ -1,7 +1,7 @@
 package net.quedex.api.market;
 
 @FunctionalInterface
-public interface QuotesListener {
-
+public interface QuotesListener
+{
     void onQuotes(Quotes quotes);
 }

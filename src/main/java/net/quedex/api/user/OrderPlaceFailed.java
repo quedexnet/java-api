@@ -7,9 +7,10 @@ import com.google.common.base.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class OrderPlaceFailed {
-
-    public enum Cause {
+public class OrderPlaceFailed
+{
+    public enum Cause
+    {
         INVALID_ORDER_ID,
         INVALID_INSTRUMENT_ID,
         NONPOSITIVE_QUANTITY,
@@ -19,7 +20,8 @@ public class OrderPlaceFailed {
         INSUFFICIENT_FUNDS;
 
         @JsonCreator
-        private static Cause deserialize(String value) {
+        private static Cause deserialize(final String value)
+        {
             return valueOf(value.toUpperCase());
         }
     }
@@ -28,38 +30,52 @@ public class OrderPlaceFailed {
     private final Cause cause;
 
     @JsonCreator
-    public OrderPlaceFailed(@JsonProperty("client_order_id") long clientOrderId, @JsonProperty("cause") Cause cause) {
+    public OrderPlaceFailed(
+        @JsonProperty("client_order_id") final long clientOrderId,
+        @JsonProperty("cause") final Cause cause)
+    {
         this.clientOrderId = clientOrderId;
         this.cause = checkNotNull(cause, "Null cause");
     }
 
-    public long getClientOrderId() {
+    public long getClientOrderId()
+    {
         return clientOrderId;
     }
 
-    public Cause getCause() {
+    public Cause getCause()
+    {
         return cause;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderPlaceFailed that = (OrderPlaceFailed) o;
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final OrderPlaceFailed that = (OrderPlaceFailed) o;
         return clientOrderId == that.clientOrderId &&
-                cause == that.cause;
+            cause == that.cause;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Objects.hashCode(clientOrderId, cause);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return MoreObjects.toStringHelper(this)
-                .add("clientOrderId", clientOrderId)
-                .add("cause", cause)
-                .toString();
+            .add("clientOrderId", clientOrderId)
+            .add("cause", cause)
+            .toString();
     }
 }

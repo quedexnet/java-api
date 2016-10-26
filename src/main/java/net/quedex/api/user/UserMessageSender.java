@@ -22,8 +22,8 @@ import java.util.concurrent.Executors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-class UserMessageSender {
-
+class UserMessageSender
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMessageSender.class);
     private static final ObjectMapper OBJECT_MAPPER = MessageReceiver.OBJECT_MAPPER;
     private static final ObjectWriter OBJECT_WRITER = OBJECT_MAPPER.writer();
@@ -38,12 +38,12 @@ class UserMessageSender {
     private volatile long nonce;
 
     UserMessageSender(
-            WebSocketClient webSocketClient,
-            long accountId,
-            int nonceGroup,
-            BcPublicKey publicKey,
-            BcPrivateKey privateKey
-    ) {
+        final WebSocketClient webSocketClient,
+        final long accountId,
+        final int nonceGroup,
+        final BcPublicKey publicKey,
+        final BcPrivateKey privateKey)
+    {
         checkArgument(nonceGroup >= 0, "nonceGroup=%s < 0", nonceGroup);
         checkArgument(accountId > 0, "accountId=%s <= 0", accountId);
         this.webSocketClient = checkNotNull(webSocketClient, "null webSocketClient");
@@ -52,69 +52,89 @@ class UserMessageSender {
         this.nonceGroup = nonceGroup;
     }
 
-    void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
+    void registerStreamFailureListener(final StreamFailureListener streamFailureListener)
+    {
         this.streamFailureListener = streamFailureListener;
     }
 
-    void setStartNonce(long startNonce) {
+    void setStartNonce(final long startNonce)
+    {
         LOGGER.debug("setStartNonce({})", startNonce);
         nonce = startNonce;
     }
 
-    void sendGetLastNonce() throws CommunicationException {
-        try {
+    void sendGetLastNonce() throws CommunicationException
+    {
+        try
+        {
             sendMessage(OBJECT_MAPPER.createObjectNode().put("type", "get_last_nonce").put("nonce_group", nonceGroup));
-        } catch (PGPExceptionBase | JsonProcessingException e) {
+        }
+        catch (PGPExceptionBase | JsonProcessingException e)
+        {
             throw new CommunicationException("Error sending get_last_nonce", e);
         }
     }
 
-    void sendSubscribe() {
+    void sendSubscribe()
+    {
         sendNoncedMessage(OBJECT_MAPPER.createObjectNode().put("type", "subscribe"));
     }
 
-    void sendOrderSpec(OrderSpec orderSpec) {
+    void sendOrderSpec(final OrderSpec orderSpec)
+    {
         sendNoncedMessage(OBJECT_MAPPER.valueToTree(orderSpec));
     }
 
-    void sendBatch(List<OrderSpec> batch) {
-        ObjectNode messageJson = (ObjectNode) OBJECT_MAPPER.createObjectNode()
-                .put("type", "batch")
-                .set("batch", OBJECT_MAPPER.valueToTree(batch));
+    void sendBatch(final List<OrderSpec> batch)
+    {
+        final ObjectNode messageJson = (ObjectNode) OBJECT_MAPPER.createObjectNode()
+            .put("type", "batch")
+            .set("batch", OBJECT_MAPPER.valueToTree(batch));
         sendNoncedMessage(messageJson);
     }
 
-    void stop() {
+    void stop()
+    {
         executor.shutdown();
     }
 
-    private void sendNoncedMessage(ObjectNode jsonMessage) {
-        executor.execute(() -> {
+    private void sendNoncedMessage(final ObjectNode jsonMessage)
+    {
+        executor.execute(() ->
+        {
             jsonMessage.put("nonce", getNonce()).put("nonce_group", nonceGroup);
-            try {
+            try
+            {
                 sendMessage(jsonMessage);
-            } catch (Exception e) {
+            }
+            catch (final Exception e)
+            {
                 onError(new CommunicationException("Error sending message", e));
             }
         });
     }
 
-    private long getNonce() {
+    private long getNonce()
+    {
         return ++nonce;
     }
 
-    private void sendMessage(ObjectNode jsonMessage) throws JsonProcessingException, PGPExceptionBase {
+    private void sendMessage(final ObjectNode jsonMessage) throws JsonProcessingException, PGPExceptionBase
+    {
         jsonMessage.put("account_id", accountId);
-        String messageStr = OBJECT_WRITER.writeValueAsString(jsonMessage);
+        final String messageStr = OBJECT_WRITER.writeValueAsString(jsonMessage);
         webSocketClient.send(encryptor.encrypt(messageStr, true));
 
         LOGGER.trace("sendMessage({})", messageStr);
     }
 
-    private void onError(Exception e) {
+    private void onError(final Exception e)
+    {
         LOGGER.warn("onError({})", e);
-        StreamFailureListener streamFailureListener = this.streamFailureListener;
-        if (streamFailureListener != null) {
+        final StreamFailureListener streamFailureListener = this.streamFailureListener;
+
+        if (streamFailureListener != null)
+        {
             streamFailureListener.onStreamFailure(e);
         }
     }

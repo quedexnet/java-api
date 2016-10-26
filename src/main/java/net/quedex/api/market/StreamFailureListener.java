@@ -1,6 +1,6 @@
 package net.quedex.api.market;
 
-public interface StreamFailureListener {
-
+public interface StreamFailureListener
+{
     void onStreamFailure(Exception exception);
 }

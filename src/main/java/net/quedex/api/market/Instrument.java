@@ -10,26 +10,30 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class Instrument {
-
+public final class Instrument
+{
     private static final int SETTLEMENT_HOUR_UTC_MILLIS = 8 * 60 * 60 * 1000;
 
-    public enum Type {
+    public enum Type
+    {
         FUTURES,
         OPTION;
 
         @JsonCreator
-        private static Type deserialize(String value) {
+        private static Type deserialize(final String value)
+        {
             return valueOf(value.toUpperCase());
         }
     }
 
-    public enum OptionType {
+    public enum OptionType
+    {
         CALL_EUROPEAN,
         PUT_EUROPEAN;
 
         @JsonCreator
-        private static OptionType deserialize(String value) {
+        private static OptionType deserialize(final String value)
+        {
             return valueOf(value.toUpperCase());
         }
     }
@@ -51,21 +55,21 @@ public final class Instrument {
 
     @JsonCreator
     public Instrument(
-            @JsonProperty("symbol") String symbol,
-            @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("type") Type type,
-            @JsonProperty("option_type") OptionType optionType,
-            @JsonProperty("tick_size") BigDecimal tickSize,
-            @JsonProperty("issue_date") long issueDate,
-            @JsonProperty("expiration_date") long expirationDate,
-            @JsonProperty("underlying_symbol") String underlyingSymbol,
-            @JsonProperty("notional_amount") int notionalAmount,
-            @JsonProperty("fee") BigDecimal feeFraction,
-            @JsonProperty("taker_to_maker") BigDecimal takerToMakerFraction,
-            @JsonProperty("initial_margin") BigDecimal initialMarginFraction,
-            @JsonProperty("maintenance_margin") BigDecimal maintenanceMarginFraction,
-            @JsonProperty("strike") BigDecimal strike
-    ) {
+        @JsonProperty("symbol") final String symbol,
+        @JsonProperty("instrument_id") final int instrumentId,
+        @JsonProperty("type") final Type type,
+        @JsonProperty("option_type") final OptionType optionType,
+        @JsonProperty("tick_size") final BigDecimal tickSize,
+        @JsonProperty("issue_date") final long issueDate,
+        @JsonProperty("expiration_date") final long expirationDate,
+        @JsonProperty("underlying_symbol") final String underlyingSymbol,
+        @JsonProperty("notional_amount") final int notionalAmount,
+        @JsonProperty("fee") final BigDecimal feeFraction,
+        @JsonProperty("taker_to_maker") final BigDecimal takerToMakerFraction,
+        @JsonProperty("initial_margin") final BigDecimal initialMarginFraction,
+        @JsonProperty("maintenance_margin") final BigDecimal maintenanceMarginFraction,
+        @JsonProperty("strike") final BigDecimal strike)
+    {
         checkArgument(!symbol.isEmpty(), "Empty symbol");
         checkArgument(tickSize.compareTo(BigDecimal.ZERO) > 0, "tickSize=%s <=0", tickSize);
         checkArgument(issueDate > 0, "issueDate=%s <= 0", issueDate);
@@ -75,12 +79,12 @@ public final class Instrument {
         checkArgument(feeFraction.compareTo(BigDecimal.ZERO) >= 0, "feeFraction=%s < 0", takerToMakerFraction);
         checkArgument(takerToMakerFraction.compareTo(BigDecimal.ZERO) >= 0, "takerToMaker=%s < 0", takerToMakerFraction);
         checkArgument(
-                initialMarginFraction.compareTo(BigDecimal.ZERO) >= 0,
-                "initialMarginFraction=%s < 0", initialMarginFraction
+            initialMarginFraction.compareTo(BigDecimal.ZERO) >= 0,
+            "initialMarginFraction=%s < 0", initialMarginFraction
         );
         checkArgument(
-                maintenanceMarginFraction.compareTo(BigDecimal.ZERO) >= 0,
-                "maintenanceMarginFraction=%s < 0", maintenanceMarginFraction
+            maintenanceMarginFraction.compareTo(BigDecimal.ZERO) >= 0,
+            "maintenanceMarginFraction=%s < 0", maintenanceMarginFraction
         );
 
         this.symbol = symbol;
@@ -96,126 +100,156 @@ public final class Instrument {
         this.initialMarginFraction = initialMarginFraction;
         this.maintenanceMarginFraction = maintenanceMarginFraction;
 
-        if (this.type == Type.FUTURES) {
+        if (this.type == Type.FUTURES)
+        {
             checkArgument(strike == null, "Expected null strike");
             checkArgument(optionType == null, "Expected null optionType");
             this.strike = null;
             this.optionType = null;
-        } else {
+        }
+        else
+        {
             checkArgument(strike.compareTo(BigDecimal.ZERO) > 0, "strike=%s <= 0", strike);
             this.strike = strike;
             this.optionType = checkNotNull(optionType, "null optionType");
         }
     }
 
-    public String getSymbol() {
+    public String getSymbol()
+    {
         return symbol;
     }
 
-    public int getInstrumentId() {
+    public int getInstrumentId()
+    {
         return instrumentId;
     }
 
-    public Type getType() {
+    public Type getType()
+    {
         return type;
     }
 
-    public BigDecimal getTickSize() {
+    public BigDecimal getTickSize()
+    {
         return tickSize;
     }
 
-    public long getIssueDate() {
+    public long getIssueDate()
+    {
         return issueDate;
     }
 
-    public long getExpirationDate() {
+    public long getExpirationDate()
+    {
         return expirationDate;
     }
 
-    public String getUnderlyingSymbol() {
+    public String getUnderlyingSymbol()
+    {
         return underlyingSymbol;
     }
 
-    public int getNotionalAmount() {
+    public int getNotionalAmount()
+    {
         return notionalAmount;
     }
 
-    public BigDecimal getFeeFraction() {
+    public BigDecimal getFeeFraction()
+    {
         return feeFraction;
     }
 
-    public BigDecimal getTakerToMakerFeeFraction() {
+    public BigDecimal getTakerToMakerFeeFraction()
+    {
         return takerToMakerFeeFraction;
     }
 
     /**
      * @return taker fee fraction
      */
-    public BigDecimal getTakerFeeFraction() {
+    public BigDecimal getTakerFeeFraction()
+    {
         return feeFraction.add(takerToMakerFeeFraction);
     }
 
     /**
      * @return maker fee fraction (may be negative)
      */
-    public BigDecimal getMakerFeeFraction() {
+    public BigDecimal getMakerFeeFraction()
+    {
         return feeFraction.subtract(takerToMakerFeeFraction);
     }
 
-    public BigDecimal getInitialMarginFraction() {
+    public BigDecimal getInitialMarginFraction()
+    {
         return initialMarginFraction;
     }
 
-    public BigDecimal getMaintenanceMarginFraction() {
+    public BigDecimal getMaintenanceMarginFraction()
+    {
         return maintenanceMarginFraction;
     }
 
-    public Optional<BigDecimal> getStrike() {
+    public Optional<BigDecimal> getStrike()
+    {
         return Optional.ofNullable(strike);
     }
 
-    public Optional<OptionType> getOptionType() {
+    public Optional<OptionType> getOptionType()
+    {
         return Optional.ofNullable(optionType);
     }
 
-    public boolean isFutures() {
+    public boolean isFutures()
+    {
         return type == Type.FUTURES;
     }
 
-    public boolean isTraded(long currentTimeMillis) {
+    public boolean isTraded(final long currentTimeMillis)
+    {
         return issueDate < currentTimeMillis && currentTimeMillis < expirationDate + SETTLEMENT_HOUR_UTC_MILLIS;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Instrument that = (Instrument) o;
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final Instrument that = (Instrument) o;
         return instrumentId == that.instrumentId;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Integer.hashCode(instrumentId);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return MoreObjects.toStringHelper(this)
-                .add("instrumentId", instrumentId)
-                .add("symbol", symbol)
-                .add("instrumentType", type)
-                .add("tickSize", tickSize)
-                .add("issueDate", issueDate)
-                .add("expirationDate", expirationDate)
-                .add("underlyingSymbol", underlyingSymbol)
-                .add("notionalAmount", notionalAmount)
-                .add("feeFraction", feeFraction)
-                .add("takerToMakerFeeFraction", takerToMakerFeeFraction)
-                .add("initialMarginFraction", initialMarginFraction)
-                .add("maintenanceMarginFraction", maintenanceMarginFraction)
-                .add("strike", strike)
-                .add("optionType", optionType)
-                .toString();
+            .add("instrumentId", instrumentId)
+            .add("symbol", symbol)
+            .add("instrumentType", type)
+            .add("tickSize", tickSize)
+            .add("issueDate", issueDate)
+            .add("expirationDate", expirationDate)
+            .add("underlyingSymbol", underlyingSymbol)
+            .add("notionalAmount", notionalAmount)
+            .add("feeFraction", feeFraction)
+            .add("takerToMakerFeeFraction", takerToMakerFeeFraction)
+            .add("initialMarginFraction", initialMarginFraction)
+            .add("maintenanceMarginFraction", maintenanceMarginFraction)
+            .add("strike", strike)
+            .add("optionType", optionType)
+            .toString();
     }
 }

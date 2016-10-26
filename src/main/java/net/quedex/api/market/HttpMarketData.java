@@ -17,37 +17,46 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class HttpMarketData implements MarketData {
-
+public class HttpMarketData implements MarketData
+{
     private static final ObjectMapper OBJECT_MAPPER = MessageReceiver.OBJECT_MAPPER;
 
-    static {
+    static
+    {
         Unirest.setTimeouts(10_000, 10_000);
     }
 
     private final String instrumentDataUrl;
     private final BcSignatureVerifier signatureVerifier;
 
-    public HttpMarketData(String instrumentDataUrl, BcPublicKey publicKey) {
+    public HttpMarketData(final String instrumentDataUrl, final BcPublicKey publicKey)
+    {
         checkArgument(!instrumentDataUrl.isEmpty(), "Empty instrumentDataUrl");
         this.instrumentDataUrl = instrumentDataUrl;
         this.signatureVerifier = new BcSignatureVerifier(publicKey);
     }
 
-    public HttpMarketData(Config config) {
+    public HttpMarketData(final Config config)
+    {
         this(config.getInstrumentDataUrl(), config.getQdxPublicKey());
     }
 
     @Override
-    public Map<Integer, Instrument> getInstruments() throws CommunicationException {
-        try {
-            String data = Unirest.get(instrumentDataUrl).asString().getBody();
-            JsonNode metaJson = OBJECT_MAPPER.readTree(signatureVerifier.verifySignature(data));
+    public Map<Integer, Instrument> getInstruments() throws CommunicationException
+    {
+        try
+        {
+            final String data = Unirest.get(instrumentDataUrl).asString().getBody();
+            final JsonNode metaJson = OBJECT_MAPPER.readTree(signatureVerifier.verifySignature(data));
             return OBJECT_MAPPER.treeToValue(metaJson.get("data"), InstrumentsMap.class);
-        } catch (UnirestException | IOException | PGPExceptionBase e) {
+        }
+        catch (UnirestException | IOException | PGPExceptionBase e)
+        {
             throw new CommunicationException("Error fetching instruments", e);
         }
     }
 
-    private static class InstrumentsMap extends HashMap<Integer, Instrument> {}
+    private static class InstrumentsMap extends HashMap<Integer, Instrument>
+    {
+    }
 }

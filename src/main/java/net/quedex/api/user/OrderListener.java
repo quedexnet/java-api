@@ -1,7 +1,7 @@
 package net.quedex.api.user;
 
-public interface OrderListener {
-
+public interface OrderListener
+{
     void onOrderPlaced(OrderPlaced orderPlaced);
 
     void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed);

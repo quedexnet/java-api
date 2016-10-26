@@ -1,10 +1,20 @@
-group 'net.quedex'
-version '0.1.0'
-
 apply plugin: 'java'
-apply plugin: 'findbugs'
 apply plugin: 'maven'
 apply plugin: 'signing'
+
+group 'net.quedex'
+version '0.1.1-SNAPSHOT'
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+ext {
+    if (!project.hasProperty('ossrhUsername')) {
+        ossrhUsername = ''
+    }
+
+    if (!project.hasProperty('ossrhPassword')) {
+        ossrhPassword = ''
+    }
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -28,28 +38,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12' // mockito depends on it
 }
 
-wrapper {
-    gradleVersion '2.14'
-}
-
 test {
     useTestNG()
 
     testLogging.showStandardStreams = true
-}
-
-findbugsMain {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
-findbugsTest {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
 }
 
 task javadocJar(type: Jar) {
@@ -62,12 +54,14 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
 }
 
-signing {
-    sign configurations.archives
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }
 
 uploadArchives {
@@ -107,7 +101,7 @@ uploadArchives {
 
                 developers {
                     developer {
-                        id  ='wgromniak'
+                        id = 'wgromniak'
                         name = 'Wiktor Gromniak'
                         email = 'wgromniak@quedex.net'
                         url = 'https://github.com/wgromniak'
@@ -116,4 +110,8 @@ uploadArchives {
             }
         }
     }
+}
+
+wrapper {
+    gradleVersion '2.14'
 }

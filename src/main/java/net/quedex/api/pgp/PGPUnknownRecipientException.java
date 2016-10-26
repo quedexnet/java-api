@@ -1,19 +1,23 @@
 package net.quedex.api.pgp;
 
-public final class PGPUnknownRecipientException extends PGPExceptionBase {
-
-    public PGPUnknownRecipientException() {
+public final class PGPUnknownRecipientException extends PGPExceptionBase
+{
+    public PGPUnknownRecipientException()
+    {
     }
 
-    public PGPUnknownRecipientException(String message) {
+    public PGPUnknownRecipientException(final String message)
+    {
         super(message);
     }
 
-    public PGPUnknownRecipientException(String message, Throwable cause) {
+    public PGPUnknownRecipientException(final String message, final Throwable cause)
+    {
         super(message, cause);
     }
 
-    public PGPUnknownRecipientException(Throwable cause) {
+    public PGPUnknownRecipientException(final Throwable cause)
+    {
         super(cause);
     }
 }

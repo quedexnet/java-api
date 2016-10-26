@@ -1,6 +1,6 @@
 package net.quedex.api.user;
 
-public interface OrderSpec {
-
+public interface OrderSpec
+{
     long getClientOrderId();
 }

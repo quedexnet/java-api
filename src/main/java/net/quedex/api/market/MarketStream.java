@@ -3,8 +3,8 @@ package net.quedex.api.market;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.SessionStateListener;
 
-public interface MarketStream {
-
+public interface MarketStream
+{
     void registerStreamFailureListener(StreamFailureListener streamFailureListener);
 
     void start() throws CommunicationException;

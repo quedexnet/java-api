@@ -10,13 +10,15 @@ import java.math.BigDecimal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class Trade {
-
-    public enum LiquidityProvider {
+public final class Trade
+{
+    public enum LiquidityProvider
+    {
         BUYER, SELLER, AUCTION;
 
         @JsonCreator
-        private static LiquidityProvider deserialize(String value) {
+        private static LiquidityProvider deserialize(final String value)
+        {
             return valueOf(value.toUpperCase());
         }
     }
@@ -31,13 +33,13 @@ public final class Trade {
 
     @JsonCreator
     public Trade(
-            @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("trade_id") long tradeId,
-            @JsonProperty("timestamp") long timestamp,
-            @JsonProperty("price") BigDecimal price,
-            @JsonProperty("quantity") int quantity,
-            @JsonProperty("liquidity_provider") LiquidityProvider liquidityProvider
-    ) {
+        @JsonProperty("instrument_id") final int instrumentId,
+        @JsonProperty("trade_id") final long tradeId,
+        @JsonProperty("timestamp") final long timestamp,
+        @JsonProperty("price") final BigDecimal price,
+        @JsonProperty("quantity") final int quantity,
+        @JsonProperty("liquidity_provider") final LiquidityProvider liquidityProvider)
+    {
         checkArgument(quantity > 0, "quantity=%s <= 0", quantity);
         this.instrumentId = instrumentId;
         this.tradeId = tradeId;
@@ -47,63 +49,85 @@ public final class Trade {
         this.liquidityProvider = checkNotNull(liquidityProvider, "null liquidityProvider");
     }
 
-    public int getInstrumentId() {
+    public int getInstrumentId()
+    {
         return instrumentId;
     }
 
-    public long getTradeId() {
+    public long getTradeId()
+    {
         return tradeId;
     }
 
-    public long getTimestamp() {
+    public long getTimestamp()
+    {
         return timestamp;
     }
 
-    public BigDecimal getPrice() {
+    public BigDecimal getPrice()
+    {
         return price;
     }
 
-    public int getQuantity() {
+    public int getQuantity()
+    {
         return quantity;
     }
 
-    public LiquidityProvider getLiquidityProvider() {
+    public LiquidityProvider getLiquidityProvider()
+    {
         return liquidityProvider;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Trade trade = (Trade) o;
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final Trade trade = (Trade) o;
         return tradeId == trade.tradeId;
     }
 
-    public boolean equalsFieldByField(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Trade trade = (Trade) o;
+    public boolean equalsFieldByField(final Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final Trade trade = (Trade) o;
         return instrumentId == trade.instrumentId &&
-                tradeId == trade.tradeId &&
-                timestamp == trade.timestamp &&
-                quantity == trade.quantity &&
-                Objects.equal(price, trade.price) &&
-                liquidityProvider == trade.liquidityProvider;
+            tradeId == trade.tradeId &&
+            timestamp == trade.timestamp &&
+            quantity == trade.quantity &&
+            Objects.equal(price, trade.price) &&
+            liquidityProvider == trade.liquidityProvider;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Objects.hashCode(tradeId);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return MoreObjects.toStringHelper(this)
-                .add("instrumentId", instrumentId)
-                .add("tradeId", tradeId)
-                .add("price", price)
-                .add("quantity", quantity)
-                .add("liquidityProvider", liquidityProvider)
-                .toString();
+            .add("instrumentId", instrumentId)
+            .add("tradeId", tradeId)
+            .add("price", price)
+            .add("quantity", quantity)
+            .add("liquidityProvider", liquidityProvider)
+            .toString();
     }
 }

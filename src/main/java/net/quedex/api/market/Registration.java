@@ -2,8 +2,8 @@ package net.quedex.api.market;
 
 import java.util.Collection;
 
-public interface Registration {
-
+public interface Registration
+{
     Registration subscribe(int instrumentId);
 
     Registration unsubscribe(int instrumentId);
