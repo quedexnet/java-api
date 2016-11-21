@@ -5,8 +5,6 @@ net.quedex.client.api.userStreamUrl = wss://url/user_stream
 net.quedex.client.api.accountId = 123456789
 net.quedex.client.api.nonceGroup = 5
 
-dont.do.it.in.production.privateKeyPasspharse = <passphrase>
-
 net.quedex.client.api.qdxPublicKey = -----BEGIN PGP PUBLIC KEY BLOCK-----\n\
                                      Version: GnuPG v1\n\
                                      \n\
