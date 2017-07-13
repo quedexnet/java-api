@@ -1,4 +1,4 @@
-package net.quedex.api.common;
+package net.quedex.api.market;
 
 import net.quedex.api.market.SessionState;
 

@@ -2,7 +2,6 @@ package net.quedex.api.market;
 
 import com.google.common.collect.ImmutableList;
 import net.quedex.api.common.CommunicationException;
-import net.quedex.api.common.SessionStateListener;
 import net.quedex.api.pgp.BcPublicKey;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

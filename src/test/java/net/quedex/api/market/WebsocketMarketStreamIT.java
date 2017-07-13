@@ -1,7 +1,6 @@
 package net.quedex.api.market;
 
 import net.quedex.api.common.Config;
-import net.quedex.api.common.SessionStateListener;
 import net.quedex.api.testcommons.Utils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

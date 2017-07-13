@@ -1,7 +1,6 @@
 package net.quedex.api.market;
 
 import net.quedex.api.common.CommunicationException;
-import net.quedex.api.common.SessionStateListener;
 
 public interface MarketStream {
 

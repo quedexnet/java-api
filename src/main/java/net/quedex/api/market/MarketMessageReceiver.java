@@ -2,7 +2,6 @@ package net.quedex.api.market;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import net.quedex.api.common.MessageReceiver;
-import net.quedex.api.common.SessionStateListener;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.pgp.BcSignatureVerifier;
 import net.quedex.api.pgp.PGPExceptionBase;
