@@ -5,47 +5,36 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class OrderModified
-{
+public class OrderModified {
+
     private final long clientOrderId;
 
     @JsonCreator
-    public OrderModified(@JsonProperty("client_order_id") final long clientOrderId)
-    {
+    public OrderModified(@JsonProperty("client_order_id") long clientOrderId) {
         this.clientOrderId = clientOrderId;
     }
 
-    public long getClientOrderId()
-    {
+    public long getClientOrderId() {
         return clientOrderId;
     }
 
     @Override
-    public boolean equals(final Object o)
-    {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        final OrderModified that = (OrderModified) o;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderModified that = (OrderModified) o;
         return clientOrderId == that.clientOrderId;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hashCode(clientOrderId);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("clientOrderId", clientOrderId)
-            .toString();
+                .add("clientOrderId", clientOrderId)
+                .toString();
     }
 }

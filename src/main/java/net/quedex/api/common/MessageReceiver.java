@@ -11,37 +11,33 @@ import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class MessageReceiver
-{
+public abstract class MessageReceiver {
+
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final String KEEPALIVE_STR = "keepalive";
 
     private final Logger logger;
 
     private volatile StreamFailureListener streamFailureListener;
 
-    protected MessageReceiver(final Logger logger)
-    {
+    protected MessageReceiver(Logger logger) {
         this.logger = checkNotNull(logger, "null logger");
     }
 
     protected abstract void processData(String data) throws IOException, PGPExceptionBase;
 
-    public final void processMessage(final String message)
-    {
-        if (KEEPALIVE_STR.equals(message))
-        {
+    public final void processMessage(String message) {
+
+        if (KEEPALIVE_STR.equals(message)) {
             logger.trace(KEEPALIVE_STR);
             return;
         }
 
-        try
-        {
-            final JsonNode metaJson = OBJECT_MAPPER.readTree(message);
+        try {
+            JsonNode metaJson = OBJECT_MAPPER.readTree(message);
 
-            switch (metaJson.get("type").asText())
-            {
+            switch (metaJson.get("type").asText()) {
                 case "data":
                     processData(metaJson.get("data").asText());
                     break;
@@ -52,38 +48,29 @@ public abstract class MessageReceiver
                     // no-op
                     break;
             }
-        }
-        catch (final IOException e)
-        {
+        } catch (IOException e) {
             onError(new CommunicationException("Error parsing json entity on message=" + message, e));
-        }
-        catch (final PGPExceptionBase e)
-        {
+        } catch (PGPExceptionBase e) {
             onError(new CommunicationException("PGP error on message=" + message, e));
         }
     }
 
-    private void processError(final String errorCode)
-    {
+    private void processError(String errorCode) {
         logger.trace("processError({})", errorCode);
-        if ("maintenance".equals(errorCode))
-        {
+        if ("maintenance".equals(errorCode)) {
             onError(new MaintenanceException());
         }
     }
 
-    private void onError(final Exception e)
-    {
+    private void onError(Exception e) {
         logger.warn("onError({})", e);
-        final StreamFailureListener streamFailureListener = this.streamFailureListener;
-        if (streamFailureListener != null)
-        {
+        StreamFailureListener streamFailureListener = this.streamFailureListener;
+        if (streamFailureListener != null) {
             streamFailureListener.onStreamFailure(e);
         }
     }
 
-    public final void registerStreamFailureListener(final StreamFailureListener streamFailureListener)
-    {
+    public final void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
         this.streamFailureListener = streamFailureListener;
     }
 }

@@ -12,15 +12,13 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class OpenPosition
-{
-    public enum PositionSide
-    {
+public class OpenPosition {
+
+    public enum PositionSide {
         LONG, SHORT;
 
         @JsonCreator
-        private static PositionSide deserialize(final String value)
-        {
+        private static PositionSide deserialize(String value) {
             return valueOf(value.toUpperCase());
         }
     }
@@ -35,14 +33,14 @@ public class OpenPosition
 
     @JsonCreator
     public OpenPosition(
-        @JsonProperty("instrument_id") final int instrumentId,
-        @JsonProperty("pnl") final BigDecimal pnl,
-        @JsonProperty("maintenance_margin") final BigDecimal maintenanceMargin,
-        @JsonProperty("initial_margin") final BigDecimal initialMargin,
-        @JsonProperty("side") final PositionSide side,
-        @JsonProperty("quantity") final int quantity,
-        @JsonProperty("average_opening_price") final BigDecimal averageOpeningPrice)
-    {
+            @JsonProperty("instrument_id") int instrumentId,
+            @JsonProperty("pnl") BigDecimal pnl,
+            @JsonProperty("maintenance_margin") BigDecimal maintenanceMargin,
+            @JsonProperty("initial_margin") BigDecimal initialMargin,
+            @JsonProperty("side") PositionSide side,
+            @JsonProperty("quantity") int quantity,
+            @JsonProperty("average_opening_price") BigDecimal averageOpeningPrice
+    ) {
         checkArgument(instrumentId > 0, "instrumentId=%s <= 0", instrumentId);
         checkArgument(maintenanceMargin.compareTo(BigDecimal.ZERO) >= 0, "maintenanceMargin=%s < 0", maintenanceMargin);
         checkArgument(initialMargin.compareTo(BigDecimal.ZERO) >= 0, "initialMargin=%s < 0", initialMargin);
@@ -56,8 +54,7 @@ public class OpenPosition
         this.averageOpeningPrice = averageOpeningPrice;
     }
 
-    public int getInstrumentId()
-    {
+    public int getInstrumentId() {
         return instrumentId;
     }
 
@@ -65,39 +62,33 @@ public class OpenPosition
      * @return PnL of this position, present only for {@link Instrument.Type#FUTURES}
      *         position
      */
-    public Optional<BigDecimal> getPnl()
-    {
+    public Optional<BigDecimal> getPnl() {
         return Optional.ofNullable(pnl);
     }
 
-    public BigDecimal getMaintenanceMargin()
-    {
+    public BigDecimal getMaintenanceMargin() {
         return maintenanceMargin;
     }
 
-    public BigDecimal getInitialMargin()
-    {
+    public BigDecimal getInitialMargin() {
         return initialMargin;
     }
 
     /**
      * @return side of this position, may be any of LONG, SHORT for a closed position
      */
-    public PositionSide getSide()
-    {
+    public PositionSide getSide() {
         return side;
     }
 
     /**
      * @return nonnegative quantity of this position, zero for a closed position
      */
-    public int getQuantity()
-    {
+    public int getQuantity() {
         return quantity;
     }
 
-    public int getQuantitySigned()
-    {
+    public int getQuantitySigned() {
         return side == PositionSide.LONG ? quantity : -quantity;
     }
 
@@ -105,49 +96,39 @@ public class OpenPosition
      * @return weighted (by quantities) average of the prices this position has been opened at, may be any number for a
      *         closed position
      */
-    public BigDecimal getAverageOpeningPrice()
-    {
+    public BigDecimal getAverageOpeningPrice() {
         return averageOpeningPrice;
     }
 
     @Override
-    public boolean equals(final Object o)
-    {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        final OpenPosition that = (OpenPosition) o;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OpenPosition that = (OpenPosition) o;
         return instrumentId == that.instrumentId &&
-            quantity == that.quantity &&
-            Objects.equal(pnl, that.pnl) &&
-            Objects.equal(maintenanceMargin, that.maintenanceMargin) &&
-            Objects.equal(initialMargin, that.initialMargin) &&
-            side == that.side &&
-            Objects.equal(averageOpeningPrice, that.averageOpeningPrice);
+                quantity == that.quantity &&
+                Objects.equal(pnl, that.pnl) &&
+                Objects.equal(maintenanceMargin, that.maintenanceMargin) &&
+                Objects.equal(initialMargin, that.initialMargin) &&
+                side == that.side &&
+                Objects.equal(averageOpeningPrice, that.averageOpeningPrice);
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hashCode(instrumentId, pnl, maintenanceMargin, initialMargin, side, quantity, averageOpeningPrice);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("instrumentId", instrumentId)
-            .add("pnl", pnl)
-            .add("maintenanceMargin", maintenanceMargin)
-            .add("initialMargin", initialMargin)
-            .add("side", side)
-            .add("quantity", quantity)
-            .add("averageOpeningPrice", averageOpeningPrice)
-            .toString();
+                .add("instrumentId", instrumentId)
+                .add("pnl", pnl)
+                .add("maintenanceMargin", maintenanceMargin)
+                .add("initialMargin", initialMargin)
+                .add("side", side)
+                .add("quantity", quantity)
+                .add("averageOpeningPrice", averageOpeningPrice)
+                .toString();
     }
 }

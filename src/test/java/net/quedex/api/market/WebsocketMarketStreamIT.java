@@ -14,6 +14,8 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -25,8 +27,8 @@ import static org.mockito.Mockito.*;
  *     <li> Run the test. </li>
  * </ol>
  */
-public class WebsocketMarketStreamIT
-{
+public class WebsocketMarketStreamIT {
+
     private static final boolean TEST_ENABLED = false; // enable to run
 
     @Mock private OrderBookListener orderBookListener;
@@ -39,19 +41,18 @@ public class WebsocketMarketStreamIT
     private MarketData marketData;
 
     @BeforeMethod
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        final Config config = Config.fromResource(Utils.getKeyPassphraseFromProps());
+        Config config = Config.fromResource(Utils.getKeyPassphraseFromProps());
         marketStream = new WebsocketMarketStream(config);
         marketData = new HttpMarketData(config);
     }
 
     @Test(enabled = TEST_ENABLED)
-    public void testIntegrationWithLiveWS() throws Exception
-    {
-        final Collection<Integer> instrumentIds = marketData.getInstruments().keySet();
+    public void testIntegrationWithLiveWS() throws Exception {
+
+        Collection<Integer> instrumentIds = marketData.getInstruments().keySet();
         assertThat(instrumentIds).isNotEmpty();
 
         System.out.println("instrumentIds = " + instrumentIds); // for debugging
@@ -65,9 +66,9 @@ public class WebsocketMarketStreamIT
         marketStream.registerTradeListener(tradeListener).subscribe(instrumentIds);
 
         instrumentIds
-            .forEach(id -> verify(orderBookListener, timeout(1000)).onOrderBook(argThat(obHasInstrumentId(id))));
+                .forEach(id -> verify(orderBookListener, timeout(1000)).onOrderBook(argThat(obHasInstrumentId(id))));
         instrumentIds
-            .forEach(id -> verify(quotesListener, timeout(1000)).onQuotes(argThat(quotesHaveInstrumentId(id))));
+                .forEach(id -> verify(quotesListener, timeout(1000)).onQuotes(argThat(quotesHaveInstrumentId(id))));
         verify(sessionStateListener, timeout(1000)).onSessionState(any());
 
         marketStream.stop();
@@ -75,51 +76,37 @@ public class WebsocketMarketStreamIT
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
-    private static Matcher<OrderBook> obHasInstrumentId(final int id)
-    {
-        return new BaseMatcher<OrderBook>()
-        {
+    private static Matcher<OrderBook> obHasInstrumentId(int id) {
+        return new BaseMatcher<OrderBook>() {
             @Override
-            public boolean matches(final Object o)
-            {
-                if (o instanceof OrderBook)
-                {
+            public boolean matches(Object o) {
+                if (o instanceof OrderBook) {
                     return ((OrderBook) o).getInstrumentId() == id;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
 
             @Override
-            public void describeTo(final Description description)
-            {
+            public void describeTo(Description description) {
                 description.appendText("OrderBook with instrumentId").appendValue(id);
             }
         };
     }
 
-    private static Matcher<Quotes> quotesHaveInstrumentId(final int id)
-    {
-        return new BaseMatcher<Quotes>()
-        {
+    private static Matcher<Quotes> quotesHaveInstrumentId(int id) {
+        return new BaseMatcher<Quotes>() {
             @Override
-            public boolean matches(final Object o)
-            {
-                if (o instanceof Quotes)
-                {
+            public boolean matches(Object o) {
+                if (o instanceof Quotes) {
                     return ((Quotes) o).getInstrumentId() == id;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
 
             @Override
-            public void describeTo(final Description description)
-            {
+            public void describeTo(Description description) {
                 description.appendText("Wuotes with instrumentId").appendValue(id);
             }
         };

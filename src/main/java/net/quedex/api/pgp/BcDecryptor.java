@@ -15,113 +15,91 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class BcDecryptor
-{
+public class BcDecryptor {
+
     private static final long HIDDEN_RECIPIENT_KEY_ID = 0;
 
     private final BcPublicKey publicKey;
     private final BcPrivateKey ourKey;
 
-    public BcDecryptor(final BcPublicKey publicKey, final BcPrivateKey ourKey)
-    {
+    public BcDecryptor(BcPublicKey publicKey, BcPrivateKey ourKey) {
         this.publicKey = checkNotNull(publicKey);
         this.ourKey = checkNotNull(ourKey);
     }
 
-    public String decrypt(final String message)
-        throws PGPDecryptionException, PGPUnknownRecipientException, PGPInvalidSignatureException
-    {
-        try
-        {
-            final InputStream in = PGPUtil.getDecoderStream(new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8)));
+    public String decrypt(String message)
+            throws PGPDecryptionException, PGPKeyNotFoundException, PGPUnknownRecipientException, PGPInvalidSignatureException {
+        try {
+            InputStream in = PGPUtil.getDecoderStream(new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8)));
 
-            final PGPObjectFactory encryptedFactory = new BcPGPObjectFactory(in);
-            final Object object = encryptedFactory.nextObject();
+            PGPObjectFactory encryptedFactory = new BcPGPObjectFactory(in);
+            Object object = encryptedFactory.nextObject();
 
-            final PGPEncryptedDataList encryptedDataList;
+            PGPEncryptedDataList encryptedDataList;
 
-            if (object instanceof PGPEncryptedDataList)
-            {
+            if (object instanceof PGPEncryptedDataList) {
                 encryptedDataList = (PGPEncryptedDataList) object;
-            }
-            else
-            {
+            } else {
                 encryptedDataList = (PGPEncryptedDataList) encryptedFactory.nextObject();
             }
 
             PGPPublicKeyEncryptedData encryptedData = null;
             InputStream clear = null;
 
-            for (final Iterator it = encryptedDataList.getEncryptedDataObjects(); it.hasNext(); )
-            {
+            for (Iterator it = encryptedDataList.getEncryptedDataObjects(); it.hasNext(); ) {
                 encryptedData = (PGPPublicKeyEncryptedData) it.next();
 
-                if (encryptedData.getKeyID() == HIDDEN_RECIPIENT_KEY_ID)
-                {
-                    for (final PGPPrivateKey keyToCheck : ourKey.getPrivateKeys())
-                    {
-                        try
-                        {
+                if (encryptedData.getKeyID() == HIDDEN_RECIPIENT_KEY_ID) {
+
+                    for (final PGPPrivateKey keyToCheck : ourKey.getPrivateKeys()) {
+                        try {
                             clear = encryptedData.getDataStream(new BcPublicKeyDataDecryptorFactory(keyToCheck));
                             break;
-                        }
-                        catch (final Exception e)
-                        { /* fall through and retry */ }
+                        } catch (Exception e) { /* fall through and retry */ }
                     }
-                }
-                else
-                {
-                    try
-                    {
-                        final PGPPrivateKey privateKey = ourKey.getPrivateKeyWithId(encryptedData.getKeyID());
+                } else {
+                    try {
+                        PGPPrivateKey privateKey = ourKey.getPrivateKeyWithId(encryptedData.getKeyID());
                         clear = encryptedData.getDataStream(new BcPublicKeyDataDecryptorFactory(privateKey));
-                    }
-                    catch (final PGPKeyNotFoundException e)
-                    { /* fall through and retry */ }
+                    } catch (PGPKeyNotFoundException e) { /* fall through and retry */ }
                 }
 
-                if (clear != null)
-                {
+                if (clear != null) {
                     break;
                 }
             }
 
-            if (clear == null)
-            {
+            if (clear == null) {
                 throw new PGPUnknownRecipientException("Message is encrypted for unknown recipient");
             }
 
             PGPObjectFactory plainFactory = new BcPGPObjectFactory(clear);
             Object nextObject = plainFactory.nextObject();
 
-            final PGPCompressedData compressedData = (PGPCompressedData) nextObject;
-            final PGPObjectFactory uncompressedFactory = new BcPGPObjectFactory(compressedData.getDataStream());
+            PGPCompressedData compressedData = (PGPCompressedData) nextObject;
+            PGPObjectFactory uncompressedFactory = new BcPGPObjectFactory(compressedData.getDataStream());
 
             plainFactory = uncompressedFactory;
             nextObject = uncompressedFactory.nextObject();
 
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            final PGPOnePassSignatureList sigList = (PGPOnePassSignatureList) nextObject;
-            final PGPOnePassSignature signature = sigList.get(0);
+            PGPOnePassSignatureList sigList = (PGPOnePassSignatureList) nextObject;
+            PGPOnePassSignature signature = sigList.get(0);
 
             nextObject = plainFactory.nextObject();
-
-            if (!(nextObject instanceof PGPLiteralData))
-            {
+            if (!(nextObject instanceof PGPLiteralData)) {
                 throw new PGPDataValidationException("Expected literal data packet");
             }
-
-            final PGPLiteralData literalData = (PGPLiteralData) nextObject;
+            PGPLiteralData literalData = (PGPLiteralData) nextObject;
             ByteStreams.copy(literalData.getInputStream(), out);
 
-            final PGPSignatureList signatureList = (PGPSignatureList) plainFactory.nextObject();
+            PGPSignatureList signatureList = (PGPSignatureList) plainFactory.nextObject();
 
             signature.init(new BcPGPContentVerifierBuilderProvider(), publicKey.getSigningKey());
             signature.update(out.toByteArray());
 
-            if (signature.verify(signatureList.get(0)))
-            {
+            if (signature.verify(signatureList.get(0))) {
                 checkIntegrity(encryptedData);
 
                 return new String(out.toByteArray(), StandardCharsets.UTF_8);
@@ -129,25 +107,18 @@ public class BcDecryptor
 
             throw new PGPInvalidSignatureException("The signature is not valid");
 
-        }
-        catch (PGPException | RuntimeException | IOException e)
-        {
+        } catch (PGPException | RuntimeException | IOException e) {
             throw new PGPDecryptionException("Error Decrypting message", e);
         }
     }
 
-    private static void checkIntegrity(final PGPPublicKeyEncryptedData encryptedData)
-        throws PGPException, IOException, PGPDecryptionException
-    {
-        if (encryptedData.isIntegrityProtected())
-        {
-            if (!encryptedData.verify())
-            {
+    private static void checkIntegrity(PGPPublicKeyEncryptedData encryptedData)
+            throws PGPException, IOException, PGPDecryptionException {
+        if (encryptedData.isIntegrityProtected()) {
+            if (!encryptedData.verify()) {
                 throw new PGPDecryptionException("Message failed integrity check");
             }
-        }
-        else
-        {
+        } else {
             throw new PGPDecryptionException("Message not integrity protected");
         }
     }

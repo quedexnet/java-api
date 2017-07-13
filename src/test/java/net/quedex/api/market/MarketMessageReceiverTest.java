@@ -17,8 +17,8 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public class MarketMessageReceiverTest
-{
+public class MarketMessageReceiverTest {
+
     @Mock private OrderBookListener orderBookListener;
     @Mock private QuotesListener quotesListener;
     @Mock private SessionStateListener sessionStateListener;
@@ -28,8 +28,7 @@ public class MarketMessageReceiverTest
     private MarketMessageReceiver messageReceiver;
 
     @BeforeMethod
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         messageReceiver = new MarketMessageReceiver(BcPublicKey.fromArmored(Fixtures.PUB_KEY));
@@ -37,10 +36,10 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testOrderBookProcessing() throws Exception
-    {
+    public void testOrderBookProcessing() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
 
         // when
         messageReceiver.processMessage(Fixtures.ORDER_BOOK_STR);
@@ -49,17 +48,17 @@ public class MarketMessageReceiverTest
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(orderBookListener).onOrderBook(new OrderBook(
-            1,
-            ImmutableList.of(pq("0.00142858", 1)),
-            ImmutableList.of(pq("0.00166666", 1), pq("0.00166944", 3))
+                1,
+                ImmutableList.of(pq("0.00142858", 1)),
+                ImmutableList.of(pq("0.00166666", 1), pq("0.00166944", 3))
         ));
     }
 
     @Test
-    public void testOrderBookIsNoProcessedIfNotSubscribedForInstrument() throws Exception
-    {
+    public void testOrderBookIsNoProcessedIfNotSubscribedForInstrument() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
@@ -71,10 +70,10 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testQuotesProcessing() throws Exception
-    {
+    public void testQuotesProcessing() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerQuotesListener(quotesListener);
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
 
         // when
         reg.subscribe(1);
@@ -86,10 +85,10 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testQuotesAreNotProcessedIfNotSubscribedForInstrument() throws Exception
-    {
+    public void testQuotesAreNotProcessedIfNotSubscribedForInstrument() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerQuotesListener(quotesListener);
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
@@ -101,10 +100,10 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testTradeProcessing() throws Exception
-    {
+    public void testTradeProcessing() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerTradeListener(tradeListener);
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
 
         // when
         messageReceiver.processMessage(Fixtures.TRADE_STR);
@@ -113,15 +112,15 @@ public class MarketMessageReceiverTest
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(tradeListener).onTrade(argThat(isFieldByFiledEqual(
-            new Trade(1, 70, 1470681720788L, $("0.00166666"), 1, Trade.LiquidityProvider.SELLER)
+                new Trade(1, 70, 1470681720788L, $("0.00166666"), 1, Trade.LiquidityProvider.SELLER)
         )));
     }
 
     @Test
-    public void testTradeIsNoProcessedIfNotSubscribedForInstrument() throws Exception
-    {
+    public void testTradeIsNoProcessedIfNotSubscribedForInstrument() throws Exception {
+
         // given
-        final Registration reg = messageReceiver.registerTradeListener(tradeListener);
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
 
         // when
         reg.subscribe(2).subscribe(1).unsubscribe(1);
@@ -133,8 +132,8 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testSessionStateProcessing() throws Exception
-    {
+    public void testSessionStateProcessing() throws Exception {
+
         // when
         messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
         messageReceiver.processMessage(Fixtures.SESSION_STATE_STR);
@@ -145,8 +144,8 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testStreamFailureJsonProcessingError() throws Exception
-    {
+    public void testStreamFailureJsonProcessingError() throws Exception {
+
         // when
         messageReceiver.processMessage("BOMBA");
 
@@ -155,8 +154,8 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testStreamFailureSignatureError() throws Exception
-    {
+    public void testStreamFailureSignatureError() throws Exception {
+
         // when
         messageReceiver.processMessage(Fixtures.SESSION_STATE_STR_WRONG_SIG);
 
@@ -165,8 +164,8 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testMaintenanceErrorProcessing() throws Exception
-    {
+    public void testMaintenanceErrorProcessing() throws Exception {
+
         // when
         messageReceiver.processMessage(Fixtures.ERROR_MAINTENANCE_STR);
 
@@ -175,8 +174,8 @@ public class MarketMessageReceiverTest
     }
 
     @Test
-    public void testKeepaliveProcessing() throws Exception
-    {
+    public void testKeepaliveProcessing() throws Exception {
+
         // when
         messageReceiver.processMessage("keepalive");
 
@@ -184,24 +183,19 @@ public class MarketMessageReceiverTest
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
-    private static PriceQuantity pq(final String price, final int qty)
-    {
+    private static PriceQuantity pq(String price, int qty) {
         return new PriceQuantity($(price), qty);
     }
 
-    private static Matcher<Trade> isFieldByFiledEqual(final Trade trade)
-    {
-        return new BaseMatcher<Trade>()
-        {
+    private static Matcher<Trade> isFieldByFiledEqual(Trade trade) {
+        return new BaseMatcher<Trade>() {
             @Override
-            public boolean matches(final Object o)
-            {
+            public boolean matches(Object o) {
                 return trade.equalsFieldByField(o);
             }
 
             @Override
-            public void describeTo(final Description description)
-            {
+            public void describeTo(Description description) {
                 description.appendValue(trade);
             }
         };
