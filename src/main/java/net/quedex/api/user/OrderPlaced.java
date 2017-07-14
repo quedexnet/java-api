@@ -30,7 +30,7 @@ public class OrderPlaced {
     public OrderPlaced(
             @JsonProperty("client_order_id") long clientOrderId,
             @JsonProperty("instrument_id") int instrumentId,
-            @JsonProperty("price") BigDecimal price,
+            @JsonProperty("limit_price") BigDecimal price,
             @JsonProperty("side") OrderSide side,
             @JsonProperty("quantity") int quantity,
             @JsonProperty("initial_quantity") int initialQuantity

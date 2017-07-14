@@ -15,7 +15,7 @@ public class OrderFilled {
     @JsonCreator
     public OrderFilled(
             @JsonProperty("client_order_id") long clientOrderId,
-            @JsonProperty("filled_quantity") int filledQuantity
+            @JsonProperty("trade_quantity") int filledQuantity
     ) {
         checkArgument(filledQuantity > 0, "filledQuantity=%s <= 0", filledQuantity);
         this.clientOrderId = clientOrderId;

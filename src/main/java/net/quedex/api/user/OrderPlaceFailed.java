@@ -12,8 +12,6 @@ public class OrderPlaceFailed {
     public enum Cause {
         INVALID_ORDER_ID,
         INVALID_INSTRUMENT_ID,
-        NONPOSITIVE_QUANTITY,
-        NONPOSITIVE_PRICE,
         SESSION_NOT_ACTIVE,
         INVALID_TICK_SIZE,
         INSUFFICIENT_FUNDS;

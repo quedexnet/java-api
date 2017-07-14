@@ -57,7 +57,7 @@ public class LimitOrderSpec implements OrderSpec {
         return quantity;
     }
 
-    @JsonProperty("price")
+    @JsonProperty("limit_price")
     public BigDecimal getLimitPrice() {
         return limitPrice;
     }

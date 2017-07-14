@@ -1,9 +1,15 @@
 package net.quedex.api.user;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jdk.nashorn.internal.ir.ObjectNode;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.market.StreamFailureListener;
+import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
+import net.quedex.api.testcommons.Keys;
+import org.json.JSONObject;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
@@ -18,10 +24,13 @@ import static org.mockito.Mockito.verify;
 
 public class UserMessageReceiverTest {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     @Mock private AccountStateListener accountStateListener;
     @Mock private OpenPositionListener openPositionListener;
     @Mock private OrderListener orderListener;
     @Mock private StreamFailureListener streamFailureListener;
+    private BcEncryptor encryptor;
 
     private UserMessageReceiver userMessageReceiver;
 
@@ -30,17 +39,25 @@ public class UserMessageReceiverTest {
         MockitoAnnotations.initMocks(this);
 
         userMessageReceiver = new UserMessageReceiver(
-                BcPublicKey.fromArmored(Fixtures.PUB_KEY),
-                BcPrivateKey.fromArmored(Fixtures.PRV_KEY, "qwer".toCharArray())
+                BcPublicKey.fromArmored(Keys.QUEDEX_PUBLIC),
+                BcPrivateKey.fromArmored(Keys.TRADER_PRIVATE)
         );
         userMessageReceiver.registerStreamFailureListener(streamFailureListener);
+        encryptor = new BcEncryptor(
+            BcPublicKey.fromArmored(Keys.TRADER_PUBLIC),
+            BcPrivateKey.fromArmored(Keys.QUEDEX_PRIVATE)
+        );
     }
 
     @Test
     public void testLastNonceProcessing() throws Exception {
+        // given
+        JsonNode lastNonceJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "last_nonce")
+            .put("last_nonce", 97);
 
         // when
-        userMessageReceiver.processMessage(Fixtures.LAST_NONCE_STR);
+        userMessageReceiver.processMessage(encryptToTrader(lastNonceJson));
 
         // then
         assertThat(userMessageReceiver.getLastNonce()).isEqualTo(97);
@@ -48,31 +65,48 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testAccountStateProcessing() throws Exception {
+        // given
+        JsonNode accountStateJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "account_state")
+            .put("balance", "139.27152122")
+            .put("free_balance", "127.17152122")
+            .put("total_initial_margin", "12")
+            .put("total_maintenance_margin", "8")
+            .put("total_unsettled_pnl", "0")
+            .put("total_locked_for_orders", "0.1")
+            .put("total_pending_withdrawal", "0")
+            .put("account_status", "active");
 
         // when
         userMessageReceiver.registerAccountStateListener(accountStateListener);
-        userMessageReceiver.processMessage(Fixtures.ACCOUNT_STATE_STR);
+        userMessageReceiver.processMessage(encryptToTrader(accountStateJson));
 
         // then
+
         verify(accountStateListener).onAccountState(new AccountState(
-                $("139.27152122"),
-                $("127.17152122"),
-                $(12),
-                $(8),
-                $(0),
-                $("0.1"),
-                $(0),
-                AccountState.Status.ACTIVE
+            $("139.27152122"),
+            $("127.17152122"),
+            $(12),
+            $(8),
+            $(0),
+            $("0.1"),
+            $(0),
+            AccountState.Status.ACTIVE
         ));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
     @Test
     public void testOrderModificationFailedProcessing() throws Exception {
+        // given
+        JsonNode modificationFailedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_modification_failed")
+            .put("client_order_id", -1)
+            .put("cause", "not_found");
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_MODIFICATION_FAILED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(modificationFailedJson));
 
         // then
         verify(orderListener).onOrderModificationFailed(
@@ -83,10 +117,15 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderPlaceFailedProcessing() throws Exception {
+        // given
+        JsonNode placeFailedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_place_failed")
+            .put("client_order_id", 1470843409796L)
+            .put("cause", "insufficient_funds");
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_PLACE_FAILED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(placeFailedJson));
 
         // then
         verify(orderListener).onOrderPlaceFailed(
@@ -97,10 +136,19 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderPlacedProcessing() throws Exception {
+        // given
+        JsonNode placedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_placed")
+            .put("client_order_id", 1470843412276L)
+            .put("instrument_id", "47")
+            .put("side", "sell")
+            .put("limit_price", "0.01")
+            .put("initial_quantity", 5)
+            .put("quantity", 5);
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_PLACED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(placedJson));
 
         // then
         verify(orderListener).onOrderPlaced(
@@ -111,10 +159,14 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderModifiedProcessing() throws Exception {
+        // given
+        JsonNode modifiedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_modified")
+            .put("client_order_id", 1470843412276L);
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_MODIFIED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(modifiedJson));
 
         // then
         verify(orderListener).onOrderModified(new OrderModified(1470843412276L));
@@ -123,10 +175,14 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderCanceledProcessing() throws Exception {
+        // given
+        JsonNode cancelledJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_cancelled")
+            .put("client_order_id", 1470843412276L);
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_CANCELED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(cancelledJson));
 
         // then
         verify(orderListener).onOrderCanceled(new OrderCanceled(1470843412276L));
@@ -135,10 +191,15 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderCancelFailedProcessing() throws Exception {
+        // given
+        JsonNode cancelFailedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_cancel_failed")
+            .put("client_order_id", -1)
+            .put("cause", "not_found");
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_CANCEL_FAILED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(cancelFailedJson));
 
         // then
         verify(orderListener).onOrderCancelFailed(new OrderCancelFailed(-1, OrderCancelFailed.Cause.NOT_FOUND));
@@ -147,10 +208,15 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOrderFilledProcessing() throws Exception {
+        // given
+        JsonNode filledJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_filled")
+            .put("client_order_id", 1470844278115L)
+            .put("trade_quantity", 5);
 
         // when
         userMessageReceiver.registerOrderListener(orderListener);
-        userMessageReceiver.processMessage(Fixtures.ORDER_FILLED_STR);
+        userMessageReceiver.processMessage(encryptToTrader(filledJson));
 
         // then
         verify(orderListener).onOrderFilled(new OrderFilled(1470844278115L, 5));
@@ -159,10 +225,20 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testOpenPositionProcessing() throws Exception {
+        // given
+        JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "open_position")
+            .put("instrument_id", "47")
+            .put("pnl", "0.070676")
+            .put("maintenance_margin", "0.155476")
+            .put("initial_margin", "0.233216")
+            .put("side", "long")
+            .put("quantity", 4)
+            .put("average_opening_price", "0.00176678");
 
         // when
         userMessageReceiver.registerOpenPositionListener(openPositionListener);
-        userMessageReceiver.processMessage(Fixtures.OPEN_POSITION_STR);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionJson));
 
         // then
         verify(openPositionListener).onOpenPosition(new OpenPosition(
@@ -195,5 +271,14 @@ public class UserMessageReceiverTest {
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    private String encryptToTrader(final Object object) throws Exception {
+        JsonNode jsonContent = MAPPER.getNodeFactory().arrayNode()
+            .add(MAPPER.valueToTree(object));
+        JsonNode jsonWrapper = MAPPER.getNodeFactory().objectNode()
+            .put("type", "data")
+            .put("data", encryptor.encrypt(MAPPER.writeValueAsString(jsonContent), true));
+        return MAPPER.writeValueAsString(jsonWrapper);
     }
 }

@@ -1,6 +1,7 @@
 package net.quedex.api.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,9 +19,11 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 class UserMessageSender {
 
@@ -63,48 +66,65 @@ class UserMessageSender {
 
     void sendGetLastNonce() throws CommunicationException {
         try {
-            sendMessage(OBJECT_MAPPER.createObjectNode().put("type", "get_last_nonce").put("nonce_group", nonceGroup));
+            sendMessage(
+                OBJECT_MAPPER.createObjectNode()
+                    .put("type", "get_last_nonce")
+                    .put("nonce_group", nonceGroup)
+                    .put("account_id", accountId)
+            );
         } catch (PGPExceptionBase | JsonProcessingException e) {
             throw new CommunicationException("Error sending get_last_nonce", e);
         }
     }
 
     void sendSubscribe() {
-        sendNoncedMessage(OBJECT_MAPPER.createObjectNode().put("type", "subscribe"));
+        sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.createObjectNode().put("type", "subscribe")));
     }
 
     void sendOrderSpec(OrderSpec orderSpec) {
-        sendNoncedMessage(OBJECT_MAPPER.valueToTree(orderSpec));
+        sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.valueToTree(orderSpec)));
     }
 
     void sendBatch(List<OrderSpec> batch) {
-        ObjectNode messageJson = (ObjectNode) OBJECT_MAPPER.createObjectNode()
+        sendMessageQueued(() -> {
+            JsonNode batchJson = OBJECT_MAPPER.valueToTree(batch);
+            for (final JsonNode node : batchJson) {
+                checkState(node instanceof ObjectNode, "Expected ObjectNode");
+                addNonceAccountId((ObjectNode) node);
+            }
+            return OBJECT_MAPPER.createObjectNode()
                 .put("type", "batch")
-                .set("batch", OBJECT_MAPPER.valueToTree(batch));
-        sendNoncedMessage(messageJson);
+                .put("account_id", accountId)
+                .set("batch", batchJson);
+        });
     }
 
     void stop() {
         executor.shutdown();
     }
 
-    private void sendNoncedMessage(ObjectNode jsonMessage) {
+    private void sendMessageQueued(Supplier<JsonNode> supplier) {
         executor.execute(() -> {
-            jsonMessage.put("nonce", getNonce()).put("nonce_group", nonceGroup);
             try {
-                sendMessage(jsonMessage);
+                sendMessage(supplier.get());
             } catch (Exception e) {
                 onError(new CommunicationException("Error sending message", e));
             }
         });
     }
 
+    private ObjectNode addNonceAccountId(ObjectNode jsonMessage) {
+        return jsonMessage
+            .put("account_id", accountId)
+            .put("nonce", getNonce())
+            .put("nonce_group", nonceGroup);
+    }
+
     private long getNonce() {
         return ++nonce;
     }
 
-    private void sendMessage(ObjectNode jsonMessage) throws JsonProcessingException, PGPExceptionBase {
-        jsonMessage.put("account_id", accountId);
+    private void sendMessage(JsonNode jsonMessage) throws JsonProcessingException, PGPExceptionBase {
         String messageStr = OBJECT_WRITER.writeValueAsString(jsonMessage);
         webSocketClient.send(encryptor.encrypt(messageStr, true));
 

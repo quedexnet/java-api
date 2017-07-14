@@ -54,7 +54,7 @@ public class OrderModificationSpec implements OrderSpec {
         return Optional.ofNullable(newLimitPrice);
     }
 
-    @JsonProperty("new_price")
+    @JsonProperty("new_limit_price")
     private BigDecimal getNewLimitPriceRaw() {
         return newLimitPrice;
     }
