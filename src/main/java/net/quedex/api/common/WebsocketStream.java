@@ -2,6 +2,7 @@ package net.quedex.api.common;
 
 import net.quedex.api.market.StreamFailureListener;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
+import org.java_websocket.client.DefaultWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
@@ -64,6 +65,15 @@ public class WebsocketStream<T extends MessageReceiver> {
         };
 
         webSocketClientFactoryExec = Executors.newSingleThreadExecutor();
+        if (streamUrl.startsWith("wss")) {
+            initSsl();
+        }
+
+        this.messageReceiver = checkNotNull(messageReceiver, "null messageReceiver");
+        this.logger = checkNotNull(logger, "null logger");
+    }
+
+    private void initSsl() {
         try {
             SSLContext ssl = SSLContext.getInstance("TLS");
             ssl.init(null, null, null);
@@ -73,9 +83,6 @@ public class WebsocketStream<T extends MessageReceiver> {
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new IllegalStateException("Error initialising SSL", e);
         }
-
-        this.messageReceiver = checkNotNull(messageReceiver, "null messageReceiver");
-        this.logger = checkNotNull(logger, "null logger");
     }
 
     public void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
