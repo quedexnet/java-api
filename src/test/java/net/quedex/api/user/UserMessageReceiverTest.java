@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jdk.nashorn.internal.ir.ObjectNode;
 import net.quedex.api.common.CommunicationException;
+import net.quedex.api.common.MaintenanceException;
 import net.quedex.api.market.StreamFailureListener;
 import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
@@ -271,6 +272,34 @@ public class UserMessageReceiverTest {
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
+    public void testMaintenanceProcessing() throws Exception {
+        // given
+        JsonNode jsonWrapper = MAPPER.getNodeFactory().objectNode()
+            .put("type", "error")
+            .put("error_code", "maintenance");
+
+        // when
+        userMessageReceiver.processMessage(MAPPER.writeValueAsString(jsonWrapper));
+
+        // then
+        verify(streamFailureListener).onStreamFailure(isA(MaintenanceException.class));
+    }
+
+    @Test
+    public void testNotRecognisedProcessing() throws Exception {
+        // given
+        JsonNode jsonWrapper = MAPPER.getNodeFactory().objectNode()
+            .put("type", "error")
+            .put("error_code", "not_recognised");
+
+        // when
+        userMessageReceiver.processMessage(MAPPER.writeValueAsString(jsonWrapper));
+
+        // then
+        verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
     }
 
     private String encryptToTrader(final Object object) throws Exception {

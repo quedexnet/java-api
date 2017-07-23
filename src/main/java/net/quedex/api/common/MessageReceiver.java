@@ -59,6 +59,8 @@ public abstract class MessageReceiver {
         logger.trace("processError({})", errorCode);
         if ("maintenance".equals(errorCode)) {
             onError(new MaintenanceException());
+        } else {
+            onError(new CommunicationException("Received server processing error: " + errorCode));
         }
     }
 
