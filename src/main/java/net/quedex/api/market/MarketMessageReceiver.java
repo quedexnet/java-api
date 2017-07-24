@@ -2,7 +2,6 @@ package net.quedex.api.market;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import net.quedex.api.common.MessageReceiver;
-import net.quedex.api.common.SessionStateListener;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.pgp.BcSignatureVerifier;
 import net.quedex.api.pgp.PGPExceptionBase;
@@ -14,8 +13,8 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-class MarketMessageReceiver extends MessageReceiver
-{
+class MarketMessageReceiver extends MessageReceiver {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
 
     private final BcSignatureVerifier bcSignatureVerifier;
@@ -36,83 +35,65 @@ class MarketMessageReceiver extends MessageReceiver
     private final Object sessionStateMonitor = new Object();
     private SessionState sessionStateCached;
 
-    MarketMessageReceiver(final BcPublicKey qdxPublicKey)
-    {
+    MarketMessageReceiver(BcPublicKey qdxPublicKey) {
         super(LOGGER);
         this.bcSignatureVerifier = new BcSignatureVerifier(qdxPublicKey);
     }
 
-    Registration registerOrderBookListener(final OrderBookListener orderBookListener)
-    {
+    Registration registerOrderBookListener(OrderBookListener orderBookListener) {
         this.orderBookListener = orderBookListener;
-        return new CachedRegistration<OrderBook>(orderBookSubscriptions, orderBookCache)
-        {
+        return new CachedRegistration<OrderBook>(orderBookSubscriptions, orderBookCache) {
             @Override
-            void onSubscribe(final OrderBook element)
-            {
-                if (orderBookListener != null)
-                {
+            void onSubscribe(OrderBook element) {
+                if (orderBookListener != null) {
                     orderBookListener.onOrderBook(element);
                 }
             }
         };
     }
 
-    Registration registerTradeListener(final TradeListener tradeListener)
-    {
+    Registration registerTradeListener(TradeListener tradeListener) {
         this.tradeListener = tradeListener;
-        return new CachedRegistration<Trade>(tradeSubscriptions, tradeCache)
-        {
+        return new CachedRegistration<Trade>(tradeSubscriptions, tradeCache) {
             @Override
-            void onSubscribe(final Trade element)
-            {
-                if (tradeListener != null)
-                {
+            void onSubscribe(Trade element) {
+                if (tradeListener != null) {
                     tradeListener.onTrade(element);
                 }
             }
         };
     }
 
-    Registration registerQuotesListener(final QuotesListener quotesListener)
-    {
+    Registration registerQuotesListener(QuotesListener quotesListener) {
         this.quotesListener = quotesListener;
-        return new CachedRegistration<Quotes>(quotesSubscriptions, quotesCache)
-        {
+        return new CachedRegistration<Quotes>(quotesSubscriptions, quotesCache) {
             @Override
-            void onSubscribe(final Quotes element)
-            {
-                if (quotesListener != null)
-                {
+            void onSubscribe(Quotes element) {
+                if (quotesListener != null) {
                     quotesListener.onQuotes(element);
                 }
             }
         };
     }
 
-    void registerAndSubscribeSessionStateListener(final SessionStateListener sessionStateListener)
-    {
+    void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener) {
         this.sessionStateListener = sessionStateListener;
-        synchronized (sessionStateMonitor)
-        {
-            final SessionState sessionStateCached = this.sessionStateCached;
-            if (sessionStateListener != null && sessionStateCached != null)
-            {
+        synchronized (sessionStateMonitor) {
+            SessionState sessionStateCached = this.sessionStateCached;
+            if (sessionStateListener != null && sessionStateCached != null) {
                 sessionStateListener.onSessionState(sessionStateCached);
             }
         }
     }
 
     @Override
-    protected void processData(final String data) throws IOException, PGPExceptionBase
-    {
+    protected void processData(String data) throws IOException, PGPExceptionBase {
         LOGGER.trace("processData({})", data);
 
-        final String verified = bcSignatureVerifier.verifySignature(data);
-        final JsonNode dataJson = OBJECT_MAPPER.readTree(verified);
+        String verified = bcSignatureVerifier.verifySignature(data);
+        JsonNode dataJson = OBJECT_MAPPER.readTree(verified);
 
-        switch (dataJson.get("type").asText())
-        {
+        switch (dataJson.get("type").asText()) {
             case "order_book":
                 onOrderBook(OBJECT_MAPPER.treeToValue(dataJson, OrderBook.class));
                 break;
@@ -131,65 +112,52 @@ class MarketMessageReceiver extends MessageReceiver
         }
     }
 
-    private void onOrderBook(final OrderBook orderBook)
-    {
-        synchronized (orderBookCache)
-        {
+    private void onOrderBook(OrderBook orderBook) {
+        synchronized (orderBookCache) {
             orderBookCache.put(orderBook.getInstrumentId(), orderBook);
-            final OrderBookListener orderBookListener = this.orderBookListener;
-            if (orderBookListener != null && orderBookSubscriptions.contains(orderBook.getInstrumentId()))
-            {
+            OrderBookListener orderBookListener = this.orderBookListener;
+            if (orderBookListener != null && orderBookSubscriptions.contains(orderBook.getInstrumentId())) {
                 orderBookListener.onOrderBook(orderBook);
             }
         }
     }
 
-    private void onQuotes(final Quotes quotes)
-    {
-        synchronized (quotesCache)
-        {
+    private void onQuotes(Quotes quotes) {
+        synchronized (quotesCache) {
             quotesCache.put(quotes.getInstrumentId(), quotes);
-            final QuotesListener quotesListener = this.quotesListener;
-            if (quotesListener != null && quotesSubscriptions.contains(quotes.getInstrumentId()))
-            {
+            QuotesListener quotesListener = this.quotesListener;
+            if (quotesListener != null && quotesSubscriptions.contains(quotes.getInstrumentId())) {
                 quotesListener.onQuotes(quotes);
             }
         }
     }
 
-    private void onTrade(final Trade trade)
-    {
-        synchronized (tradeCache)
-        {
+    private void onTrade(Trade trade) {
+        synchronized (tradeCache) {
             tradeCache.put(trade.getInstrumentId(), trade);
-            final TradeListener tradeListener = this.tradeListener;
-            if (tradeListener != null && tradeSubscriptions.contains(trade.getInstrumentId()))
-            {
+            TradeListener tradeListener = this.tradeListener;
+            if (tradeListener != null && tradeSubscriptions.contains(trade.getInstrumentId())) {
                 tradeListener.onTrade(trade);
             }
         }
     }
 
-    private void onSessionState(final SessionState sessionState)
-    {
-        synchronized (sessionStateMonitor)
-        {
+    private void onSessionState(SessionState sessionState) {
+        synchronized (sessionStateMonitor) {
             sessionStateCached = sessionState;
-            final SessionStateListener sessionStateListener = this.sessionStateListener;
-            if (sessionStateListener != null)
-            {
+            SessionStateListener sessionStateListener = this.sessionStateListener;
+            if (sessionStateListener != null) {
                 sessionStateListener.onSessionState(sessionState);
             }
         }
     }
 
-    private abstract static class CachedRegistration<T> implements Registration
-    {
+    private abstract static class CachedRegistration<T> implements Registration {
+
         final Set<Integer> subscriptions;
         final Map<Integer, T> cache;
 
-        CachedRegistration(final Set<Integer> subscriptions, final Map<Integer, T> cache)
-        {
+        CachedRegistration(Set<Integer> subscriptions, Map<Integer, T> cache) {
             this.subscriptions = checkNotNull(subscriptions, "null subscriptions");
             this.cache = checkNotNull(cache, "null cache");
         }
@@ -197,14 +165,11 @@ class MarketMessageReceiver extends MessageReceiver
         abstract void onSubscribe(T element);
 
         @Override
-        public CachedRegistration subscribe(final int instrumentId)
-        {
-            synchronized (cache)
-            {
+        public CachedRegistration subscribe(int instrumentId) {
+            synchronized (cache) {
                 subscriptions.add(instrumentId);
-                final T element = cache.get(instrumentId);
-                if (element != null)
-                {
+                T element = cache.get(instrumentId);
+                if (element != null) {
                     onSubscribe(element);
                 }
             }
@@ -212,29 +177,25 @@ class MarketMessageReceiver extends MessageReceiver
         }
 
         @Override
-        public CachedRegistration subscribe(final Collection<Integer> instrumentIds)
-        {
+        public CachedRegistration subscribe(Collection<Integer> instrumentIds) {
             instrumentIds.forEach(this::subscribe);
             return this;
         }
 
         @Override
-        public CachedRegistration unsubscribe(final int instrumentId)
-        {
+        public CachedRegistration unsubscribe(int instrumentId) {
             subscriptions.remove(instrumentId);
             return this;
         }
 
         @Override
-        public CachedRegistration unsubscribe(final Collection<Integer> instrumentIds)
-        {
+        public CachedRegistration unsubscribe(Collection<Integer> instrumentIds) {
             instrumentIds.forEach(this::unsubscribe);
             return this;
         }
 
         @Override
-        public Registration unsubscribeAll()
-        {
+        public Registration unsubscribeAll() {
             subscriptions.clear();
             return this;
         }

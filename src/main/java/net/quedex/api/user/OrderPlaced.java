@@ -11,10 +11,9 @@ import java.math.BigDecimal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class OrderPlaced
-{
-    public enum OrderType
-    {
+public class OrderPlaced {
+
+    public enum OrderType {
         LIMIT
     }
 
@@ -29,13 +28,13 @@ public class OrderPlaced
 
     @JsonCreator
     public OrderPlaced(
-        @JsonProperty("client_order_id") final long clientOrderId,
-        @JsonProperty("instrument_id") final int instrumentId,
-        @JsonProperty("price") final BigDecimal price,
-        @JsonProperty("side") final OrderSide side,
-        @JsonProperty("quantity") final int quantity,
-        @JsonProperty("initial_quantity") final int initialQuantity)
-    {
+            @JsonProperty("client_order_id") long clientOrderId,
+            @JsonProperty("instrument_id") int instrumentId,
+            @JsonProperty("limit_price") BigDecimal price,
+            @JsonProperty("side") OrderSide side,
+            @JsonProperty("quantity") int quantity,
+            @JsonProperty("initial_quantity") int initialQuantity
+    ) {
         checkArgument(clientOrderId > 0, "clientOrderId=%s <= 0", clientOrderId);
         checkArgument(instrumentId > 0, "instrumentId=%s <= 0", instrumentId);
         checkArgument(price.compareTo(BigDecimal.ZERO) > 0, "price=%s <= 0", price);
@@ -50,79 +49,64 @@ public class OrderPlaced
         this.initialQuantity = initialQuantity;
     }
 
-    public long getClientOrderId()
-    {
+
+    public long getClientOrderId() {
         return clientOrderId;
     }
 
-    public int getInstrumentId()
-    {
+    public int getInstrumentId() {
         return instrumentId;
     }
 
-    public OrderType getType()
-    {
+    public OrderType getType() {
         return type;
     }
 
-    public BigDecimal getPrice()
-    {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public OrderSide getSide()
-    {
+    public OrderSide getSide() {
         return side;
     }
 
-    public int getQuantity()
-    {
+    public int getQuantity() {
         return quantity;
     }
 
-    public int getInitialQuantity()
-    {
+    public int getInitialQuantity() {
         return initialQuantity;
     }
 
     @Override
-    public boolean equals(final Object o)
-    {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        final OrderPlaced that = (OrderPlaced) o;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderPlaced that = (OrderPlaced) o;
         return clientOrderId == that.clientOrderId &&
-            instrumentId == that.instrumentId &&
-            quantity == that.quantity &&
-            initialQuantity == that.initialQuantity &&
-            type == that.type &&
-            Objects.equal(price, that.price) &&
-            side == that.side;
+                instrumentId == that.instrumentId &&
+                quantity == that.quantity &&
+                initialQuantity == that.initialQuantity &&
+                type == that.type &&
+                Objects.equal(price, that.price) &&
+                side == that.side;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hashCode(clientOrderId, instrumentId, type, price, side, quantity, initialQuantity);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("clientOrderId", clientOrderId)
-            .add("instrumentId", instrumentId)
-            .add("type", type)
-            .add("price", price)
-            .add("side", side)
-            .add("quantity", quantity)
-            .add("initialQuantity", initialQuantity)
-            .toString();
+                .add("clientOrderId", clientOrderId)
+                .add("instrumentId", instrumentId)
+                .add("type", type)
+                .add("price", price)
+                .add("side", side)
+                .add("quantity", quantity)
+                .add("initialQuantity", initialQuantity)
+                .toString();
     }
 }

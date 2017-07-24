@@ -1,23 +1,19 @@
 package net.quedex.api.pgp;
 
-public final class PGPKeyInitialisationException extends PGPExceptionBase
-{
-    public PGPKeyInitialisationException()
-    {
+public final class PGPKeyInitialisationException extends PGPExceptionBase {
+
+    public PGPKeyInitialisationException() {
     }
 
-    public PGPKeyInitialisationException(final String message)
-    {
+    public PGPKeyInitialisationException(String message) {
         super(message);
     }
 
-    public PGPKeyInitialisationException(final String message, final Throwable cause)
-    {
+    public PGPKeyInitialisationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public PGPKeyInitialisationException(final Throwable cause)
-    {
+    public PGPKeyInitialisationException(Throwable cause) {
         super(cause);
     }
 }

@@ -5,8 +5,8 @@ import net.quedex.api.market.StreamFailureListener;
 
 import java.util.List;
 
-public interface UserStream
-{
+public interface UserStream {
+
     void registerStreamFailureListener(StreamFailureListener streamFailureListener);
 
     void start() throws CommunicationException;
@@ -25,6 +25,7 @@ public interface UserStream
      *     <li> an {@link OpenPosition} item for each opened position </li>
      *     <li> an initial {@link AccountState} </li>
      * </ul>
+     *
      * The welcome package constitutes an initial state that will be modified by the subsequent events received by the
      * listeners.
      * <p>
@@ -48,8 +49,8 @@ public interface UserStream
 
     void stop() throws CommunicationException;
 
-    interface Batch
-    {
+    interface Batch {
+
         Batch placeOrder(LimitOrderSpec limitOrderSpec);
 
         Batch placeOrders(List<LimitOrderSpec> limitOrderSpecs);

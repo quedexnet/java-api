@@ -4,8 +4,8 @@ import net.quedex.api.common.CommunicationException;
 
 import java.util.Map;
 
-public interface MarketData
-{
+public interface MarketData {
+
     /**
      * @return a map from instrument ids to instruments
      */

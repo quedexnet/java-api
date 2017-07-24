@@ -1,18 +1,15 @@
 package net.quedex.api.pgp;
 
-public class PGPSignatureVerificationException extends PGPExceptionBase
-{
-    public PGPSignatureVerificationException()
-    {
+public class PGPSignatureVerificationException extends PGPExceptionBase {
+
+    public PGPSignatureVerificationException() {
     }
 
-    public PGPSignatureVerificationException(final String message)
-    {
+    public PGPSignatureVerificationException(String message) {
         super(message);
     }
 
-    public PGPSignatureVerificationException(final String message, final Throwable cause)
-    {
+    public PGPSignatureVerificationException(String message, Throwable cause) {
         super(message, cause);
     }
 }
