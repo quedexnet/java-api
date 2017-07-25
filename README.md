@@ -1,5 +1,8 @@
 ## Quedex Java API
 
+**Notice**: the documentation for this project is incomplete - it will be developed shortly. If you have any questions
+please contact support@quedex.net or open an issue in this repository.
+
 ### Usage
 
 Include to your project as a Maven dependency:
