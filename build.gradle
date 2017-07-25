@@ -84,12 +84,12 @@ uploadArchives {
                 packaging = 'pom'
                 // optionally artifactId can be defined here
                 description = 'Quedex Java API.'
-                url = 'https://github.com/wgromniak/java-api'
+                url = 'https://github.com/quedexnet/java-api'
 
                 scm {
                     connection = 'scm:git:https://github.com/wgromniak/java-api.git'
-                    developerConnection = 'scm:git:https://github.com/wgromniak/java-api.git'
-                    url = 'https://github.com/wgromniak/java-api'
+                    developerConnection = 'scm:git:https://github.com/quedexnet/java-api.git'
+                    url = 'https://github.com/quedexnet/java-api'
                 }
 
                 licenses {
