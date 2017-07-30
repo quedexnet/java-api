@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class Instrument {
 
-    private static final int SETTLEMENT_HOUR_UTC_MILLIS = 8 * 60 * 60 * 1000;
+    private static final int SETTLEMENT_HOUR_UTC_MILLIS = 12 * 60 * 60 * 1000;
 
     public enum Type {
         FUTURES,
