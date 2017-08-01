@@ -8,6 +8,8 @@ public interface OrderListener {
 
     void onOrderCanceled(OrderCanceled orderCanceled);
 
+    void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled);
+
     void onOrderCancelFailed(OrderCancelFailed orderCancelFailed);
 
     void onOrderModified(OrderModified orderModified);

@@ -197,6 +197,25 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testOrderForcefullyCanceledProcessing() throws Exception {
+        // given
+        JsonNode cancelledJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "order_forcefully_cancelled")
+            .put("client_order_id", 1470843412276L)
+            .put("cause", "liquidation");
+
+        // when
+        userMessageReceiver.registerOrderListener(orderListener);
+        userMessageReceiver.processMessage(encryptToTrader(cancelledJson));
+
+        // then
+        verify(orderListener).onOrderForcefullyCancelled(
+            new OrderForcefullyCancelled(1470843412276L, OrderForcefullyCancelled.Cause.LIQUIDATION)
+        );
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testOrderCancelFailedProcessing() throws Exception {
         // given
         JsonNode cancelFailedJson = MAPPER.getNodeFactory().objectNode()

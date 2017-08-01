@@ -72,6 +72,9 @@ class UserMessageReceiver extends MessageReceiver {
                     case "order_cancelled":
                         onOrderCanceled(OBJECT_MAPPER.treeToValue(dataJson, OrderCanceled.class));
                         break;
+                    case "order_forcefully_cancelled":
+                        onOrderForcefullyCancelled(OBJECT_MAPPER.treeToValue(dataJson, OrderForcefullyCancelled.class));
+                        break;
                     case "order_cancel_failed":
                         onOrderCancelFailed(OBJECT_MAPPER.treeToValue(dataJson, OrderCancelFailed.class));
                         break;
@@ -124,6 +127,13 @@ class UserMessageReceiver extends MessageReceiver {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
             orderListener.onOrderCanceled(orderCanceled);
+        }
+    }
+
+    private void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled) {
+        OrderListener orderListener = this.orderListener;
+        if (orderListener != null) {
+            orderListener.onOrderForcefullyCancelled(orderForcefullyCancelled);
         }
     }
 
