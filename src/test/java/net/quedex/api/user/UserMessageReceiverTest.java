@@ -11,6 +11,8 @@ import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.testcommons.Keys;
 import org.json.JSONObject;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
@@ -20,8 +22,10 @@ import static net.quedex.api.testcommons.Utils.$;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class UserMessageReceiverTest {
 
@@ -300,6 +304,31 @@ public class UserMessageReceiverTest {
 
         // then
         verify(streamFailureListener).onStreamFailure(isA(CommunicationException.class));
+    }
+
+    @Test
+    public void callsErrorCallbackOnListenerError() throws Exception {
+        // given
+        JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "open_position")
+            .put("instrument_id", "47")
+            .put("pnl", "0.070676")
+            .put("maintenance_margin", "0.155476")
+            .put("initial_margin", "0.233216")
+            .put("side", "long")
+            .put("quantity", 4)
+            .put("average_opening_price", "0.00176678");
+        final IllegalStateException exception = new IllegalStateException("error");
+        doThrow(exception).when(openPositionListener).onOpenPosition(any());
+
+        // when
+        userMessageReceiver.registerOpenPositionListener(openPositionListener);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionJson));
+
+        // then
+        final ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
     }
 
     private String encryptToTrader(final Object object) throws Exception {
