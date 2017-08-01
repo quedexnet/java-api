@@ -17,7 +17,11 @@ import java.util.List;
 
 import static net.quedex.api.testcommons.Utils.$;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 public class WebsocketUserStreamIT {
 
@@ -103,7 +107,7 @@ public class WebsocketUserStreamIT {
         userStream.cancelOrder(new OrderCancelSpec(clOrId));
 
         // then
-        verify(orderListener, timeout(1000)).onOrderCanceled(new OrderCanceled(clOrId));
+        verify(orderListener, timeout(1000)).onOrderCancelled(new OrderCancelled(clOrId));
         verify(accountStateListener, new Timeout(1000, atLeastOnce())).onAccountState(any());
 
         verify(streamFailureListener, never()).onStreamFailure(any());
@@ -202,9 +206,9 @@ public class WebsocketUserStreamIT {
         verify(orderListener, timeout(1000)).onOrderModified(new OrderModified(clOrId1));
         verify(orderListener, timeout(1000)).onOrderModified(new OrderModified(clOrId2));
         verify(orderListener, timeout(1000)).onOrderModified(new OrderModified(clOrId3));
-        verify(orderListener, timeout(1000)).onOrderCanceled(new OrderCanceled(clOrId1));
-        verify(orderListener, timeout(1000)).onOrderCanceled(new OrderCanceled(clOrId2));
-        verify(orderListener, timeout(1000)).onOrderCanceled(new OrderCanceled(clOrId3));
+        verify(orderListener, timeout(1000)).onOrderCancelled(new OrderCancelled(clOrId1));
+        verify(orderListener, timeout(1000)).onOrderCancelled(new OrderCancelled(clOrId2));
+        verify(orderListener, timeout(1000)).onOrderCancelled(new OrderCancelled(clOrId3));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -244,7 +248,7 @@ public class WebsocketUserStreamIT {
             userStream.batch().cancelOrders(orderListener.ordersToCancel).send();
             orderListener.ordersToCancel.forEach(
                     cancelSpec -> verify(orderListener, timeout(1000))
-                            .onOrderCanceled(new OrderCanceled(cancelSpec.getClientOrderId()))
+                            .onOrderCancelled(new OrderCancelled(cancelSpec.getClientOrderId()))
             );
             verify(accountStateListener, new Timeout(1000, atLeastOnce())).onAccountState(any());
         }
@@ -262,7 +266,7 @@ public class WebsocketUserStreamIT {
         @Override
         public void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed) {}
         @Override
-        public void onOrderCanceled(OrderCanceled orderCanceled) {}
+        public void onOrderCancelled(OrderCancelled orderCancelled) {}
         @Override
         public void onOrderCancelFailed(OrderCancelFailed orderCancelFailed) {}
         @Override

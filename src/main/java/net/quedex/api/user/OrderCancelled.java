@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class OrderCanceled {
+public class OrderCancelled {
 
     private final long clientOrderId;
 
     @JsonCreator
-    public OrderCanceled(@JsonProperty("client_order_id") long clientOrderId) {
+    public OrderCancelled(@JsonProperty("client_order_id") long clientOrderId) {
         this.clientOrderId = clientOrderId;
     }
 
@@ -22,7 +22,7 @@ public class OrderCanceled {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OrderCanceled that = (OrderCanceled) o;
+        OrderCancelled that = (OrderCancelled) o;
         return clientOrderId == that.clientOrderId;
     }
 
