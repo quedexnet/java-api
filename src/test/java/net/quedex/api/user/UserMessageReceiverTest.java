@@ -18,6 +18,8 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
+
 import static net.quedex.api.testcommons.Utils.$;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -217,6 +219,13 @@ public class UserMessageReceiverTest {
         JsonNode filledJson = MAPPER.getNodeFactory().objectNode()
             .put("type", "order_filled")
             .put("client_order_id", 1470844278115L)
+            .put("instrument_id", "2")
+            .put("order_limit_price", "12.34")
+            .put("order_type", "limit")
+            .put("order_side", "buy")
+            .put("order_initial_quantity", 10)
+            .put("leaves_order_quantity", 5)
+            .put("trade_price", "10.3")
             .put("trade_quantity", 5);
 
         // when
@@ -224,7 +233,16 @@ public class UserMessageReceiverTest {
         userMessageReceiver.processMessage(encryptToTrader(filledJson));
 
         // then
-        verify(orderListener).onOrderFilled(new OrderFilled(1470844278115L, 5));
+        verify(orderListener).onOrderFilled(new OrderFilled(
+            1470844278115L,
+            2,
+            new BigDecimal("12.34"),
+            OrderSide.BUY,
+            10,
+            5,
+            new BigDecimal("10.3"),
+            5
+        ));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
