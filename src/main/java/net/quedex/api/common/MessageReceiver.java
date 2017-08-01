@@ -52,6 +52,8 @@ public abstract class MessageReceiver {
             onError(new CommunicationException("Error parsing json entity on message=" + message, e));
         } catch (PGPExceptionBase e) {
             onError(new CommunicationException("PGP error on message=" + message, e));
+        } catch (RuntimeException e) {
+            onError(new CommunicationException("Error processing message=" + message, e));
         }
     }
 
