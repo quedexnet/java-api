@@ -6,7 +6,7 @@ public interface OrderListener {
 
     void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed);
 
-    void onOrderCanceled(OrderCanceled orderCanceled);
+    void onOrderCancelled(OrderCancelled orderCancelled);
 
     void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled);
 

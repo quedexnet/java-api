@@ -2,7 +2,6 @@ package net.quedex.api.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.nashorn.internal.ir.ObjectNode;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.MaintenanceException;
 import net.quedex.api.market.StreamFailureListener;
@@ -10,9 +9,7 @@ import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.testcommons.Keys;
-import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +24,6 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class UserMessageReceiverTest {
 
@@ -181,7 +177,7 @@ public class UserMessageReceiverTest {
     }
 
     @Test
-    public void testOrderCanceledProcessing() throws Exception {
+    public void testOrderCancelledProcessing() throws Exception {
         // given
         JsonNode cancelledJson = MAPPER.getNodeFactory().objectNode()
             .put("type", "order_cancelled")
@@ -192,12 +188,12 @@ public class UserMessageReceiverTest {
         userMessageReceiver.processMessage(encryptToTrader(cancelledJson));
 
         // then
-        verify(orderListener).onOrderCanceled(new OrderCanceled(1470843412276L));
+        verify(orderListener).onOrderCancelled(new OrderCancelled(1470843412276L));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
     @Test
-    public void testOrderForcefullyCanceledProcessing() throws Exception {
+    public void testOrderForcefullyCancelledProcessing() throws Exception {
         // given
         JsonNode cancelledJson = MAPPER.getNodeFactory().objectNode()
             .put("type", "order_forcefully_cancelled")
