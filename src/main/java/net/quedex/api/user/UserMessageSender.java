@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.quedex.api.common.CommunicationException;
+import net.quedex.api.common.DisconnectedException;
 import net.quedex.api.common.MessageReceiver;
 import net.quedex.api.market.StreamFailureListener;
 import net.quedex.api.pgp.BcEncryptor;
@@ -13,6 +14,7 @@ import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.pgp.PGPExceptionBase;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +109,8 @@ class UserMessageSender {
         executor.execute(() -> {
             try {
                 sendMessage(supplier.get());
+            } catch (WebsocketNotConnectedException e) {
+                onError(new DisconnectedException(e));
             } catch (Exception e) {
                 onError(new CommunicationException("Error sending message", e));
             }
