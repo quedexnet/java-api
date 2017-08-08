@@ -2,13 +2,13 @@ package net.quedex.api.common;
 
 import net.quedex.api.market.StreamFailureListener;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import org.java_websocket.client.DefaultWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 
 import javax.net.ssl.SSLContext;
+
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -51,7 +51,7 @@ public class WebsocketStream<T extends MessageReceiver> {
             public void onClose(int code, String reason, boolean remote) {
                 if (remote) {
                     WebsocketStream.this.onError(
-                            new CommunicationException("Websocket closed with code=" + code + ", reason=" + reason)
+                            new DisconnectedException("Websocket closed with code=" + code + ", reason=" + reason)
                     );
                 } else {
                     logger.info("Websocket closed with code={}, reason={}", code, reason);
