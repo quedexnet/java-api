@@ -2,7 +2,7 @@ package net.quedex.api.user;
 
 import com.google.common.collect.ImmutableList;
 import net.quedex.api.common.Config;
-import net.quedex.api.market.StreamFailureListener;
+import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.testcommons.Utils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;

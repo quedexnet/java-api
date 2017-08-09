@@ -3,7 +3,6 @@ package net.quedex.api.common;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.quedex.api.market.StreamFailureListener;
 import net.quedex.api.pgp.PGPExceptionBase;
 import org.slf4j.Logger;
 

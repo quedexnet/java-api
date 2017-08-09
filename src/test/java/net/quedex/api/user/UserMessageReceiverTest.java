@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.MaintenanceException;
-import net.quedex.api.market.StreamFailureListener;
+import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;

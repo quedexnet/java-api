@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.DisconnectedException;
 import net.quedex.api.common.MessageReceiver;
-import net.quedex.api.market.StreamFailureListener;
+import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
