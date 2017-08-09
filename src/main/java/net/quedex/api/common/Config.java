@@ -23,6 +23,10 @@ public class Config {
     private final long accountId;
     private final int nonceGroup;
 
+    /**
+     * @param nonceGroup value between 0 and 9, has to be different for every WebSocket connection opened to the
+     *                   exchange (e.g. browser and trading bot); our webapp uses nonce_group=0
+     */
     public Config(String marketStreamUrl,
                   String userStreamUrl,
                   BcPublicKey qdxPublicKey,
