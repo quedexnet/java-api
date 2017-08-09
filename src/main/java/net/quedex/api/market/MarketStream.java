@@ -8,6 +8,8 @@ public interface MarketStream {
 
     void start() throws CommunicationException;
 
+    void registerInstrumentsListener(InstrumentsListener instrumentsListener);
+
     Registration registerOrderBookListener(OrderBookListener orderBookListener);
 
     Registration registerTradeListener(TradeListener tradeListener);

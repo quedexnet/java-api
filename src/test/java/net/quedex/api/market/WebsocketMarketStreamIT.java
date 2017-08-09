@@ -10,12 +10,16 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 /**
  * An integration test with live Quedex Websocket. To run it:
@@ -37,7 +41,6 @@ public class WebsocketMarketStreamIT {
     @Mock private StreamFailureListener streamFailureListener;
 
     private MarketStream marketStream;
-    private MarketData marketData;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -45,24 +48,28 @@ public class WebsocketMarketStreamIT {
 
         Config config = Config.fromResource(Utils.getKeyPassphraseFromProps());
         marketStream = new WebsocketMarketStream(config);
-        marketData = new HttpMarketData(config);
     }
 
     @Test(enabled = TEST_ENABLED)
     public void testIntegrationWithLiveWS() throws Exception {
 
-        Collection<Integer> instrumentIds = marketData.getInstruments().keySet();
-        assertThat(instrumentIds).isNotEmpty();
-
-        System.out.println("instrumentIds = " + instrumentIds); // for debugging
+        List<Integer> instrumentIds = Collections.synchronizedList(new ArrayList<>());
 
         marketStream.start();
 
         marketStream.registerStreamFailureListener(streamFailureListener);
         marketStream.registerAndSubscribeSessionStateListener(sessionStateListener);
-        marketStream.registerOrderBookListener(orderBookListener).subscribe(instrumentIds);
-        marketStream.registerQuotesListener(quotesListener).subscribe(instrumentIds);
-        marketStream.registerTradeListener(tradeListener).subscribe(instrumentIds);
+
+        marketStream.registerInstrumentsListener(instruments -> {
+            instrumentIds.addAll(instruments.keySet());
+            assertThat(instrumentIds).isNotEmpty();
+
+            System.out.println("instrumentIds = " + instrumentIds); // for debugging
+
+            marketStream.registerOrderBookListener(orderBookListener).subscribe(instrumentIds);
+            marketStream.registerQuotesListener(quotesListener).subscribe(instrumentIds);
+            marketStream.registerTradeListener(tradeListener).subscribe(instrumentIds);
+        });
 
         instrumentIds
                 .forEach(id -> verify(orderBookListener, timeout(1000)).onOrderBook(argThat(obHasInstrumentId(id))));

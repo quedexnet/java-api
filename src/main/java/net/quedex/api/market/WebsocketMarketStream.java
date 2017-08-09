@@ -19,6 +19,11 @@ public class WebsocketMarketStream extends WebsocketStream<MarketMessageReceiver
     }
 
     @Override
+    public void registerInstrumentsListener(final InstrumentsListener instrumentsListener) {
+        messageReceiver.registerInstrumentsListener(instrumentsListener);
+    }
+
+    @Override
     public Registration registerOrderBookListener(OrderBookListener orderBookListener) {
         return messageReceiver.registerOrderBookListener(orderBookListener);
     }

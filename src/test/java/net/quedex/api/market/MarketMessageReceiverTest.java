@@ -6,13 +6,19 @@ import net.quedex.api.pgp.BcPublicKey;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
+
 import static net.quedex.api.testcommons.Utils.$;
-import static org.mockito.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -23,6 +29,7 @@ public class MarketMessageReceiverTest {
     @Mock private SessionStateListener sessionStateListener;
     @Mock private TradeListener tradeListener;
     @Mock private StreamFailureListener streamFailureListener;
+    @Mock private InstrumentsListener instrumentsListener;
 
     private MarketMessageReceiver messageReceiver;
 
@@ -140,6 +147,39 @@ public class MarketMessageReceiverTest {
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(sessionStateListener).onSessionState(SessionState.AUCTION);
+    }
+
+    @Test
+    public void testInstrumentDataProcessing() throws Exception {
+
+        // given
+        messageReceiver.registerInstrumentsListener(instrumentsListener);
+
+        // when
+        messageReceiver.processMessage(Fixtures.INSTRUMENT_DATA_STR);
+
+        // then
+        verify(streamFailureListener, never()).onStreamFailure(any());
+
+        final ArgumentCaptor<MarketMessageReceiver.InstrumentsMap> captor =
+            ArgumentCaptor.forClass(MarketMessageReceiver.InstrumentsMap.class);
+        verify(instrumentsListener).onInstruments(captor.capture());
+        assertThat(captor.getValue().get(190)).isEqualToComparingFieldByField(new Instrument(
+            "F.USD.AUG17W2",
+            190,
+            Instrument.Type.FUTURES,
+            null,
+            new BigDecimal("0.00000001"),
+            1501200000000L,
+            1502409600000L,
+            "USD",
+            1,
+            new BigDecimal("0.00005000"),
+            new BigDecimal("0.00025000"),
+            new BigDecimal("0.05000000"),
+            new BigDecimal("0.04000000"),
+            null
+        ));
     }
 
     @Test
