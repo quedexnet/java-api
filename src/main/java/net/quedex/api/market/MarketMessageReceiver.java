@@ -9,15 +9,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 class MarketMessageReceiver extends MessageReceiver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MarketMessageReceiver.class);
 
     private final BcSignatureVerifier bcSignatureVerifier;
+
+    private volatile InstrumentsListener instrumentsListener;
+    private final Object instrumentsMonitor = new Object();
+    private Map<Integer, Instrument> instrumentsCached;
 
     private volatile OrderBookListener orderBookListener;
     private final Set<Integer> orderBookSubscriptions = new HashSet<>(64, 0.75f);
@@ -38,6 +46,16 @@ class MarketMessageReceiver extends MessageReceiver {
     MarketMessageReceiver(BcPublicKey qdxPublicKey) {
         super(LOGGER);
         this.bcSignatureVerifier = new BcSignatureVerifier(qdxPublicKey);
+    }
+
+    void registerInstrumentsListener(InstrumentsListener instrumentsListener) {
+        this.instrumentsListener = instrumentsListener;
+        synchronized (instrumentsMonitor) {
+            Map<Integer, Instrument> instrumentsCached = this.instrumentsCached;
+            if (instrumentsListener != null && instrumentsCached != null) {
+                instrumentsListener.onInstruments(instrumentsCached);
+            }
+        }
     }
 
     Registration registerOrderBookListener(OrderBookListener orderBookListener) {
@@ -106,9 +124,21 @@ class MarketMessageReceiver extends MessageReceiver {
             case "session_state":
                 onSessionState(SessionState.valueOf(dataJson.get("state").textValue().toUpperCase()));
                 break;
+            case "instrument_data":
+                onInstrumentData(OBJECT_MAPPER.treeToValue(dataJson.get("data"), InstrumentsMap.class));
             default:
                 // no-op
                 break;
+        }
+    }
+
+    private void onInstrumentData(Map<Integer, Instrument> instruments) {
+        synchronized (instrumentsMonitor) {
+            instrumentsCached = instruments;
+            InstrumentsListener instrumentsListener = this.instrumentsListener;
+            if (instrumentsListener != null) {
+                instrumentsListener.onInstruments(instruments);
+            }
         }
     }
 
@@ -200,4 +230,6 @@ class MarketMessageReceiver extends MessageReceiver {
             return this;
         }
     }
+
+    public static class InstrumentsMap extends HashMap<Integer, Instrument> {}
 }

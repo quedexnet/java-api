@@ -1,5 +1,4 @@
 net.quedex.client.api.marketStreamUrl = wss://url/market_stream
-net.quedex.client.api.marketDataUrl = https://url/market_data
 net.quedex.client.api.userStreamUrl = wss://url/user_stream
 
 net.quedex.client.api.accountId = 123456789
