@@ -6,6 +6,9 @@ import net.quedex.api.pgp.BcPublicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ */
 public class WebsocketMarketStream extends WebsocketStream<MarketMessageReceiver> implements MarketStream {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketMarketStream.class);

@@ -1,6 +1,5 @@
 package net.quedex.api.common;
 
-import net.quedex.api.market.StreamFailureListener;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;

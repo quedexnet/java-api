@@ -2,8 +2,8 @@ package net.quedex.api.user;
 
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.Config;
+import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.common.WebsocketStream;
-import net.quedex.api.market.StreamFailureListener;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
 import org.slf4j.Logger;
