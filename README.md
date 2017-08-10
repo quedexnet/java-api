@@ -32,6 +32,7 @@ may be found in [qdxConfig.properties.example][example-config] - rename this fil
 your classpath and fill in the following (the rest of the properties is done):
 * `net.quedex.client.api.accountId`
 * `net.quedex.client.api.userPrivateKey`
+
 You may find your account id and encrypted private key in our web application - on the trading dashboard select the 
 dropdown menu with your email address in the upper right corner and go to User Profile (equivalent to visiting 
 https://quedex.net/webapp/profile when logged in).
