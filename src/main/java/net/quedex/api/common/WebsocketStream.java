@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 
 import javax.net.ssl.SSLContext;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -59,7 +60,12 @@ public class WebsocketStream<T extends MessageReceiver> {
 
             @Override
             public void onError(Exception ex) {
-                WebsocketStream.this.onError(new CommunicationException("Websocket error", ex));
+                if (ex instanceof IOException && "Broken pipe".equals(ex.getMessage())) {
+                    // this is a case of ungraceful disconnect
+                    WebsocketStream.this.onError(new DisconnectedException("Websocket error", ex));
+                } else {
+                    WebsocketStream.this.onError(new CommunicationException("Websocket error", ex));
+                }
             }
         };
 
