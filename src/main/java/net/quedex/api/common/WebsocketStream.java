@@ -60,7 +60,7 @@ public class WebsocketStream<T extends MessageReceiver> {
 
             @Override
             public void onError(Exception ex) {
-                if (ex instanceof IOException && "Broken pipe".equals(ex.getMessage())) {
+                if (ex instanceof IOException) {
                     // this is a case of ungraceful disconnect
                     WebsocketStream.this.onError(new DisconnectedException("Websocket error", ex));
                 } else {
