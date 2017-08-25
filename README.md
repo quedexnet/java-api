@@ -39,7 +39,7 @@ https://quedex.net/webapp/profile when logged in).
 
 Now you are ready to start hacking:
 
-```
+```java
 char[] pwd = ... // read private key passphrase 
 Config qdxConfig = Config.fromResource(pwd); // initialise the config from qdxConfig.properties using one of the factory methods
 
