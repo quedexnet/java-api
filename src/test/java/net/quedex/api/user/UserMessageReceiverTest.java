@@ -303,9 +303,13 @@ public class UserMessageReceiverTest {
 
     @Test
     public void testKeepaliveProcessing() throws Exception {
+        // given
+        JsonNode jsonWrapper = MAPPER.getNodeFactory().objectNode()
+            .put("type", "keepalive")
+            .put("timestamp", 1506958410894L);
 
         // when
-        userMessageReceiver.processMessage("keepalive");
+        userMessageReceiver.processMessage(MAPPER.writeValueAsString(jsonWrapper));
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());

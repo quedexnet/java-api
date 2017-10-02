@@ -1,5 +1,7 @@
 package net.quedex.api.market;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.StreamFailureListener;
@@ -24,6 +26,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 public class MarketMessageReceiverTest {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Mock private OrderBookListener orderBookListener;
     @Mock private QuotesListener quotesListener;
@@ -215,9 +219,13 @@ public class MarketMessageReceiverTest {
 
     @Test
     public void testKeepaliveProcessing() throws Exception {
+        // given
+        JsonNode jsonWrapper = MAPPER.getNodeFactory().objectNode()
+            .put("type", "keepalive")
+            .put("timestamp", 1506958410894L);
 
         // when
-        messageReceiver.processMessage("keepalive");
+        messageReceiver.processMessage(MAPPER.writeValueAsString(jsonWrapper));
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());

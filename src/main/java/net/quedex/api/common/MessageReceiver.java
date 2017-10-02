@@ -14,7 +14,6 @@ public abstract class MessageReceiver {
 
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    private static final String KEEPALIVE_STR = "keepalive";
 
     private final Logger logger;
 
@@ -28,11 +27,6 @@ public abstract class MessageReceiver {
 
     public final void processMessage(String message) {
 
-        if (KEEPALIVE_STR.equals(message)) {
-            logger.trace(KEEPALIVE_STR);
-            return;
-        }
-
         try {
             JsonNode metaJson = OBJECT_MAPPER.readTree(message);
 
@@ -42,6 +36,9 @@ public abstract class MessageReceiver {
                     break;
                 case "error":
                     processError(metaJson.get("error_code").asText());
+                    break;
+                case "keepalive":
+                    logger.trace("keepalive with server time: {}", metaJson.get("timestamp").asLong());
                     break;
                 default:
                     // no-op
