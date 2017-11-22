@@ -40,13 +40,11 @@ public class OpenPosition {
             @JsonProperty("average_opening_price") BigDecimal averageOpeningPrice
     ) {
         checkArgument(instrumentId > 0, "instrumentId=%s <= 0", instrumentId);
-        checkArgument(maintenanceMargin.compareTo(BigDecimal.ZERO) >= 0, "maintenanceMargin=%s < 0", maintenanceMargin);
-        checkArgument(initialMargin.compareTo(BigDecimal.ZERO) >= 0, "initialMargin=%s < 0", initialMargin);
         checkArgument(quantity >= 0, "quantity=%s < 0", quantity);
         this.instrumentId = instrumentId;
         this.pnl = pnl;
-        this.maintenanceMargin = maintenanceMargin;
-        this.initialMargin = initialMargin;
+        this.maintenanceMargin = checkNotNull(maintenanceMargin, "null maintenanceMargin");
+        this.initialMargin = checkNotNull(initialMargin, "null initialMargin");
         this.side = checkNotNull(side, "null side");
         this.quantity = quantity;
         this.averageOpeningPrice = averageOpeningPrice;
