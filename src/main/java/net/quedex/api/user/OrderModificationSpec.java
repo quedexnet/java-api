@@ -1,12 +1,10 @@
 package net.quedex.api.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -44,24 +42,20 @@ public class OrderModificationSpec implements OrderSpec {
         return clientOrderId;
     }
 
-    @JsonIgnore
-    public Optional<Integer> getNewQuantity() {
-        return Optional.ofNullable(newQuantity);
-    }
-
-    @JsonIgnore
-    public Optional<BigDecimal> getNewLimitPrice() {
-        return Optional.ofNullable(newLimitPrice);
-    }
-
-    @JsonProperty("new_limit_price")
-    private BigDecimal getNewLimitPriceRaw() {
-        return newLimitPrice;
-    }
-
+    /**
+     * @return new quantity of the order if present, null otherwise
+     */
     @JsonProperty("new_quantity")
-    private Integer getNewQuantityRaw() {
+    public Integer getNewQuantity() {
         return newQuantity;
+    }
+
+    /**
+     * @return new price of the order if present, null otherwise
+     */
+    @JsonProperty("new_limit_price")
+    public BigDecimal getNewLimitPrice() {
+        return newLimitPrice;
     }
 
     @JsonProperty("type")
