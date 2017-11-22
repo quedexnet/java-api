@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Objects;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,8 +30,11 @@ public final class PriceQuantity {
         this.quantity = priceQty[1].intValueExact();
     }
 
-    public Optional<BigDecimal> getPrice() {
-        return Optional.ofNullable(price);
+    /**
+     * @return price, null if absent
+     */
+    public BigDecimal getPrice() {
+        return price;
     }
 
     public int getQuantity() {

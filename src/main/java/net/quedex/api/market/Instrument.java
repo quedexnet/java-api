@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -170,12 +169,18 @@ public final class Instrument {
         return maintenanceMarginFraction;
     }
 
-    public Optional<BigDecimal> getStrike() {
-        return Optional.ofNullable(strike);
+    /**
+     * @return strike value if the instrument is option, null otherwise
+     */
+    public BigDecimal getStrike() {
+        return strike;
     }
 
-    public Optional<OptionType> getOptionType() {
-        return Optional.ofNullable(optionType);
+    /**
+     * @return type of the option if the instrument is option, null otherwise
+     */
+    public OptionType getOptionType() {
+        return optionType;
     }
 
     public boolean isFutures() {

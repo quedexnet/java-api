@@ -6,7 +6,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -65,12 +64,18 @@ public class Quotes {
         return lastQuantity;
     }
 
-    public Optional<PriceQuantity> getBid() {
-        return bidQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(bid, bidQuantity));
+    /**
+     * @return fist level of the order book if present, null otherwise
+     */
+    public PriceQuantity getBid() {
+        return bidQuantity == null ? null : new PriceQuantity(bid, bidQuantity);
     }
 
-    public Optional<PriceQuantity> getAsk() {
-        return askQuantity == null ? Optional.empty() : Optional.of(new PriceQuantity(ask, askQuantity));
+    /**
+     * @return fist level of the order book if present, null otherwise
+     */
+    public PriceQuantity getAsk() {
+        return askQuantity == null ? null : new PriceQuantity(ask, askQuantity);
     }
 
     public int getVolume() {
