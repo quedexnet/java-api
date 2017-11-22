@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import net.quedex.api.market.Instrument;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -58,12 +56,8 @@ public class OpenPosition {
         return instrumentId;
     }
 
-    /**
-     * @return PnL of this position, present only for {@link Instrument.Type#FUTURES}
-     *         position
-     */
-    public Optional<BigDecimal> getPnl() {
-        return Optional.ofNullable(pnl);
+    public BigDecimal getPnl() {
+        return pnl;
     }
 
     public BigDecimal getMaintenanceMargin() {

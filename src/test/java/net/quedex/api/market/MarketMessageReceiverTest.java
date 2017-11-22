@@ -169,20 +169,20 @@ public class MarketMessageReceiverTest {
         final ArgumentCaptor<MarketMessageReceiver.InstrumentsMap> captor =
             ArgumentCaptor.forClass(MarketMessageReceiver.InstrumentsMap.class);
         verify(instrumentsListener).onInstruments(captor.capture());
-        assertThat(captor.getValue().get(190)).isEqualToComparingFieldByField(new Instrument(
-            "F.USD.AUG17W2",
-            190,
-            Instrument.Type.FUTURES,
+        assertThat(captor.getValue().get(795)).isEqualToComparingFieldByField(new Instrument(
+            "F.BTCUSD.24NOV17",
+            795,
+            Instrument.Type.INVERSE_FUTURES,
             null,
-            new BigDecimal("0.00000001"),
-            1501200000000L,
-            1502409600000L,
+            new BigDecimal("0.01000000"),
+            1509667200000L,
+            1511481600000L,
             "USD",
             1,
-            new BigDecimal("0.00005000"),
-            new BigDecimal("0.00025000"),
-            new BigDecimal("0.05000000"),
+            new BigDecimal("0.00000000"),
+            new BigDecimal("0.00000000"),
             new BigDecimal("0.04000000"),
+            new BigDecimal("0.03000000"),
             null
         ));
     }
