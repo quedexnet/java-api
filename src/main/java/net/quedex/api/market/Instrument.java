@@ -15,8 +15,8 @@ public final class Instrument {
     private static final int SETTLEMENT_HOUR_UTC_MILLIS = 12 * 60 * 60 * 1000;
 
     public enum Type {
-        FUTURES,
-        OPTION;
+        INVERSE_FUTURES,
+        INVERSE_OPTION;
 
         @JsonCreator
         private static Type deserialize(String value) {
@@ -96,7 +96,7 @@ public final class Instrument {
         this.initialMarginFraction = initialMarginFraction;
         this.maintenanceMarginFraction = maintenanceMarginFraction;
 
-        if (this.type == Type.FUTURES) {
+        if (this.type == Type.INVERSE_FUTURES) {
             checkArgument(strike == null, "Expected null strike");
             checkArgument(optionType == null, "Expected null optionType");
             this.strike = null;
@@ -179,7 +179,7 @@ public final class Instrument {
     }
 
     public boolean isFutures() {
-        return type == Type.FUTURES;
+        return type == Type.INVERSE_FUTURES;
     }
 
     public boolean isTraded(long currentTimeMillis) {
