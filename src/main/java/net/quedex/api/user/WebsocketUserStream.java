@@ -103,7 +103,7 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
-    public void batch(List<OrderSpec> batch) {
+    public void batch(List<? extends OrderSpec> batch) {
         sender.sendBatch(batch);
     }
 
