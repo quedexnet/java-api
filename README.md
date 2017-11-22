@@ -90,7 +90,7 @@ In cases when information disclosure is&nbsp;not possible, you can contact us at
 In case you need to add a feature to the API, please [submit an issue][new-issue]
 containing change proposal before submitting a PR.
 
-Pull requests containing bugfixes are wery welcome!
+Pull requests containing bugfixes are very welcome!
 
 ## License
 
