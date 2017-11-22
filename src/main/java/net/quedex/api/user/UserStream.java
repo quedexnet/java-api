@@ -77,7 +77,7 @@ public interface UserStream {
      * Sends the given list of {@link OrderSpec}s to the exchange. This method is asynchronous - the fact that it
      * returned does not guarantee that the commands have been received nor processed by the exchange.
      */
-    void batch(List<OrderSpec> batch);
+    void batch(List<? extends OrderSpec> batch);
 
     void stop() throws CommunicationException;
 

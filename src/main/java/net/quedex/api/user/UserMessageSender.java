@@ -87,7 +87,7 @@ class UserMessageSender {
         sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.valueToTree(orderSpec)));
     }
 
-    void sendBatch(List<OrderSpec> batch) {
+    void sendBatch(List<? extends OrderSpec> batch) {
         sendMessageQueued(() -> {
             JsonNode batchJson = OBJECT_MAPPER.valueToTree(batch);
             for (final JsonNode node : batchJson) {
