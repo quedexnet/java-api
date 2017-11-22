@@ -5,9 +5,6 @@ using Java.
 
 ## Important!
 
-* All **prices (offers, trades, quotes) are expressed in BTC per USD** rather than the opposite
-  (which is the case on most of the other exchanges and our web application). For details,
-  see [Inverse Notation][inverse-notation-docs] on our website.
 * Quedex Exchange uses an innovative [schedule of session states][faq-session-schedule]. Some
   session states employ different order matching model - namely, [Auction][faq-what-is-auction].
   Please consider this when placing orders.
@@ -20,7 +17,7 @@ Include in your project as a Maven dependency:
 <dependency>
     <groupId>net.quedex</groupId>
     <artifactId>java-api</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 
 ```
