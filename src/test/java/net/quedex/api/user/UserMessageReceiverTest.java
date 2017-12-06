@@ -284,6 +284,22 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testLiquidationOrderCancelledProcessing() throws Exception {
+        // given
+        JsonNode cancelledJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "liquidation_order_cancelled")
+            .put("system_order_id", 1470843412276L);
+
+        // when
+        userMessageReceiver.registerOrderListener(orderListener);
+        userMessageReceiver.processMessage(encryptToTrader(cancelledJson));
+
+        // then
+        verify(orderListener).onLiquidationOrderCancelled(new LiquidationOrderCancelled(1470843412276L));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testOpenPositionProcessing() throws Exception {
         // given
         JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
