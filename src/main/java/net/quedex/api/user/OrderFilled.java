@@ -15,7 +15,7 @@ public class OrderFilled {
     private final long clientOrderId;
     private final int instrumentId;
     private final BigDecimal orderLimitPrice;
-    private final OrderPlaced.OrderType orderType;
+    private final OrderType orderType;
     private final OrderSide side;
     private final int orderInitialQuantity;
     private final int leavesOrderQuantity;
@@ -39,7 +39,7 @@ public class OrderFilled {
         this.clientOrderId = clientOrderId;
         this.instrumentId = instrumentId;
         this.orderLimitPrice = orderLimitPrice;
-        this.orderType = OrderPlaced.OrderType.LIMIT;
+        this.orderType = OrderType.LIMIT;
         this.side = checkNotNull(side, "side");
         this.orderInitialQuantity = orderInitialQuantity;
         this.leavesOrderQuantity = leavesOrderQuantity;
@@ -59,7 +59,7 @@ public class OrderFilled {
         return orderLimitPrice;
     }
 
-    public OrderPlaced.OrderType getOrderType() {
+    public OrderType getOrderType() {
         return orderType;
     }
 
