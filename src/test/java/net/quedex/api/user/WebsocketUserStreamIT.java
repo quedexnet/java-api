@@ -276,6 +276,8 @@ public class WebsocketUserStreamIT {
         @Override
         public void onOrderFilled(OrderFilled orderFilled) {}
         @Override
-        public void onOrderForcefullyCancelled(final OrderForcefullyCancelled orderForcefullyCancelled) {}
+        public void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled) {}
+        @Override
+        public void onLiquidationOrderPlaced(LiquidationOrderPlaced liquidationOrderPlaced) {}
     }
 }

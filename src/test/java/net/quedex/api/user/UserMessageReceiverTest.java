@@ -262,6 +262,28 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testLiquidationOrderPlacedProcessing() throws Exception {
+        // given
+        JsonNode placedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "liquidation_order_placed")
+            .put("system_order_id", 123)
+            .put("instrument_id", "47")
+            .put("side", "sell")
+            .put("initial_quantity", 5)
+            .put("quantity", 5);
+
+        // when
+        userMessageReceiver.registerOrderListener(orderListener);
+        userMessageReceiver.processMessage(encryptToTrader(placedJson));
+
+        // then
+        verify(orderListener).onLiquidationOrderPlaced(
+            new LiquidationOrderPlaced(123, 47, OrderSide.SELL, 5, 5)
+        );
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testOpenPositionProcessing() throws Exception {
         // given
         JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
