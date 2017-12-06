@@ -99,6 +99,9 @@ class UserMessageReceiver extends MessageReceiver {
                     case "last_nonce":
                         onLastNonce(dataJson);
                         break;
+                    case "liquidation_order_placed":
+                        onLiquidationOrderPlaced(OBJECT_MAPPER.treeToValue(dataJson, LiquidationOrderPlaced.class));
+                        break;
                     default:
                         // no-op
                         break;
@@ -176,6 +179,13 @@ class UserMessageReceiver extends MessageReceiver {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
             orderListener.onOrderPlaceFailed(orderPlaceFailed);
+        }
+    }
+
+    private void onLiquidationOrderPlaced(LiquidationOrderPlaced liquidationOrderPlaced) {
+        OrderListener orderListener = this.orderListener;
+        if (orderListener != null) {
+            orderListener.onLiquidationOrderPlaced(liquidationOrderPlaced);
         }
     }
 
