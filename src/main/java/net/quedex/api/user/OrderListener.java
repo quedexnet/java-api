@@ -21,4 +21,6 @@ public interface OrderListener {
     void onLiquidationOrderPlaced(LiquidationOrderPlaced liquidationOrderPlaced);
 
     void onLiquidationOrderCancelled(LiquidationOrderCancelled liquidationOrderCancelled);
+
+    void onLiquidationOrderFilled(LiquidationOrderFilled liquidationOrderFilled);
 }
