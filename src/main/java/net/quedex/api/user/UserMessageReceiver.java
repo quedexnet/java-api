@@ -102,6 +102,9 @@ class UserMessageReceiver extends MessageReceiver {
                     case "liquidation_order_placed":
                         onLiquidationOrderPlaced(OBJECT_MAPPER.treeToValue(dataJson, LiquidationOrderPlaced.class));
                         break;
+                    case "liquidation_order_cancelled":
+                        onLiquidationOrderCancelled(OBJECT_MAPPER.treeToValue(dataJson, LiquidationOrderCancelled.class));
+                        break;
                     default:
                         // no-op
                         break;
@@ -186,6 +189,13 @@ class UserMessageReceiver extends MessageReceiver {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
             orderListener.onLiquidationOrderPlaced(liquidationOrderPlaced);
+        }
+    }
+
+    private void onLiquidationOrderCancelled(LiquidationOrderCancelled liquidationOrderCancelled) {
+        OrderListener orderListener = this.orderListener;
+        if (orderListener != null) {
+            orderListener.onLiquidationOrderCancelled(liquidationOrderCancelled);
         }
     }
 
