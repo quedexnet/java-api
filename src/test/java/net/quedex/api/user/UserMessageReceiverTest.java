@@ -300,6 +300,37 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testLiquidationOrderFilledProcessing() throws Exception {
+        // given
+        JsonNode filledJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "liquidation_order_filled")
+            .put("system_order_id", 1470844278115L)
+            .put("instrument_id", "2")
+            .put("order_type", "market")
+            .put("order_side", "buy")
+            .put("order_initial_quantity", 10)
+            .put("leaves_order_quantity", 5)
+            .put("trade_price", "10.3")
+            .put("trade_quantity", 5);
+
+        // when
+        userMessageReceiver.registerOrderListener(orderListener);
+        userMessageReceiver.processMessage(encryptToTrader(filledJson));
+
+        // then
+        verify(orderListener).onLiquidationOrderFilled(new LiquidationOrderFilled(
+            1470844278115L,
+            2,
+            OrderSide.BUY,
+            10,
+            5,
+            new BigDecimal("10.3"),
+            5
+        ));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testOpenPositionProcessing() throws Exception {
         // given
         JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
