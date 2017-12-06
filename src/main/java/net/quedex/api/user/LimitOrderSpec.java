@@ -63,8 +63,8 @@ public class LimitOrderSpec implements OrderSpec {
     }
 
     @JsonProperty("order_type")
-    public OrderPlaced.OrderType getOrderType() {
-        return OrderPlaced.OrderType.LIMIT;
+    public OrderType getOrderType() {
+        return OrderType.LIMIT;
     }
 
     @JsonProperty("type")

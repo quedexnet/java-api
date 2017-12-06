@@ -13,10 +13,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class OrderPlaced {
 
-    public enum OrderType {
-        LIMIT
-    }
-
     private final long clientOrderId;
     private final int instrumentId;
     @JsonIgnore
