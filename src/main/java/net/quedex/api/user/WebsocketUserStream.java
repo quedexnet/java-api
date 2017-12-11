@@ -84,6 +84,11 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
+    public void registerInternalTransferListener(InternalTransferListener listener) {
+        messageReceiver.registerInternalTransferListener(listener);
+    }
+
+    @Override
     public void subscribeListeners() {
         sender.sendSubscribe();
     }

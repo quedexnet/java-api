@@ -26,6 +26,7 @@ class UserMessageReceiver extends MessageReceiver {
     private volatile OrderListener orderListener;
     private volatile OpenPositionListener openPositionListener;
     private volatile AccountStateListener accountStateListener;
+    private volatile InternalTransferListener internalTransferListener;
 
     UserMessageReceiver(BcPublicKey qdxPublicKey, BcPrivateKey userPrivateKey) {
         super(LOGGER);
@@ -42,6 +43,10 @@ class UserMessageReceiver extends MessageReceiver {
 
     void registerAccountStateListener(AccountStateListener accountStateListener) {
         this.accountStateListener = accountStateListener;
+    }
+
+    void registerInternalTransferListener(InternalTransferListener listener) {
+        internalTransferListener = listener;
     }
 
     long getLastNonce() throws TimeoutException, InterruptedException {
@@ -107,6 +112,9 @@ class UserMessageReceiver extends MessageReceiver {
                         break;
                     case "liquidation_order_filled":
                         onLiquidationOrderFilled(OBJECT_MAPPER.treeToValue(dataJson, LiquidationOrderFilled.class));
+                        break;
+                    case "internal_transfer_executed":
+                        onInternalTransferExecuted(OBJECT_MAPPER.treeToValue(dataJson, InternalTransferExecuted.class));
                         break;
                     default:
                         // no-op
@@ -206,6 +214,13 @@ class UserMessageReceiver extends MessageReceiver {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
             orderListener.onLiquidationOrderFilled(liquidationOrderFilled);
+        }
+    }
+
+    private void onInternalTransferExecuted(InternalTransferExecuted internalTransferExecuted) {
+        InternalTransferListener listener = internalTransferListener;
+        if (listener != null) {
+            listener.onInternalTransferExecuted(internalTransferExecuted);
         }
     }
 
