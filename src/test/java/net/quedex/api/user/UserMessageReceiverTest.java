@@ -402,6 +402,23 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testInternalTransferReceived() throws Exception {
+        // given
+        JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "internal_transfer_received")
+            .put("source_account_id", "47")
+            .put("amount", "7");
+
+        // when
+        userMessageReceiver.registerInternalTransferListener(internalTransferListener);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionJson));
+
+        // then
+        verify(internalTransferListener).onInternalTransferReceived(new InternalTransferReceived(47,new BigDecimal("7")));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testStreamFailure() throws Exception {
 
         // when
