@@ -79,6 +79,8 @@ public interface UserStream {
      */
     void batch(List<? extends OrderSpec> batch);
 
+    void executeInternalTransfer(InternalTransfer internalTransfer);
+
     void stop() throws CommunicationException;
 
     interface Batch {

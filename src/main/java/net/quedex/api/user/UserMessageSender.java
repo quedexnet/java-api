@@ -10,8 +10,6 @@ import net.quedex.api.common.DisconnectedException;
 import net.quedex.api.common.MessageReceiver;
 import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.pgp.BcEncryptor;
-import net.quedex.api.pgp.BcPrivateKey;
-import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.pgp.PGPExceptionBase;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
@@ -46,13 +44,12 @@ class UserMessageSender {
             WebSocketClient webSocketClient,
             long accountId,
             int nonceGroup,
-            BcPublicKey publicKey,
-            BcPrivateKey privateKey
+            BcEncryptor encryptor
     ) {
         checkArgument(nonceGroup >= 0, "nonceGroup=%s < 0", nonceGroup);
         checkArgument(accountId > 0, "accountId=%s <= 0", accountId);
         this.webSocketClient = checkNotNull(webSocketClient, "null webSocketClient");
-        this.encryptor = new BcEncryptor(publicKey, privateKey);
+        this.encryptor = checkNotNull(encryptor);
         this.accountId = accountId;
         this.nonceGroup = nonceGroup;
     }
@@ -99,6 +96,10 @@ class UserMessageSender {
                 .put("account_id", accountId)
                 .set("batch", batchJson);
         });
+    }
+
+    void sendInternalTransfer(InternalTransfer internalTransfer) {
+        sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.valueToTree(internalTransfer)));
     }
 
     void stop() {

@@ -4,6 +4,7 @@ import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.Config;
 import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.common.WebsocketStream;
+import net.quedex.api.pgp.BcEncryptor;
 import net.quedex.api.pgp.BcPrivateKey;
 import net.quedex.api.pgp.BcPublicKey;
 import org.slf4j.Logger;
@@ -29,7 +30,12 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
             BcPrivateKey userPrivateKey
     ) {
         super(LOGGER, streamUrl, new UserMessageReceiver(qdxPublicKey, userPrivateKey));
-        this.sender = new UserMessageSender(webSocketClient, accountId, nonceGroup, qdxPublicKey, userPrivateKey);
+        this.sender = new UserMessageSender(
+            webSocketClient,
+            accountId,
+            nonceGroup,
+            new BcEncryptor(qdxPublicKey, userPrivateKey)
+        );
     }
 
     public WebsocketUserStream(Config config) {
@@ -105,6 +111,11 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     @Override
     public void batch(List<? extends OrderSpec> batch) {
         sender.sendBatch(batch);
+    }
+
+    @Override
+    public void executeInternalTransfer(final InternalTransfer internalTransfer) {
+        sender.sendInternalTransfer(internalTransfer);
     }
 
     @Override
