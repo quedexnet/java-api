@@ -380,6 +380,28 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testInternalTransferRejected() throws Exception {
+        // given
+        JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "internal_transfer_rejected")
+            .put("destination_account_id", "47")
+            .put("amount", "0.070676")
+            .put("cause", "forbidden");
+
+        // when
+        userMessageReceiver.registerInternalTransferListener(internalTransferListener);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionJson));
+
+        // then
+        verify(internalTransferListener).onInternalTransferRejected(new InternalTransferRejected(
+            47,
+            new BigDecimal("0.070676"),
+            InternalTransferRejected.Cause.FORBIDDEN
+        ));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testStreamFailure() throws Exception {
 
         // when
