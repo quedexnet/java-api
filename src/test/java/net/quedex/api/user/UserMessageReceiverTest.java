@@ -32,6 +32,7 @@ public class UserMessageReceiverTest {
     @Mock private AccountStateListener accountStateListener;
     @Mock private OpenPositionListener openPositionListener;
     @Mock private OrderListener orderListener;
+    @Mock private InternalTransferListener internalTransferListener;
     @Mock private StreamFailureListener streamFailureListener;
     private BcEncryptor encryptor;
 
@@ -357,6 +358,24 @@ public class UserMessageReceiverTest {
                 4,
                 $("0.00176678")
         ));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
+    public void testInternalTransferExecuted() throws Exception {
+        // given
+        JsonNode openPositionJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "internal_transfer_executed")
+            .put("destination_account_id", "47")
+            .put("amount", "0.070676");
+
+        // when
+        userMessageReceiver.registerInternalTransferListener(internalTransferListener);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionJson));
+
+        // then
+        verify(internalTransferListener)
+            .onInternalTransferExecuted(new InternalTransferExecuted(47, new BigDecimal("0.070676")));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 

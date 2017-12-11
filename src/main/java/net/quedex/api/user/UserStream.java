@@ -30,6 +30,8 @@ public interface UserStream {
 
     void registerAccountStateListener(AccountStateListener accountStateListener);
 
+    void registerInternalTransferListener(InternalTransferListener listener);
+
     /**
      * Subscribes previously registered listeners. Causes a welcome package to be sent to the listeners. The welcome
      * package includes:
