@@ -119,6 +119,9 @@ class UserMessageReceiver extends MessageReceiver {
                     case "internal_transfer_rejected":
                         onInternalTransferRejected(OBJECT_MAPPER.treeToValue(dataJson, InternalTransferRejected.class));
                         break;
+                    case "internal_transfer_received":
+                        onInternalTransferReceived(OBJECT_MAPPER.treeToValue(dataJson, InternalTransferReceived.class));
+                        break;
                     default:
                         // no-op
                         break;
@@ -231,6 +234,13 @@ class UserMessageReceiver extends MessageReceiver {
         InternalTransferListener listener = internalTransferListener;
         if (listener != null) {
             listener.onInternalTransferRejected(internalTransferRejected);
+        }
+    }
+
+    private void onInternalTransferReceived(InternalTransferReceived internalTransferReceived) {
+        InternalTransferListener listener = internalTransferListener;
+        if (listener != null) {
+            listener.onInternalTransferReceived(internalTransferReceived);
         }
     }
 
