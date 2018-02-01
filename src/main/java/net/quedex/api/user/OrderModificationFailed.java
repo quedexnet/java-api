@@ -18,7 +18,8 @@ public class OrderModificationFailed {
         INVALID_TICK_SIZE,
         INSUFFICIENT_FUNDS,
         MARGIN_CALL,
-        NOT_FOUND;
+        NOT_FOUND,
+        OPEN_POSITION_QUANTITY_TOO_HIGH;
 
         @JsonCreator
         private static Cause deserialize(String value) {

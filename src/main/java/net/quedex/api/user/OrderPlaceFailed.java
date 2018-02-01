@@ -14,7 +14,9 @@ public class OrderPlaceFailed {
         INVALID_INSTRUMENT_ID,
         SESSION_NOT_ACTIVE,
         INVALID_TICK_SIZE,
-        INSUFFICIENT_FUNDS;
+        INSUFFICIENT_FUNDS,
+        TOO_MANY_OPEN_ORDERS,
+        OPEN_POSITION_QUANTITY_TOO_HIGH;
 
         @JsonCreator
         private static Cause deserialize(String value) {
