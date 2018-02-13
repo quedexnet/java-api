@@ -9,7 +9,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class OrderModificationFailed {
 
-    enum Cause {
+    public enum Cause {
         INVALID_ORDER_ID,
         INVALID_INSTRUMENT_ID,
         NONPOSITIVE_QUANTITY,
