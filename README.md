@@ -18,7 +18,7 @@ Include in your project as a Maven dependency:
 <dependency>
     <groupId>net.quedex</groupId>
     <artifactId>java-api</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 
 ```
