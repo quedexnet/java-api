@@ -37,7 +37,6 @@ public class LimitOrderSpec implements OrderSpec {
     }
 
     @JsonProperty("client_order_id")
-    @Override
     public long getClientOrderId() {
         return clientOrderId;
     }

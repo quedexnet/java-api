@@ -13,7 +13,6 @@ public class OrderCancelSpec implements OrderSpec {
     }
 
     @JsonProperty("client_order_id")
-    @Override
     public long getClientOrderId() {
         return clientOrderId;
     }
