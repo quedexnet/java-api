@@ -419,6 +419,38 @@ public class UserMessageReceiverTest {
     }
 
     @Test
+    public void testAllOrdersCanceledReceived() throws Exception {
+        // given
+        userMessageReceiver.registerOrderListener(orderListener);
+        final JsonNode msg = MAPPER.getNodeFactory().objectNode()
+            .put("type", "all_orders_cancelled");
+
+        // when
+        userMessageReceiver.processMessage(encryptToTrader(msg));
+
+        // then
+        verify(orderListener).onAllOrdersCancelled();
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
+    public void testCancelAllOrdersFailed() throws Exception {
+        // given
+        userMessageReceiver.registerOrderListener(orderListener);
+        final JsonNode msg = MAPPER.getNodeFactory().objectNode()
+            .put("type", "cancel_all_orders_failed")
+            .put("cause", "session_not_active");
+
+        // when
+        userMessageReceiver.processMessage(encryptToTrader(msg));
+
+        // then
+        verify(orderListener)
+            .onCancelAllOrdersFailed(new CancelAllOrdersFailed(CancelAllOrdersFailed.Cause.SESSION_NOT_ACTIVE));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
     public void testStreamFailure() throws Exception {
 
         // when

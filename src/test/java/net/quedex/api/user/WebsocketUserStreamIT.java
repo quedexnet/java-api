@@ -270,6 +270,10 @@ public class WebsocketUserStreamIT {
         @Override
         public void onOrderCancelFailed(OrderCancelFailed orderCancelFailed) {}
         @Override
+        public void onAllOrdersCancelled() {}
+        @Override
+        public void onCancelAllOrdersFailed(final CancelAllOrdersFailed cancelAllOrdersFailed) {}
+        @Override
         public void onOrderModified(OrderModified orderModified) {}
         @Override
         public void onOrderModificationFailed(OrderModificationFailed orderModificationFailed) {}

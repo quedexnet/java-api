@@ -12,6 +12,10 @@ public interface OrderListener {
 
     void onOrderCancelFailed(OrderCancelFailed orderCancelFailed);
 
+    void onAllOrdersCancelled();
+
+    void onCancelAllOrdersFailed(CancelAllOrdersFailed cancelAllOrdersFailed);
+
     void onOrderModified(OrderModified orderModified);
 
     void onOrderModificationFailed(OrderModificationFailed orderModificationFailed);

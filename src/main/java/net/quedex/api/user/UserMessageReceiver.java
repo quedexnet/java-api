@@ -83,6 +83,12 @@ class UserMessageReceiver extends MessageReceiver {
                     case "order_cancel_failed":
                         onOrderCancelFailed(OBJECT_MAPPER.treeToValue(dataJson, OrderCancelFailed.class));
                         break;
+                    case "all_orders_cancelled":
+                        onAllOrdersCanceled();
+                        break;
+                    case "cancel_all_orders_failed":
+                        onCancelAllOrdersFailed(OBJECT_MAPPER.treeToValue(dataJson, CancelAllOrdersFailed.class));
+                        break;
                     case "order_filled":
                         onOrderFilled(OBJECT_MAPPER.treeToValue(dataJson, OrderFilled.class));
                         break;
@@ -164,6 +170,20 @@ class UserMessageReceiver extends MessageReceiver {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
             orderListener.onOrderCancelFailed(orderCancelFailed);
+        }
+    }
+
+    private void onAllOrdersCanceled() {
+        final OrderListener orderListener = this.orderListener;
+        if (orderListener != null) {
+            orderListener.onAllOrdersCancelled();
+        }
+    }
+
+    private void onCancelAllOrdersFailed(final CancelAllOrdersFailed cancelAllOrdersFailed) {
+        final OrderListener orderListener = this.orderListener;
+        if (orderListener != null) {
+            orderListener.onCancelAllOrdersFailed(cancelAllOrdersFailed);
         }
     }
 
