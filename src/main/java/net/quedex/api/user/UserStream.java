@@ -62,6 +62,12 @@ public interface UserStream {
     void cancelOrder(OrderCancelSpec orderCancelSpec);
 
     /**
+     * Sends command to cancel all pending orders for an user to the exchange. This method is asynchronous - the fact
+     * that it returned does not guarantee that the command has ben received nor processed by the exchange.
+     */
+    void cancelAllOrders();
+
+    /**
      * Sends the given {@link OrderModificationSpec} to the exchange. This method is asynchronous - the fact that it
      * returned does not guarantee that the command has been received nor processed by the exchange.
      */
@@ -94,6 +100,8 @@ public interface UserStream {
         Batch cancelOrder(OrderCancelSpec orderCancelSpec);
 
         Batch cancelOrders(List<OrderCancelSpec> orderCancelSpecs);
+
+        Batch cancelAllOrders();
 
         Batch modifyOrder(OrderModificationSpec orderModificationSpec);
 
