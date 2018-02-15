@@ -47,4 +47,17 @@ public class UserMessageSenderTest {
                 "\"nonce_group\":5}"
         );
     }
+
+    @Test
+    public void sendsCancelAllMessage() throws Exception {
+        // when
+        sender.sendOrderSpec(CancelAllOrdersSpec.INSTANCE);
+
+        verify(wsClient, timeout(100)).send(
+            "{\"type\":\"cancel_all_orders\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5}"
+        );
+    }
 }

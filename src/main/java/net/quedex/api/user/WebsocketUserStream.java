@@ -104,6 +104,11 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
+    public void cancelAllOrders() {
+        sender.sendOrderSpec(CancelAllOrdersSpec.INSTANCE);
+    }
+
+    @Override
     public void modifyOrder(OrderModificationSpec orderModificationSpec) {
         sender.sendOrderSpec(orderModificationSpec);
     }
@@ -159,6 +164,14 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
         public Batch cancelOrders(List<OrderCancelSpec> orderCancelSpecs) {
             checkState(!sent, "Batch already sent");
             batch.addAll(orderCancelSpecs);
+            return this;
+        }
+
+        @Override
+        public Batch cancelAllOrders() {
+            checkState(!sent, "Batch already sent");
+            checkState(batch.isEmpty(), "Cancel all makes sense only as first command in batch");
+            batch.add(CancelAllOrdersSpec.INSTANCE);
             return this;
         }
 
