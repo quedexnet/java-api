@@ -2,12 +2,14 @@ package net.quedex.api.user;
 
 import net.quedex.api.pgp.BcEncryptor;
 import org.java_websocket.client.WebSocketClient;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.timeout;
@@ -27,6 +29,185 @@ public class UserMessageSenderTest {
         sender = new UserMessageSender(wsClient, 1234, 5, encryptor);
         when(encryptor.encrypt(any(), anyBoolean()))
             .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
+    }
+
+    @Test
+    public void sendsOrderPlaceCommand() throws Exception {
+        // given
+        final LimitOrderSpec spec = new LimitOrderSpec(
+            888L,
+            512,
+            OrderSide.BUY,
+            1500,
+            BigDecimal.valueOf(1L, 8));
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+             "\"instrument_id\":512," +
+             "\"side\":\"BUY\"," +
+             "\"quantity\":1500," +
+             "\"limit_price\":1E-8," +
+             "\"post_only\":false," +
+             "\"order_type\":\"LIMIT\"," +
+             "\"type\":\"place_order\"," +
+             "\"account_id\":1234," +
+             "\"nonce\":1," +
+             "\"nonce_group\":5}"
+        );
+    }
+
+    @Test
+    public void sendsPostOnlyOrderPlaceCommand() throws Exception {
+        // given
+        final LimitOrderSpec spec = new LimitOrderSpec(
+            888L,
+            512,
+            OrderSide.BUY,
+            1500,
+            BigDecimal.valueOf(1L, 8),
+            true);
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+             "\"instrument_id\":512," +
+             "\"side\":\"BUY\"," +
+             "\"quantity\":1500," +
+             "\"limit_price\":1E-8," +
+             "\"post_only\":true," +
+             "\"order_type\":\"LIMIT\"," +
+             "\"type\":\"place_order\"," +
+             "\"account_id\":1234," +
+             "\"nonce\":1," +
+             "\"nonce_group\":5}"
+        );
+    }
+
+    @Test
+    public void sendsOrderModifyCommandWithPriceChange() throws Exception {
+        // given
+        final OrderModificationSpec spec = new OrderModificationSpec(888L, BigDecimal.valueOf(1400L));
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+             "\"new_quantity\":null," +
+             "\"new_limit_price\":1.4E+3," +
+             "\"post_only\":false," +
+             "\"type\":\"modify_order\"," +
+             "\"account_id\":1234," +
+             "\"nonce\":1," +
+             "\"nonce_group\":5}"
+        );
+    }
+
+    @Test
+    public void sendsPostOnlyOrderModifyCommandWithPriceChange() throws Exception {
+        // given
+        final OrderModificationSpec spec = new OrderModificationSpec(888L, BigDecimal.valueOf(1400L), true);
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+             "\"new_quantity\":null," +
+             "\"new_limit_price\":1.4E+3," +
+             "\"post_only\":true," +
+             "\"type\":\"modify_order\"," +
+             "\"account_id\":1234," +
+             "\"nonce\":1," +
+             "\"nonce_group\":5}"
+        );
+    }
+
+
+    @Test
+    public void sendsOrderModifyCommandWithQuantityChange() throws Exception {
+        // given
+        final OrderModificationSpec spec = new OrderModificationSpec(888L, 100);
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+                "\"new_quantity\":100," +
+                "\"new_limit_price\":null," +
+                "\"post_only\":false," +
+                "\"type\":\"modify_order\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5}"
+        );
+    }
+
+    @Test
+    public void sendsOrderModifyCommandWithBothPriceAndQuantityChange() throws Exception {
+        // given
+        final OrderModificationSpec spec = new OrderModificationSpec(888L, 100, BigDecimal.valueOf(1400));
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+                "\"new_quantity\":100," +
+                "\"new_limit_price\":1.4E+3," +
+                "\"post_only\":false," +
+                "\"type\":\"modify_order\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5}"
+        );
+    }
+
+    @Test
+    public void sendsPostOnlyOrderModifyCommandWithBothPriceAndQuantityChange() throws Exception {
+        // given
+        final OrderModificationSpec spec = new OrderModificationSpec(888L, 100, BigDecimal.valueOf(1400), true);
+
+        // when
+        sender.sendOrderSpec(spec);
+
+        // then
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(wsClient, timeout(500)).send(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(
+            "{\"client_order_id\":888," +
+                "\"new_quantity\":100," +
+                "\"new_limit_price\":1.4E+3," +
+                "\"post_only\":true," +
+                "\"type\":\"modify_order\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5}"
+        );
     }
 
     @Test

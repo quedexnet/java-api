@@ -16,6 +16,7 @@ public class LimitOrderSpec implements OrderSpec {
     private final OrderSide side;
     private final int quantity;
     private final BigDecimal limitPrice;
+    private final boolean postOnly;
 
     /**
      * @param clientOrderId id of an order given by the client, has to be different than ids of all other pending orders
@@ -23,10 +24,18 @@ public class LimitOrderSpec implements OrderSpec {
      * @param side side of the order
      * @param quantity quantity of the order, has to be positive
      * @param limitPrice limit price of the order, has to be positive
+     * @param postOnly if true placing of order will fail if it would match immediately
      * @throws IllegalArgumentException if {@code quantity} or {@code limitPrice} is not positive
      * @throws NullPointerException if any of nullable arguments is null
      */
-    public LimitOrderSpec(long clientOrderId, int instrumentId, OrderSide side, int quantity, BigDecimal limitPrice) {
+    public LimitOrderSpec(final long clientOrderId,
+                          final int instrumentId,
+                          final OrderSide side,
+                          final int quantity,
+                          final BigDecimal limitPrice,
+                          final boolean postOnly) {
+        checkArgument(clientOrderId > 0, "clientOrderId=%s <= 0", clientOrderId);
+        checkArgument(instrumentId > 0, "instrumentId=%s <= 0", instrumentId);
         checkArgument(quantity > 0, "quantity=%s <= 0", quantity);
         checkArgument(limitPrice.compareTo(BigDecimal.ZERO) > 0, "limitPrice=%s <= 0", limitPrice);
         this.clientOrderId = clientOrderId;
@@ -34,6 +43,15 @@ public class LimitOrderSpec implements OrderSpec {
         this.side = checkNotNull(side, "null side");
         this.quantity = quantity;
         this.limitPrice = limitPrice;
+        this.postOnly = postOnly;
+    }
+
+    public LimitOrderSpec(final long clientOrderId,
+                          final int instrumentId,
+                          final OrderSide side,
+                          final int quantity,
+                          final BigDecimal limitPrice) {
+        this(clientOrderId, instrumentId, side, quantity, limitPrice, false);
     }
 
     @JsonProperty("client_order_id")
@@ -71,6 +89,11 @@ public class LimitOrderSpec implements OrderSpec {
         return "place_order";
     }
 
+    @JsonProperty("post_only")
+    private boolean getPostOnly() {
+        return postOnly;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -80,12 +103,13 @@ public class LimitOrderSpec implements OrderSpec {
                 instrumentId == that.instrumentId &&
                 quantity == that.quantity &&
                 side == that.side &&
-                Objects.equal(limitPrice, that.limitPrice);
+                Objects.equal(limitPrice, that.limitPrice) &&
+                postOnly == that.postOnly;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(clientOrderId, instrumentId, side, quantity, limitPrice);
+        return Objects.hashCode(clientOrderId, instrumentId, side, quantity, limitPrice, postOnly);
     }
 
     @Override
@@ -96,6 +120,7 @@ public class LimitOrderSpec implements OrderSpec {
                 .add("side", side)
                 .add("quantity", quantity)
                 .add("limitPrice", limitPrice)
+                .add("postOnly", postOnly)
                 .toString();
     }
 }
