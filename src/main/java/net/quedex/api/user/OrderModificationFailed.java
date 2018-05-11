@@ -19,7 +19,8 @@ public class OrderModificationFailed {
         INSUFFICIENT_FUNDS,
         MARGIN_CALL,
         NOT_FOUND,
-        OPEN_POSITION_QUANTITY_TOO_HIGH;
+        OPEN_POSITION_QUANTITY_TOO_HIGH,
+        NOT_POST;
 
         @JsonCreator
         private static Cause deserialize(String value) {
