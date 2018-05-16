@@ -39,7 +39,8 @@ public class UserMessageSenderTest {
             512,
             OrderSide.BUY,
             1500,
-            BigDecimal.valueOf(1L, 8));
+            BigDecimal.valueOf(1L, 8)
+        );
 
         // when
         sender.sendOrderSpec(spec);
@@ -71,7 +72,8 @@ public class UserMessageSenderTest {
             OrderSide.BUY,
             1500,
             BigDecimal.valueOf(1L, 8),
-            true);
+            true
+        );
 
         // when
         sender.sendOrderSpec(spec);
