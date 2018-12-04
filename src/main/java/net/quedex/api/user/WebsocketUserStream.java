@@ -134,8 +134,7 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
         sender.stop();
     }
 
-    private class BatchImpl implements Batch {
-
+    private abstract class AbstractBatch implements Batch {
         private final List<OrderSpec> batch = new ArrayList<>();
         private boolean sent;
 
@@ -193,6 +192,14 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
         public void send() {
             checkState(!sent, "Batch already sent");
             sent = true;
+            this.sendBatch(batch);
+        }
+
+        protected abstract void sendBatch(List<OrderSpec> batch);
+    }
+
+    private final class BatchImpl extends AbstractBatch {
+        protected void sendBatch(List<OrderSpec> batch) {
             WebsocketUserStream.this.batch(batch);
         }
     }
