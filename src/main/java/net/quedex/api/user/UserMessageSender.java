@@ -85,16 +85,25 @@ class UserMessageSender {
     }
 
     void sendBatch(List<? extends OrderSpec> batch) {
+        sendMessageQueued(() -> createBatchNode(batch));
+    }
+
+    void sendTimeTriggeredBatch(final long batchId,
+                                final long executionStartTimestamp,
+                                final long executionExpirationTimestamp,
+                                final List<? extends OrderSpec> batch) {
         sendMessageQueued(() -> {
-            JsonNode batchJson = OBJECT_MAPPER.valueToTree(batch);
-            for (final JsonNode node : batchJson) {
-                checkState(node instanceof ObjectNode, "Expected ObjectNode");
-                addNonceAccountId((ObjectNode) node);
-            }
-            return OBJECT_MAPPER.createObjectNode()
-                .put("type", "batch")
-                .put("account_id", accountId)
-                .set("batch", batchJson);
+            final ObjectNode mainCommand = OBJECT_MAPPER.createObjectNode()
+                .put("type", "add_timer")
+                .put("timer_id", batchId)
+                .put("execution_start_timestamp", executionStartTimestamp)
+                .put("execution_expiration_timestamp", executionExpirationTimestamp);
+
+            addNonceAccountId(mainCommand);
+
+            mainCommand.set("command", createBatchNode(batch));
+
+            return mainCommand;
         });
     }
 
@@ -104,6 +113,18 @@ class UserMessageSender {
 
     void stop() {
         executor.shutdown();
+    }
+
+    private JsonNode createBatchNode(final List<? extends OrderSpec> batch) {
+        JsonNode batchJson = OBJECT_MAPPER.valueToTree(batch);
+        for (final JsonNode node : batchJson) {
+            checkState(node instanceof ObjectNode, "Expected ObjectNode");
+            addNonceAccountId((ObjectNode) node);
+        }
+        return OBJECT_MAPPER.createObjectNode()
+            .put("type", "batch")
+            .put("account_id", accountId)
+            .set("batch", batchJson);
     }
 
     private void sendMessageQueued(Supplier<JsonNode> supplier) {
