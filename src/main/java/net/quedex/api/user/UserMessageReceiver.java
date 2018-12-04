@@ -27,6 +27,7 @@ class UserMessageReceiver extends MessageReceiver {
     private volatile OpenPositionListener openPositionListener;
     private volatile AccountStateListener accountStateListener;
     private volatile InternalTransferListener internalTransferListener;
+    private volatile TimeTriggeredBatchListener timeTriggeredBatchListener;
 
     UserMessageReceiver(BcPublicKey qdxPublicKey, BcPrivateKey userPrivateKey) {
         super(LOGGER);
@@ -47,6 +48,10 @@ class UserMessageReceiver extends MessageReceiver {
 
     void registerInternalTransferListener(InternalTransferListener listener) {
         internalTransferListener = listener;
+    }
+
+    void registerTimeTriggeredBatchListener(TimeTriggeredBatchListener timeTriggeredBatchListener) {
+        this.timeTriggeredBatchListener = timeTriggeredBatchListener;
     }
 
     long getLastNonce() throws TimeoutException, InterruptedException {
@@ -127,6 +132,18 @@ class UserMessageReceiver extends MessageReceiver {
                         break;
                     case "internal_transfer_received":
                         onInternalTransferReceived(OBJECT_MAPPER.treeToValue(dataJson, InternalTransferReceived.class));
+                        break;
+                    case "timer_added":
+                        onTimeTriggeredBatchAdded(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchAdded.class));
+                        break;
+                    case "timer_rejected":
+                        onTimeTriggeredBatchRejected(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchRejected.class));
+                        break;
+                    case "timer_expired":
+                        onTimeTriggeredBatchExpired(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchExpired.class));
+                        break;
+                    case "timer_triggered":
+                        onTimeTriggeredBatchTriggered(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchTriggered.class));
                         break;
                     default:
                         // no-op
@@ -261,6 +278,34 @@ class UserMessageReceiver extends MessageReceiver {
         InternalTransferListener listener = internalTransferListener;
         if (listener != null) {
             listener.onInternalTransferReceived(internalTransferReceived);
+        }
+    }
+
+    private void onTimeTriggeredBatchAdded(TimeTriggeredBatchAdded timeTriggeredBatchAdded) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchAdded(timeTriggeredBatchAdded);
+        }
+    }
+
+    private void onTimeTriggeredBatchRejected(TimeTriggeredBatchRejected timeTriggeredBatchRejected) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchRejected(timeTriggeredBatchRejected);
+        }
+    }
+
+    private void onTimeTriggeredBatchExpired(TimeTriggeredBatchExpired timeTriggeredBatchExpired) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchExpired(timeTriggeredBatchExpired);
+        }
+    }
+
+    private void onTimeTriggeredBatchTriggered(TimeTriggeredBatchTriggered timeTriggeredBatchTriggered) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchTriggered(timeTriggeredBatchTriggered);
         }
     }
 
