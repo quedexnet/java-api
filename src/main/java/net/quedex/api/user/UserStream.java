@@ -32,6 +32,8 @@ public interface UserStream {
 
     void registerInternalTransferListener(InternalTransferListener listener);
 
+    void registerTimeTriggeredBatchListener(TimeTriggeredBatchListener listener);
+
     /**
      * Subscribes previously registered listeners. Causes a welcome package to be sent to the listeners. The welcome
      * package includes:
@@ -86,6 +88,34 @@ public interface UserStream {
      * returned does not guarantee that the commands have been received nor processed by the exchange.
      */
     void batch(List<? extends OrderSpec> batch);
+
+    /**
+     * Returns an object (not thread-safe) which may be used fluently to send a scheduled batch of {@link OrderSpec}s to the
+     * exchange. This batch will be executed between executionStartTimestamp and executionExpirationTimestamp.
+     * Calling {@link Batch#send()} sends scheduled batch of {@link OrderSpec}s to the exchange. This method is
+     * asynchronous - the fact that it returned does not guarantee that the commands have been received nor processed by
+     * the exchange.
+     *
+     * @param batchId a user defined batch identifier, can be used to cancel or update batch
+     * @param executionStartTimestamp the defined batch will not be executed before this timestamp
+     * @param executionExpirationTimestamp the defined batch will not ne executed after this timestamp
+     */
+    Batch timeTriggeredBatch(long batchId, long executionStartTimestamp, long executionExpirationTimestamp);
+
+    /**
+     * Sends the given list of {@link OrderSpec}s to the exchange. The given batch of commands will be executed between
+     * executionStartTimestamp and executionExpirationTimestamp. This method is asynchronous - the fact that it
+     * returned does not guarantee that the commands have been received nor processed by the exchange.
+     *
+     * @param batchId a user defined batch identifier, can be used to cancel or update batch
+     * @param executionStartTimestamp the defined batch will not be executed before this timestamp
+     * @param executionExpirationTimestamp the defined batch will not be executed after this timestamp
+     * @param batch list of {@link OrderSpec}s to be executed
+     */
+    void timeTriggeredBatch(long batchId,
+                            long executionStartTimestamp,
+                            long executionExpirationTimestamp,
+                            List<? extends OrderSpec> batch);
 
     void executeInternalTransfer(InternalTransfer internalTransfer);
 
