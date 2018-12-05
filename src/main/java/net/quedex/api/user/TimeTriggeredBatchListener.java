@@ -9,5 +9,9 @@ public interface TimeTriggeredBatchListener {
     void onTimeTriggeredBatchExpired(TimeTriggeredBatchExpired timeTriggeredBatchExpired);
 
     void onTimeTriggeredBatchTriggered(TimeTriggeredBatchTriggered timeTriggeredBatchTriggered);
+
+    void onTimeTriggeredBatchUpdated(TimeTriggeredBatchUpdated timeTriggeredBatchUpdated);
+
+    void onTimeTriggeredBatchUpdateFailed(TimeTriggeredBatchUpdateFailed timeTriggeredBatchUpdateFailed);
 }
 

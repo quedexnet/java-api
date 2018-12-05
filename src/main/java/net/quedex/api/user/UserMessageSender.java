@@ -107,6 +107,25 @@ class UserMessageSender {
         });
     }
 
+    void sendTimeTriggeredBatchUpdate(final long batchId,
+                                      final long executionStartTimestamp,
+                                      final long executionExpirationTimestamp,
+                                      final List<? extends OrderSpec> batch) {
+        sendMessageQueued(() -> {
+            final ObjectNode mainCommand = OBJECT_MAPPER.createObjectNode()
+                .put("type", "update_timer")
+                .put("timer_id", batchId)
+                .put("new_execution_start_timestamp", executionStartTimestamp)
+                .put("new_execution_expiration_timestamp", executionExpirationTimestamp);
+
+            addNonceAccountId(mainCommand);
+
+            mainCommand.set("new_command", createBatchNode(batch));
+
+            return mainCommand;
+        });
+    }
+
     void sendInternalTransfer(InternalTransfer internalTransfer) {
         sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.valueToTree(internalTransfer)));
     }

@@ -293,6 +293,89 @@ public class WebsocketUserStreamIT {
             .onTimeTriggeredBatchAdded(new TimeTriggeredBatchAdded(batchId));
     }
 
+    @Test(enabled = TESTS_ENABLED)
+    public void testUpdateTimeTriggeredBatchIteratively() throws Exception {
+
+        // given
+        final long currentTime = System.currentTimeMillis();
+
+        final long batchId = currentTime;
+        final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
+        final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
+
+        long clientOrderId = currentTime;
+
+        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+            .cancelAllOrders()
+            .send();
+
+        // when
+        userStream.updateTimeTriggeredBatch(batchId, null, executionExpirationTimestamp + 1)
+            .cancelAllOrders()
+            .placeOrder(new LimitOrderSpec(clientOrderId + 1, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("0.01")))
+            .send();
+
+        // then
+        verify(timeTriggeredBatchListener, timeout(1000))
+            .onTimeTriggeredBatchUpdated(new TimeTriggeredBatchUpdated(batchId));
+    }
+
+    @Test(enabled = TESTS_ENABLED)
+    public void testUpdateTimeTriggeredBatchImmediately() throws Exception {
+        // given
+        final long currentTime = System.currentTimeMillis();
+
+        final long batchId = currentTime;
+        final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
+        final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
+
+        long clientOrderId = currentTime;
+
+        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+            .cancelAllOrders()
+            .send();
+
+        // when
+        userStream.updateTimeTriggeredBatch(
+            batchId,
+            null,
+            executionExpirationTimestamp + 1,
+            ImmutableList.of(
+                CancelAllOrdersSpec.INSTANCE,
+                new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("0.01"))
+            )
+        );
+
+        // then
+        verify(timeTriggeredBatchListener, timeout(1000))
+            .onTimeTriggeredBatchUpdated(new TimeTriggeredBatchUpdated(batchId));
+    }
+
+    @Test(enabled = TESTS_ENABLED)
+    public void testUpdateTimeTriggeredBatchFails() throws Exception {
+
+        // given
+        final long currentTime = System.currentTimeMillis();
+
+        final long batchId = 1L;
+        final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
+        final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
+
+        // when
+        userStream.updateTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+            .cancelAllOrders()
+            .send();
+
+        // then
+        verify(timeTriggeredBatchListener, timeout(1000))
+            .onTimeTriggeredBatchUpdateFailed(
+                new TimeTriggeredBatchUpdateFailed(
+                    batchId,
+                    TimeTriggeredBatchUpdateFailed.Cause.NOT_FOUND
+                )
+            );
+    }
+
     private void cancelAllPendingOrders() throws Exception {
         Thread.sleep(1000); // let the orders arrive
         int numPending = orderListener.ordersToCancel.size();
