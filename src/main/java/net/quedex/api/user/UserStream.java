@@ -117,6 +117,46 @@ public interface UserStream {
                             long executionExpirationTimestamp,
                             List<? extends OrderSpec> batch);
 
+    /**
+     * Returns an object (not thread-safe) which may be used fluently to update an already existing batch of {@link OrderSpec}s on the
+     * exchange. At least one of the following must be modified:
+     * <ul>
+     *     <li>executionStartTimestamp</li>
+     *     <li>executionExpirationTimestamp</li>
+     *     <li>commands</li>
+     * </ul>
+     * Specified commands replace commands registered during the timer creation.
+     * Calling {@link Batch#send()} sends modified batch of {@link OrderSpec}s to the exchange. This method is
+     * asynchronous - the fact that it returned does not guarantee that the commands have been received nor processed by
+     * the exchange.
+     *
+     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     * @param executionStartTimestamp new value of executionStartTimestamp (optional)
+     * @param executionExpirationTimestamp new value of executionExpirationTimestamp (optional)
+     */
+    Batch updateTimeTriggeredBatch(long batchId, Long executionStartTimestamp, Long executionExpirationTimestamp);
+
+    /**
+     * Sends the modified batch to the exchange. At least one of the following must be modified:
+     * <ul>
+     *     <li>executionStartTimestamp</li>
+     *     <li>executionExpirationTimestamp</li>
+     *     <li>batch</li>
+     * </ul>
+     * Specified batch replaces the one registered during the timer creation.
+     * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
+     * nor processed by the exchange.
+     *
+     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     * @param executionStartTimestamp new value of executionStartTimestamp (optional)
+     * @param executionExpirationTimestamp new value of executionExpirationTimestamp (optional)
+     * @param batch new value of batch (optional)
+     */
+    void updateTimeTriggeredBatch(long batchId,
+                                  Long executionStartTimestamp,
+                                  Long executionExpirationTimestamp,
+                                  List<? extends OrderSpec> batch);
+
     void executeInternalTransfer(InternalTransfer internalTransfer);
 
     void stop() throws CommunicationException;

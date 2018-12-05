@@ -145,6 +145,12 @@ class UserMessageReceiver extends MessageReceiver {
                     case "timer_triggered":
                         onTimeTriggeredBatchTriggered(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchTriggered.class));
                         break;
+                    case "timer_updated":
+                        onTimeTriggeredBatchUpdated(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchUpdated.class));
+                        break;
+                    case "timer_update_failed":
+                        onTimeTriggeredBatchUpdateFailed(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchUpdateFailed.class));
+                        break;
                     default:
                         // no-op
                         break;
@@ -306,6 +312,20 @@ class UserMessageReceiver extends MessageReceiver {
         TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
         if (listener != null) {
             listener.onTimeTriggeredBatchTriggered(timeTriggeredBatchTriggered);
+        }
+    }
+
+    private void onTimeTriggeredBatchUpdated(TimeTriggeredBatchUpdated timeTriggeredBatchTriggered) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchUpdated(timeTriggeredBatchTriggered);
+        }
+    }
+
+    private void onTimeTriggeredBatchUpdateFailed(TimeTriggeredBatchUpdateFailed timeTriggeredBatchUpdateFailed) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchUpdateFailed(timeTriggeredBatchUpdateFailed);
         }
     }
 

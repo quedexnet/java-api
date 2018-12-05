@@ -140,7 +140,22 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
                                    final long executionStartTimestamp,
                                    final long executionExpirationTimestamp,
                                    final List<? extends OrderSpec> batch) {
-        sender.sendTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+        sender.sendTimeTriggeredBatchUpdate(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+    }
+
+    @Override
+    public Batch updateTimeTriggeredBatch(final long batchId,
+                                          final Long executionStartTimestamp,
+                                          final Long executionExpirationTimestamp) {
+        return new TimeTiggeredBatchImpl(batchId, executionStartTimestamp, executionExpirationTimestamp);
+    }
+
+    @Override
+    public void updateTimeTriggeredBatch(final long batchId,
+                                         final Long executionStartTimestamp,
+                                         final Long executionExpirationTimestamp,
+                                         final List<? extends OrderSpec> batch) {
+        sender.sendTimeTriggeredBatchUpdate(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
     }
 
     @Override

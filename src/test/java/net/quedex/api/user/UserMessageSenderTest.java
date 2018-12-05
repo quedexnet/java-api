@@ -304,4 +304,63 @@ public class UserMessageSenderTest {
             "}"
         );
     }
+
+    @Test
+    public void sendTimeTriggeredBatchUpdate() throws Exception {
+        // given
+        final long batchId = 1L;
+        final long executionStartTimestamp = 200L;
+        final long executionExpirationTimestamp = 300L;
+        final List<OrderSpec> batch = ImmutableList.of(
+            CancelAllOrdersSpec.INSTANCE,
+            new LimitOrderSpec(
+                888L,
+                512,
+                OrderSide.BUY,
+                1500,
+                BigDecimal.valueOf(1L, 8)
+            )
+        );
+
+        // when
+        sender.sendTimeTriggeredBatchUpdate(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+
+        // then
+        verify(wsClient, timeout(100)).send(
+            "{" +
+                "\"type\":\"update_timer\"," +
+                "\"timer_id\":1," +
+                "\"new_execution_start_timestamp\":200," +
+                "\"new_execution_expiration_timestamp\":300," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5," +
+                "\"new_command\":{" +
+                    "\"type\":\"batch\"," +
+                    "\"account_id\":1234," +
+                    "\"batch\":[" +
+                        "{" +
+                            "\"type\":\"cancel_all_orders\"," +
+                            "\"account_id\":1234," +
+                            "\"nonce\":2," +
+                            "\"nonce_group\":5" +
+                        "}," +
+                        "{" +
+                            "\"client_order_id\":888," +
+                            "\"instrument_id\":512," +
+                            "\"side\":\"BUY\"," +
+                            "\"quantity\":1500," +
+                            "\"limit_price\":1E-8," +
+                            "\"post_only\":false," +
+                            "\"order_type\":\"LIMIT\"," +
+                            "\"type\":\"place_order\"," +
+                            "\"account_id\":1234," +
+                            "\"nonce\":3," +
+                            "\"nonce_group\":5" +
+                        "}" +
+                    "]" +
+                "}" +
+            "}"
+        );
+    }
 }
