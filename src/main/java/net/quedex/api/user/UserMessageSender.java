@@ -126,6 +126,18 @@ class UserMessageSender {
         });
     }
 
+    void sendTimeTriggeredBatchCancellation(final long batchId) {
+        sendMessageQueued(() -> {
+            final ObjectNode cancelCommand = OBJECT_MAPPER.createObjectNode()
+                .put("type", "cancel_timer")
+                .put("timer_id", batchId);
+
+            addNonceAccountId(cancelCommand);
+
+            return cancelCommand;
+        });
+    }
+
     void sendInternalTransfer(InternalTransfer internalTransfer) {
         sendMessageQueued(() -> addNonceAccountId(OBJECT_MAPPER.valueToTree(internalTransfer)));
     }

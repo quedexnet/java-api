@@ -363,4 +363,24 @@ public class UserMessageSenderTest {
             "}"
         );
     }
+
+    @Test
+    public void sendTimeTriggeredBatchCancellation() throws Exception {
+        // given
+        final long batchId = 1L;
+
+        // when
+        sender.sendTimeTriggeredBatchCancellation(batchId);
+
+        // then
+        verify(wsClient, timeout(100)).send(
+            "{" +
+                "\"type\":\"cancel_timer\"," +
+                "\"timer_id\":1," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5" +
+            "}"
+        );
+    }
 }

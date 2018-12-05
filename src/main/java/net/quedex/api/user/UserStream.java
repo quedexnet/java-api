@@ -157,6 +157,12 @@ public interface UserStream {
                                   Long executionExpirationTimestamp,
                                   List<? extends OrderSpec> batch);
 
+    /**
+     * Sends command to cancel an existing time triggered batch.
+     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     */
+    void cancelTimeTriggeredBatch(long batchId);
+
     void executeInternalTransfer(InternalTransfer internalTransfer);
 
     void stop() throws CommunicationException;

@@ -13,5 +13,9 @@ public interface TimeTriggeredBatchListener {
     void onTimeTriggeredBatchUpdated(TimeTriggeredBatchUpdated timeTriggeredBatchUpdated);
 
     void onTimeTriggeredBatchUpdateFailed(TimeTriggeredBatchUpdateFailed timeTriggeredBatchUpdateFailed);
+
+    void onTimeTriggeredBatchCancelled(TimeTriggeredBatchCancelled timeTriggeredBatchCancelled);
+
+    void onTimeTriggeredBatchCancelFailed(TimeTriggeredBatchCancelFailed timeTriggeredBatchCancelFailed);
 }
 

@@ -629,6 +629,42 @@ public class UserMessageReceiverTest {
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
+    @Test
+    public void testTimeTriggeredBatchCancelled() throws Exception {
+        // given
+        JsonNode timerExpiredJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "timer_cancelled")
+            .put("timer_id", "1");
+
+        // when
+        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
+
+        // then
+        verify(timeTriggeredBatchListener).onTimeTriggeredBatchCancelled(new TimeTriggeredBatchCancelled(1));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
+    @Test
+    public void testTimeTriggeredBatchCancelFailed() throws Exception {
+        // given
+        JsonNode timerExpiredJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "timer_cancel_failed")
+            .put("timer_id", "1")
+            .put("cause", "not_found");
+
+        // when
+        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
+
+        // then
+        verify(timeTriggeredBatchListener).onTimeTriggeredBatchCancelFailed(new TimeTriggeredBatchCancelFailed(
+            1,
+            TimeTriggeredBatchCancelFailed.Cause.NOT_FOUND
+        ));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
     private String encryptToTrader(final Object object) throws Exception {
         JsonNode jsonContent = MAPPER.getNodeFactory().arrayNode()
             .add(MAPPER.valueToTree(object));

@@ -151,6 +151,12 @@ class UserMessageReceiver extends MessageReceiver {
                     case "timer_update_failed":
                         onTimeTriggeredBatchUpdateFailed(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchUpdateFailed.class));
                         break;
+                    case "timer_cancelled":
+                        onTimeTriggeredBatchCancelled(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchCancelled.class));
+                        break;
+                    case "timer_cancel_failed":
+                        onTimeTriggeredBatchCancelFailed(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchCancelFailed.class));
+                        break;
                     default:
                         // no-op
                         break;
@@ -326,6 +332,20 @@ class UserMessageReceiver extends MessageReceiver {
         TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
         if (listener != null) {
             listener.onTimeTriggeredBatchUpdateFailed(timeTriggeredBatchUpdateFailed);
+        }
+    }
+
+    private void onTimeTriggeredBatchCancelled(TimeTriggeredBatchCancelled timeTriggeredBatchCancelled) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchCancelled(timeTriggeredBatchCancelled);
+        }
+    }
+
+    private void onTimeTriggeredBatchCancelFailed(TimeTriggeredBatchCancelFailed timeTriggeredBatchCancelFailed) {
+        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+        if (listener != null) {
+            listener.onTimeTriggeredBatchCancelFailed(timeTriggeredBatchCancelFailed);
         }
     }
 
