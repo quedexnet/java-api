@@ -159,6 +159,11 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
+    public void cancelTimeTriggeredBatch(final long batchId) {
+        sender.sendTimeTriggeredBatchCancellation(batchId);
+    }
+
+    @Override
     public void executeInternalTransfer(final InternalTransfer internalTransfer) {
         sender.sendInternalTransfer(internalTransfer);
     }

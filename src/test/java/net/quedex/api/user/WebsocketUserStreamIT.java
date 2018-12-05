@@ -376,6 +376,49 @@ public class WebsocketUserStreamIT {
             );
     }
 
+    @Test(enabled = TESTS_ENABLED)
+    public void testCancelTimeTriggeredBatch() throws Exception {
+
+        // given
+        final long currentTime = System.currentTimeMillis();
+
+        final long batchId = currentTime;
+        final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
+        final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
+        
+        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+            .cancelAllOrders()
+            .send();
+
+        // when
+        userStream.cancelTimeTriggeredBatch(batchId);
+
+        // then
+        verify(timeTriggeredBatchListener, timeout(1000))
+            .onTimeTriggeredBatchCancelled(new TimeTriggeredBatchCancelled(batchId));
+    }
+
+    @Test(enabled = TESTS_ENABLED)
+    public void testCancelTimeTriggeredBatchFails() throws Exception {
+
+        // given
+        final long currentTime = System.currentTimeMillis();
+
+        final long batchId = currentTime;
+
+        // when
+        userStream.cancelTimeTriggeredBatch(batchId);
+
+        // then
+        verify(timeTriggeredBatchListener, timeout(1000))
+            .onTimeTriggeredBatchCancelFailed(
+                new TimeTriggeredBatchCancelFailed(
+                    batchId,
+                    TimeTriggeredBatchCancelFailed.Cause.NOT_FOUND
+                )
+            );
+    }
+
     private void cancelAllPendingOrders() throws Exception {
         Thread.sleep(1000); // let the orders arrive
         int numPending = orderListener.ordersToCancel.size();
