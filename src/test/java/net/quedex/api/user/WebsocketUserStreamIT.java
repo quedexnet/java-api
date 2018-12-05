@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 public class WebsocketUserStreamIT {
 
     private static final boolean TESTS_ENABLED = false; // enable to run
-    private static final int FUTURES_INSTRUMENT_ID = 47;
+    private static final int FUTURES_INSTRUMENT_ID = 2894;
 
     @Mock private AccountStateListener accountStateListener;
     @Mock private OpenPositionListener openPositionListener;
@@ -72,7 +72,7 @@ public class WebsocketUserStreamIT {
 
         // given
         long clOrId = System.currentTimeMillis();
-        BigDecimal price = $("0.1");
+        BigDecimal price = $("5000");
         OrderSide side = OrderSide.SELL;
         int qty = 5;
 
@@ -258,7 +258,7 @@ public class WebsocketUserStreamIT {
         // when
         userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
-            .placeOrder(new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("0.01")))
+            .placeOrder(new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("5000")))
             .send();
 
         // then
@@ -284,7 +284,7 @@ public class WebsocketUserStreamIT {
             executionExpirationTimestamp,
             ImmutableList.of(
                 CancelAllOrdersSpec.INSTANCE,
-                new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("0.01"))
+                new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("5000"))
             )
         );
 

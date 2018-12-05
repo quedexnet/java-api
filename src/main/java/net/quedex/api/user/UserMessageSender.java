@@ -108,8 +108,8 @@ class UserMessageSender {
     }
 
     void sendTimeTriggeredBatchUpdate(final long batchId,
-                                      final long executionStartTimestamp,
-                                      final long executionExpirationTimestamp,
+                                      final Long executionStartTimestamp,
+                                      final Long executionExpirationTimestamp,
                                       final List<? extends OrderSpec> batch) {
         sendMessageQueued(() -> {
             final ObjectNode mainCommand = OBJECT_MAPPER.createObjectNode()
