@@ -92,9 +92,10 @@ public interface UserStream {
     /**
      * Returns an object (not thread-safe) which may be used fluently to send a scheduled batch of {@link OrderSpec}s to the
      * exchange. This batch will be executed between executionStartTimestamp and executionExpirationTimestamp.
-     * Calling {@link Batch#send()} sends scheduled batch of {@link OrderSpec}s to the exchange. This method is
-     * asynchronous - the fact that it returned does not guarantee that the commands have been received nor processed by
-     * the exchange.
+     * Calling {@link Batch#send()} sends scheduled batch of {@link OrderSpec}s to the exchange. In reaction to this
+     * the exchange engine creates a timer with the same id.
+     * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
+     * nor processed by the exchange.
      *
      * @param batchId a user defined batch identifier, can be used to cancel or update batch
      * @param executionStartTimestamp the defined batch will not be executed before this timestamp
