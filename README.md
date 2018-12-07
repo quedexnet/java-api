@@ -79,6 +79,80 @@ userStream.batch()
 userStream.stop();
 marketStream.stop();
 ```
+### Batching orders
+
+The API provides means to batch multiple order commands, and send them all in one single request.
+There are two types of batches:
+- regular
+- time triggered
+
+#### Regular batches
+
+When a *regular* batch is received by the exchange engine, all the carried order commands are immediately processed,
+one by one, in the creation order.
+
+To create a regular batch, use the ```batch()``` method, and then specify order commands.
+
+Example:
+
+```
+userStream.batch()
+    .placeOrder(...)
+    ...
+    .send();
+```
+
+#### Time triggered batches
+
+When a *time triggered* batch is received by the exchange engine, a new timer is registered.
+Based on the timer configuration, at some point in the future, all the carried order commands are processed, one by one, in the creation order.
+
+To create a time triggered batch, use the ```timeTriggeredBatch()``` method, and then specify order commands.
+
+Example:
+
+```
+userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+    .placeOrder(...)
+    ...
+    .send();
+```
+
+All the arguments passed to the ```timeTriggeredBatch()``` method, are timer configuration.
+
+```batchId``` is an identifier of a batch, but also of a corresponding timer, created in exchange engine. It can be used to cancel or update the timer.
+The specified order commands will be evaluated between ```executionStartTimestamp``` and ```executionExpirationTimestamp```. 
+
+**Execution guarantees**
+
+There is no guarantee that the created timer will be triggered and the order commands will be processed. The possibility is higher
+when the gap between ```executionStartTimestamp``` and ```executionExpirationTimestamp``` is smaller.
+
+To be sure that your timer will be triggered just specify wider time gap, or simply specify very high ```executionExpirationTimestamp```.
+
+**Update time triggered batch**
+
+Time triggered batch can be updated. 
+
+To update a time triggered batch, use the ```updateTimeTriggeredBatch()``` method.
+
+```
+userStream.updateTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+    .placeOrder(...)
+    ...
+    .send();
+```
+
+When only ```executionExpirationTimestamp``` or new order commands are specified, timer is modified in place. This means that the update
+does not change the order of registered timers.
+
+When ```executionStartTimestamp``` is modified, then the timer will be placed after other existing timers with the same ```executionStartTimestamp```.
+
+**Cancel time triggered batch**
+
+Time triggered batch can be cancelled. 
+
+To cancel a time triggered batch, use the ```cancelTimeTriggeredBatch()``` method.
 
 ## Contributing Guide
 
