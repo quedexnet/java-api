@@ -88,14 +88,14 @@ class UserMessageSender {
         sendMessageQueued(() -> createBatchNode(batch));
     }
 
-    void sendTimeTriggeredBatch(final long batchId,
-                                final long executionStartTimestamp,
-                                final long executionExpirationTimestamp,
-                                final List<? extends OrderSpec> batch) {
+    void sendTimeTriggeredBatch(long timerId,
+                                long executionStartTimestamp,
+                                long executionExpirationTimestamp,
+                                List<? extends OrderSpec> batch) {
         sendMessageQueued(() -> {
             final ObjectNode mainCommand = OBJECT_MAPPER.createObjectNode()
                 .put("type", "add_timer")
-                .put("timer_id", batchId)
+                .put("timer_id", timerId)
                 .put("execution_start_timestamp", executionStartTimestamp)
                 .put("execution_expiration_timestamp", executionExpirationTimestamp);
 
@@ -107,14 +107,14 @@ class UserMessageSender {
         });
     }
 
-    void sendTimeTriggeredBatchUpdate(final long batchId,
-                                      final Long executionStartTimestamp,
-                                      final Long executionExpirationTimestamp,
-                                      final List<? extends OrderSpec> batch) {
+    void sendTimeTriggeredBatchUpdate(long timerId,
+                                      Long executionStartTimestamp,
+                                      Long executionExpirationTimestamp,
+                                      List<? extends OrderSpec> batch) {
         sendMessageQueued(() -> {
             final ObjectNode mainCommand = OBJECT_MAPPER.createObjectNode()
                 .put("type", "update_timer")
-                .put("timer_id", batchId)
+                .put("timer_id", timerId)
                 .put("new_execution_start_timestamp", executionStartTimestamp)
                 .put("new_execution_expiration_timestamp", executionExpirationTimestamp);
 
@@ -126,11 +126,11 @@ class UserMessageSender {
         });
     }
 
-    void sendTimeTriggeredBatchCancellation(final long batchId) {
+    void sendTimeTriggeredBatchCancellation(long timerId) {
         sendMessageQueued(() -> {
             final ObjectNode cancelCommand = OBJECT_MAPPER.createObjectNode()
                 .put("type", "cancel_timer")
-                .put("timer_id", batchId);
+                .put("timer_id", timerId);
 
             addNonceAccountId(cancelCommand);
 

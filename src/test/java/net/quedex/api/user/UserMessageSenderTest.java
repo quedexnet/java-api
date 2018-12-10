@@ -249,7 +249,7 @@ public class UserMessageSenderTest {
     @Test
     public void sendsTimeTriggeredBatchMessage() throws Exception {
         // given
-        final long batchId = 1L;
+        final long timerId = 1L;
         final long executionStartTimestamp = 200L;
         final long executionExpirationTimestamp = 300L;
         final List<OrderSpec> batch = ImmutableList.of(
@@ -264,7 +264,7 @@ public class UserMessageSenderTest {
         );
 
         // when
-        sender.sendTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+        sender.sendTimeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp, batch);
 
         // then
         verify(wsClient, timeout(100)).send(
@@ -308,7 +308,7 @@ public class UserMessageSenderTest {
     @Test
     public void sendTimeTriggeredBatchUpdate() throws Exception {
         // given
-        final long batchId = 1L;
+        final long timerId = 1L;
         final long executionStartTimestamp = 200L;
         final long executionExpirationTimestamp = 300L;
         final List<OrderSpec> batch = ImmutableList.of(
@@ -323,7 +323,7 @@ public class UserMessageSenderTest {
         );
 
         // when
-        sender.sendTimeTriggeredBatchUpdate(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+        sender.sendTimeTriggeredBatchUpdate(timerId, executionStartTimestamp, executionExpirationTimestamp, batch);
 
         // then
         verify(wsClient, timeout(100)).send(
@@ -367,10 +367,10 @@ public class UserMessageSenderTest {
     @Test
     public void sendTimeTriggeredBatchCancellation() throws Exception {
         // given
-        final long batchId = 1L;
+        final long timerId = 1L;
 
         // when
-        sender.sendTimeTriggeredBatchCancellation(batchId);
+        sender.sendTimeTriggeredBatchCancellation(timerId);
 
         // then
         verify(wsClient, timeout(100)).send(

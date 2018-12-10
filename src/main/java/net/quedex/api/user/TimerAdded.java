@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class TimeTriggeredBatchAdded {
+public class TimerAdded {
 
-    private final long batchId;
+    private final long timerId;
 
     @JsonCreator
-    public TimeTriggeredBatchAdded(final @JsonProperty("timer_id") long batchId) {
-        this.batchId = batchId;
+    public TimerAdded(final @JsonProperty("timer_id") long timerId) {
+        this.timerId = timerId;
     }
 
-    public long getBatchId() {
-        return batchId;
+    public long getTimerId() {
+        return timerId;
     }
 
     @Override
@@ -26,19 +26,19 @@ public class TimeTriggeredBatchAdded {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final TimeTriggeredBatchAdded that = (TimeTriggeredBatchAdded) o;
-        return batchId == that.batchId;
+        final TimerAdded that = (TimerAdded) o;
+        return timerId == that.timerId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(batchId);
+        return Objects.hashCode(timerId);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("batchId", batchId)
+            .add("timerId", timerId)
             .toString();
     }
 }

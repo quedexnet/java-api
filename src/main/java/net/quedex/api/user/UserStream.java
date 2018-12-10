@@ -32,7 +32,7 @@ public interface UserStream {
 
     void registerInternalTransferListener(InternalTransferListener listener);
 
-    void registerTimeTriggeredBatchListener(TimeTriggeredBatchListener listener);
+    void registerTimerListener(TimerListener listener);
 
     /**
      * Subscribes previously registered listeners. Causes a welcome package to be sent to the listeners. The welcome
@@ -90,30 +90,46 @@ public interface UserStream {
     void batch(List<? extends OrderSpec> batch);
 
     /**
-     * Returns an object (not thread-safe) which may be used fluently to send a scheduled batch of {@link OrderSpec}s to the
-     * exchange. This batch will be executed between executionStartTimestamp and executionExpirationTimestamp.
-     * Calling {@link Batch#send()} sends scheduled batch of {@link OrderSpec}s to the exchange. In reaction to this
-     * the exchange engine creates a timer with the same id.
+     * <p>Returns an object (not thread-safe) which may be used fluently to create a time triggered batch of {@link OrderSpec}s.
+     * Calling {@link Batch#send()} sends this batch of {@link OrderSpec}s to the exchange.
+     * When a time triggered batch is received by the exchange engine, a new timer is registered.
+     * Based on the timer configuration, at some point in the future (between <i>executionStartTimestamp</i> and <i>executionExpirationTimestamp</i>),
+     * all the carried order commands are processed, one by one, in the creation order. If <i>executionStartTimestamp</i> is in the past
+     * and <i>executionExpirationTimestamp</i> is in the future, the batch will be processed immediately.</p>
+     * <p>Timers are ordered by <i>executionStartTimestamp</i> and order of arrival. Timers with earlier <i>executionStartTimestamp</i> are processed first.
+     * When there are more timers with the same <i>executionStartTimestamp</i> they are triggered by the order of arrival.</p>
+     * <p><strong>Note:</strong> timers are evaluated each time a new command is processed by the exchange engine. If between <i>executionStartTimestamp</i>
+     * and <i>executionExpirationTimestamp</i> no new command is processed by the engine, the timer will not be triggered, and will expire.</p>
+     *
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
      *
-     * @param batchId a user defined batch identifier, can be used to cancel or update batch
+     * @param timerId a user defined timer identifier, can be used to cancel or update batch
      * @param executionStartTimestamp the defined batch will not be executed before this timestamp
      * @param executionExpirationTimestamp the defined batch will not ne executed after this timestamp
      */
-    Batch timeTriggeredBatch(long batchId, long executionStartTimestamp, long executionExpirationTimestamp);
+    Batch timeTriggeredBatch(long timerId, long executionStartTimestamp, long executionExpirationTimestamp);
 
     /**
-     * Sends the given list of {@link OrderSpec}s to the exchange. The given batch of commands will be executed between
-     * executionStartTimestamp and executionExpirationTimestamp. This method is asynchronous - the fact that it
-     * returned does not guarantee that the commands have been received nor processed by the exchange.
+     * <p>Sends a time triggered batch with the given list of {@link OrderSpec}s to the exchange.
+     * When a time triggered batch is received by the exchange engine, a new timer is registered.
+     * Based on the timer configuration, at some point in the future (between <i>executionStartTimestamp</i> and <i>executionExpirationTimestamp</i>),
+     * all the carried order commands are processed, one by one, in the creation order. If <i>executionStartTimestamp</i> is in the past
+     * and <i>executionExpirationTimestamp</i> is in the future, the batch will be processed immediately.</p>
+     * <p>Timers are ordered by <i>executionStartTimestamp</i> and order of arrival. Timers with earlier <i>executionStartTimestamp</i> are processed first.
+     * When there are more timers with the same <i>executionStartTimestamp</i> they are triggered by the order of arrival.</p>
+     * <p><strong>Note:</strong> timers are evaluated each time a new command is processed by the exchange engine. If between <i>executionStartTimestamp</i>
+     * and <i>executionExpirationTimestamp</i> no new command is processed by the engine, the timer will not be triggered, and will expire.</p>
      *
-     * @param batchId a user defined batch identifier, can be used to cancel or update batch
+     * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
+     * nor processed by the exchange.
+     *
+     * @param timerId a user defined batch identifier, can be used to cancel or update batch
      * @param executionStartTimestamp the defined batch will not be executed before this timestamp
      * @param executionExpirationTimestamp the defined batch will not be executed after this timestamp
      * @param batch list of {@link OrderSpec}s to be executed
      */
-    void timeTriggeredBatch(long batchId,
+    void timeTriggeredBatch(long timerId,
                             long executionStartTimestamp,
                             long executionExpirationTimestamp,
                             List<? extends OrderSpec> batch);
@@ -126,16 +142,21 @@ public interface UserStream {
      *     <li>executionExpirationTimestamp</li>
      *     <li>commands</li>
      * </ul>
-     * Specified commands replace commands registered during the timer creation.
-     * Calling {@link Batch#send()} sends modified batch of {@link OrderSpec}s to the exchange. This method is
-     * asynchronous - the fact that it returned does not guarantee that the commands have been received nor processed by
-     * the exchange.
+     * <p>Specified commands replace commands registered during the timer creation.
+     * When only <i>executionExpirationTimestamp</i> or new order commands are specified, the timer is modified in place.
+     * This means that the update does not change the order of registered timers.
+     * When <i>executionStartTimestamp</i> is modified, then the timer will be placed after other existing timers
+     * with the same <i>executionStartTimestamp</i>.<br>
+     * Calling {@link Batch#send()} sends modified batch of {@link OrderSpec}s to the exchange.</p>
      *
-     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
+     * nor processed by the exchange.
+     *
+     * @param timerId a user defined timer identifier, the same as used when creating the batch
      * @param executionStartTimestamp new value of executionStartTimestamp (optional)
      * @param executionExpirationTimestamp new value of executionExpirationTimestamp (optional)
      */
-    Batch updateTimeTriggeredBatch(long batchId, Long executionStartTimestamp, Long executionExpirationTimestamp);
+    Batch updateTimeTriggeredBatch(long timerId, Long executionStartTimestamp, Long executionExpirationTimestamp);
 
     /**
      * Sends the modified batch to the exchange. At least one of the following must be modified:
@@ -144,25 +165,30 @@ public interface UserStream {
      *     <li>executionExpirationTimestamp</li>
      *     <li>batch</li>
      * </ul>
-     * Specified batch replaces the one registered during the timer creation.
+     * <p>Specified batch replaces the one registered during the timer creation.
+     * When only <i>executionExpirationTimestamp</i> or new order commands are specified, the timer is modified in place.
+     * This means that the update does not change the order of registered timers.
+     * When <i>executionStartTimestamp</i> is modified, then the timer will be placed after already existing timers
+     * with the same <i>executionStartTimestamp</i>.</p>
+     *
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
      *
-     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     * @param timerId a user defined timer identifier, the same as used when creating the batch
      * @param executionStartTimestamp new value of executionStartTimestamp (optional)
      * @param executionExpirationTimestamp new value of executionExpirationTimestamp (optional)
      * @param batch new value of batch (optional)
      */
-    void updateTimeTriggeredBatch(long batchId,
+    void updateTimeTriggeredBatch(long timerId,
                                   Long executionStartTimestamp,
                                   Long executionExpirationTimestamp,
                                   List<? extends OrderSpec> batch);
 
     /**
      * Sends command to cancel an existing time triggered batch.
-     * @param batchId a user defined batch identifier, the same as used when creating the batch
+     * @param timerId a user defined batch identifier, the same as used when creating the batch
      */
-    void cancelTimeTriggeredBatch(long batchId);
+    void cancelTimeTriggeredBatch(long timerId);
 
     void executeInternalTransfer(InternalTransfer internalTransfer);
 

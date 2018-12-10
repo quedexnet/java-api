@@ -34,7 +34,7 @@ public class UserMessageReceiverTest {
     @Mock private OrderListener orderListener;
     @Mock private InternalTransferListener internalTransferListener;
     @Mock private StreamFailureListener streamFailureListener;
-    @Mock private TimeTriggeredBatchListener timeTriggeredBatchListener;
+    @Mock private TimerListener timerListener;
     private BcEncryptor encryptor;
 
     private UserMessageReceiver userMessageReceiver;
@@ -536,11 +536,11 @@ public class UserMessageReceiverTest {
             .put("timer_id", "1");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerAddedJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchAdded(new TimeTriggeredBatchAdded(1));
+        verify(timerListener).onTimerAdded(new TimerAdded(1));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -553,11 +553,11 @@ public class UserMessageReceiverTest {
             .put("cause", "timer_already_exists");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerRejectedJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchRejected(new TimeTriggeredBatchRejected(1, TimeTriggeredBatchRejected.Cause.TIMER_ALREADY_EXISTS));
+        verify(timerListener).onTimerRejected(new TimerRejected(1, TimerRejected.Cause.TIMER_ALREADY_EXISTS));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -569,11 +569,11 @@ public class UserMessageReceiverTest {
             .put("timer_id", "1");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchExpired(new TimeTriggeredBatchExpired(1));
+        verify(timerListener).onTimerExpired(new TimerExpired(1));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -585,11 +585,11 @@ public class UserMessageReceiverTest {
             .put("timer_id", "1");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchTriggered(new TimeTriggeredBatchTriggered(1));
+        verify(timerListener).onTimerTriggered(new TimerTriggered(1));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -601,11 +601,11 @@ public class UserMessageReceiverTest {
             .put("timer_id", "1");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchUpdated(new TimeTriggeredBatchUpdated(1));
+        verify(timerListener).onTimerUpdated(new TimerUpdated(1));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -618,13 +618,13 @@ public class UserMessageReceiverTest {
             .put("cause", "not_found");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchUpdateFailed(new TimeTriggeredBatchUpdateFailed(
+        verify(timerListener).onTimerUpdateFailed(new TimerUpdateFailed(
             1,
-            TimeTriggeredBatchUpdateFailed.Cause.NOT_FOUND
+            TimerUpdateFailed.Cause.NOT_FOUND
         ));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
@@ -637,11 +637,11 @@ public class UserMessageReceiverTest {
             .put("timer_id", "1");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchCancelled(new TimeTriggeredBatchCancelled(1));
+        verify(timerListener).onTimerCancelled(new TimerCancelled(1));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
@@ -654,13 +654,13 @@ public class UserMessageReceiverTest {
             .put("cause", "not_found");
 
         // when
-        userMessageReceiver.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userMessageReceiver.registerTimeTriggeredBatchListener(timerListener);
         userMessageReceiver.processMessage(encryptToTrader(timerExpiredJson));
 
         // then
-        verify(timeTriggeredBatchListener).onTimeTriggeredBatchCancelFailed(new TimeTriggeredBatchCancelFailed(
+        verify(timerListener).onTimerCancelFailed(new TimerCancelFailed(
             1,
-            TimeTriggeredBatchCancelFailed.Cause.NOT_FOUND
+            TimerCancelFailed.Cause.NOT_FOUND
         ));
         verify(streamFailureListener, never()).onStreamFailure(any());
     }

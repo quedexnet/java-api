@@ -27,7 +27,7 @@ class UserMessageReceiver extends MessageReceiver {
     private volatile OpenPositionListener openPositionListener;
     private volatile AccountStateListener accountStateListener;
     private volatile InternalTransferListener internalTransferListener;
-    private volatile TimeTriggeredBatchListener timeTriggeredBatchListener;
+    private volatile TimerListener timerListener;
 
     UserMessageReceiver(BcPublicKey qdxPublicKey, BcPrivateKey userPrivateKey) {
         super(LOGGER);
@@ -50,8 +50,8 @@ class UserMessageReceiver extends MessageReceiver {
         internalTransferListener = listener;
     }
 
-    void registerTimeTriggeredBatchListener(TimeTriggeredBatchListener timeTriggeredBatchListener) {
-        this.timeTriggeredBatchListener = timeTriggeredBatchListener;
+    void registerTimeTriggeredBatchListener(TimerListener timerListener) {
+        this.timerListener = timerListener;
     }
 
     long getLastNonce() throws TimeoutException, InterruptedException {
@@ -134,28 +134,28 @@ class UserMessageReceiver extends MessageReceiver {
                         onInternalTransferReceived(OBJECT_MAPPER.treeToValue(dataJson, InternalTransferReceived.class));
                         break;
                     case "timer_added":
-                        onTimeTriggeredBatchAdded(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchAdded.class));
+                        onTimerAdded(OBJECT_MAPPER.treeToValue(dataJson, TimerAdded.class));
                         break;
                     case "timer_rejected":
-                        onTimeTriggeredBatchRejected(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchRejected.class));
+                        onTimerRejected(OBJECT_MAPPER.treeToValue(dataJson, TimerRejected.class));
                         break;
                     case "timer_expired":
-                        onTimeTriggeredBatchExpired(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchExpired.class));
+                        onTimerExpired(OBJECT_MAPPER.treeToValue(dataJson, TimerExpired.class));
                         break;
                     case "timer_triggered":
-                        onTimeTriggeredBatchTriggered(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchTriggered.class));
+                        onTimerTriggered(OBJECT_MAPPER.treeToValue(dataJson, TimerTriggered.class));
                         break;
                     case "timer_updated":
-                        onTimeTriggeredBatchUpdated(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchUpdated.class));
+                        onTimerUpdated(OBJECT_MAPPER.treeToValue(dataJson, TimerUpdated.class));
                         break;
                     case "timer_update_failed":
-                        onTimeTriggeredBatchUpdateFailed(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchUpdateFailed.class));
+                        onTimerUpdateFailed(OBJECT_MAPPER.treeToValue(dataJson, TimerUpdateFailed.class));
                         break;
                     case "timer_cancelled":
-                        onTimeTriggeredBatchCancelled(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchCancelled.class));
+                        onTimerCancelled(OBJECT_MAPPER.treeToValue(dataJson, TimerCancelled.class));
                         break;
                     case "timer_cancel_failed":
-                        onTimeTriggeredBatchCancelFailed(OBJECT_MAPPER.treeToValue(dataJson, TimeTriggeredBatchCancelFailed.class));
+                        onTimerCanelFailed(OBJECT_MAPPER.treeToValue(dataJson, TimerCancelFailed.class));
                         break;
                     default:
                         // no-op
@@ -293,59 +293,59 @@ class UserMessageReceiver extends MessageReceiver {
         }
     }
 
-    private void onTimeTriggeredBatchAdded(TimeTriggeredBatchAdded timeTriggeredBatchAdded) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerAdded(TimerAdded timerAdded) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchAdded(timeTriggeredBatchAdded);
+            listener.onTimerAdded(timerAdded);
         }
     }
 
-    private void onTimeTriggeredBatchRejected(TimeTriggeredBatchRejected timeTriggeredBatchRejected) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerRejected(TimerRejected timerRejected) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchRejected(timeTriggeredBatchRejected);
+            listener.onTimerRejected(timerRejected);
         }
     }
 
-    private void onTimeTriggeredBatchExpired(TimeTriggeredBatchExpired timeTriggeredBatchExpired) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerExpired(TimerExpired timerExpired) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchExpired(timeTriggeredBatchExpired);
+            listener.onTimerExpired(timerExpired);
         }
     }
 
-    private void onTimeTriggeredBatchTriggered(TimeTriggeredBatchTriggered timeTriggeredBatchTriggered) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerTriggered(TimerTriggered timerTriggered) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchTriggered(timeTriggeredBatchTriggered);
+            listener.onTimerTriggered(timerTriggered);
         }
     }
 
-    private void onTimeTriggeredBatchUpdated(TimeTriggeredBatchUpdated timeTriggeredBatchTriggered) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerUpdated(TimerUpdated timeTriggeredBatchTriggered) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchUpdated(timeTriggeredBatchTriggered);
+            listener.onTimerUpdated(timeTriggeredBatchTriggered);
         }
     }
 
-    private void onTimeTriggeredBatchUpdateFailed(TimeTriggeredBatchUpdateFailed timeTriggeredBatchUpdateFailed) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerUpdateFailed(TimerUpdateFailed timerUpdateFailed) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchUpdateFailed(timeTriggeredBatchUpdateFailed);
+            listener.onTimerUpdateFailed(timerUpdateFailed);
         }
     }
 
-    private void onTimeTriggeredBatchCancelled(TimeTriggeredBatchCancelled timeTriggeredBatchCancelled) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerCancelled(TimerCancelled timerCancelled) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchCancelled(timeTriggeredBatchCancelled);
+            listener.onTimerCancelled(timerCancelled);
         }
     }
 
-    private void onTimeTriggeredBatchCancelFailed(TimeTriggeredBatchCancelFailed timeTriggeredBatchCancelFailed) {
-        TimeTriggeredBatchListener listener = timeTriggeredBatchListener;
+    private void onTimerCanelFailed(TimerCancelFailed timerCancelFailed) {
+        TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimeTriggeredBatchCancelFailed(timeTriggeredBatchCancelFailed);
+            listener.onTimerCancelFailed(timerCancelFailed);
         }
     }
 
