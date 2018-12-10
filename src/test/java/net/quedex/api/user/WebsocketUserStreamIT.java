@@ -32,7 +32,7 @@ public class WebsocketUserStreamIT {
     @Mock private OpenPositionListener openPositionListener;
     private CollectingOrderListener orderListener;
     @Mock private StreamFailureListener streamFailureListener;
-    @Mock private TimeTriggeredBatchListener timeTriggeredBatchListener;
+    @Mock private TimerListener timerListener;
 
     private UserStream userStream;
 
@@ -50,7 +50,7 @@ public class WebsocketUserStreamIT {
         userStream.registerAccountStateListener(accountStateListener);
         userStream.registerOpenPositionListener(openPositionListener);
         userStream.registerOrderListener(orderListener);
-        userStream.registerTimeTriggeredBatchListener(timeTriggeredBatchListener);
+        userStream.registerTimerListener(timerListener);
 
         // when
         userStream.subscribeListeners();
@@ -249,21 +249,21 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
 
         long clientOrderId = currentTime;
 
         // when
-        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+        userStream.timeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
             .placeOrder(new LimitOrderSpec(clientOrderId, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("5000")))
             .send();
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchAdded(new TimeTriggeredBatchAdded(batchId));
+        verify(timerListener, timeout(1000))
+            .onTimerAdded(new TimerAdded(timerId));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -271,7 +271,7 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
 
@@ -279,7 +279,7 @@ public class WebsocketUserStreamIT {
 
         // when
         userStream.timeTriggeredBatch(
-            batchId,
+            timerId,
             executionStartTimestamp,
             executionExpirationTimestamp,
             ImmutableList.of(
@@ -289,8 +289,8 @@ public class WebsocketUserStreamIT {
         );
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchAdded(new TimeTriggeredBatchAdded(batchId));
+        verify(timerListener, timeout(1000))
+            .onTimerAdded(new TimerAdded(timerId));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -299,25 +299,25 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
 
         long clientOrderId = currentTime;
 
-        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+        userStream.timeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
             .send();
 
         // when
-        userStream.updateTimeTriggeredBatch(batchId, null, executionExpirationTimestamp + 1)
+        userStream.updateTimeTriggeredBatch(timerId, null, executionExpirationTimestamp + 1)
             .cancelAllOrders()
             .placeOrder(new LimitOrderSpec(clientOrderId + 1, FUTURES_INSTRUMENT_ID, OrderSide.SELL, 5, $("0.01")))
             .send();
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchUpdated(new TimeTriggeredBatchUpdated(batchId));
+        verify(timerListener, timeout(1000))
+            .onTimerUpdated(new TimerUpdated(timerId));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -325,19 +325,19 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
 
         long clientOrderId = currentTime;
 
-        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+        userStream.timeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
             .send();
 
         // when
         userStream.updateTimeTriggeredBatch(
-            batchId,
+            timerId,
             null,
             executionExpirationTimestamp + 1,
             ImmutableList.of(
@@ -347,8 +347,8 @@ public class WebsocketUserStreamIT {
         );
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchUpdated(new TimeTriggeredBatchUpdated(batchId));
+        verify(timerListener, timeout(1000))
+            .onTimerUpdated(new TimerUpdated(timerId));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -357,21 +357,21 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = 1L;
+        final long timerId = 1L;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
 
         // when
-        userStream.updateTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+        userStream.updateTimeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
             .send();
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchUpdateFailed(
-                new TimeTriggeredBatchUpdateFailed(
-                    batchId,
-                    TimeTriggeredBatchUpdateFailed.Cause.NOT_FOUND
+        verify(timerListener, timeout(1000))
+            .onTimerUpdateFailed(
+                new TimerUpdateFailed(
+                    timerId,
+                    TimerUpdateFailed.Cause.NOT_FOUND
                 )
             );
     }
@@ -382,20 +382,20 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
         final long executionStartTimestamp = currentTime + (5 * 60 * 1000);
         final long executionExpirationTimestamp = currentTime + (10 * 60 * 1000);
         
-        userStream.timeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp)
+        userStream.timeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp)
             .cancelAllOrders()
             .send();
 
         // when
-        userStream.cancelTimeTriggeredBatch(batchId);
+        userStream.cancelTimeTriggeredBatch(timerId);
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchCancelled(new TimeTriggeredBatchCancelled(batchId));
+        verify(timerListener, timeout(1000))
+            .onTimerCancelled(new TimerCancelled(timerId));
     }
 
     @Test(enabled = TESTS_ENABLED)
@@ -404,17 +404,17 @@ public class WebsocketUserStreamIT {
         // given
         final long currentTime = System.currentTimeMillis();
 
-        final long batchId = currentTime;
+        final long timerId = currentTime;
 
         // when
-        userStream.cancelTimeTriggeredBatch(batchId);
+        userStream.cancelTimeTriggeredBatch(timerId);
 
         // then
-        verify(timeTriggeredBatchListener, timeout(1000))
-            .onTimeTriggeredBatchCancelFailed(
-                new TimeTriggeredBatchCancelFailed(
-                    batchId,
-                    TimeTriggeredBatchCancelFailed.Cause.NOT_FOUND
+        verify(timerListener, timeout(1000))
+            .onTimerCancelFailed(
+                new TimerCancelFailed(
+                    timerId,
+                    TimerCancelFailed.Cause.NOT_FOUND
                 )
             );
     }

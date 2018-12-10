@@ -7,7 +7,7 @@ import com.google.common.base.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class TimeTriggeredBatchUpdateFailed {
+public class TimerUpdateFailed {
 
     public enum Cause {
         NOT_FOUND,
@@ -19,18 +19,18 @@ public class TimeTriggeredBatchUpdateFailed {
         }
     }
 
-    private final long batchId;
+    private final long timerId;
     private final Cause cause;
 
     @JsonCreator
-    public TimeTriggeredBatchUpdateFailed(final @JsonProperty("timer_id") long batchId,
-                                          final @JsonProperty("cause") Cause cause) {
-        this.batchId = batchId;
+    public TimerUpdateFailed(final @JsonProperty("timer_id") long timerId,
+                             final @JsonProperty("cause") Cause cause) {
+        this.timerId = timerId;
         this.cause = checkNotNull(cause, "Null cause");
     }
 
-    public long getBatchId() {
-        return batchId;
+    public long getTimerId() {
+        return timerId;
     }
 
     public Cause getCause() {
@@ -41,20 +41,20 @@ public class TimeTriggeredBatchUpdateFailed {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TimeTriggeredBatchUpdateFailed that = (TimeTriggeredBatchUpdateFailed) o;
-        return batchId == that.batchId &&
+        TimerUpdateFailed that = (TimerUpdateFailed) o;
+        return timerId == that.timerId &&
             cause == that.cause;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(batchId, cause);
+        return Objects.hashCode(timerId, cause);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("batchId", batchId)
+            .add("timerId", timerId)
             .add("cause", cause)
             .toString();
     }

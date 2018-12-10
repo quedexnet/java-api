@@ -89,7 +89,7 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
-    public void registerTimeTriggeredBatchListener(TimeTriggeredBatchListener listener) {
+    public void registerTimerListener(TimerListener listener) {
         messageReceiver.registerTimeTriggeredBatchListener(listener);
     }
 
@@ -129,38 +129,38 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
     }
 
     @Override
-    public Batch timeTriggeredBatch(final long batchId,
+    public Batch timeTriggeredBatch(final long timerId,
                                     final long executionStartTimestamp,
                                     final long executionExpirationTimestamp) {
-        return new CreateTimeTriggeredBatchImpl(batchId, executionStartTimestamp, executionExpirationTimestamp);
+        return new CreateTimeTriggeredBatchImpl(timerId, executionStartTimestamp, executionExpirationTimestamp);
     }
 
     @Override
-    public void timeTriggeredBatch(final long batchId,
+    public void timeTriggeredBatch(final long timerId,
                                    final long executionStartTimestamp,
                                    final long executionExpirationTimestamp,
                                    final List<? extends OrderSpec> batch) {
-        sender.sendTimeTriggeredBatch(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+        sender.sendTimeTriggeredBatch(timerId, executionStartTimestamp, executionExpirationTimestamp, batch);
     }
 
     @Override
-    public Batch updateTimeTriggeredBatch(final long batchId,
+    public Batch updateTimeTriggeredBatch(final long timerId,
                                           final Long executionStartTimestamp,
                                           final Long executionExpirationTimestamp) {
-        return new UpdateTimeTriggeredBatchImpl(batchId, executionStartTimestamp, executionExpirationTimestamp);
+        return new UpdateTimeTriggeredBatchImpl(timerId, executionStartTimestamp, executionExpirationTimestamp);
     }
 
     @Override
-    public void updateTimeTriggeredBatch(final long batchId,
+    public void updateTimeTriggeredBatch(final long timerId,
                                          final Long executionStartTimestamp,
                                          final Long executionExpirationTimestamp,
                                          final List<? extends OrderSpec> batch) {
-        sender.sendTimeTriggeredBatchUpdate(batchId, executionStartTimestamp, executionExpirationTimestamp, batch);
+        sender.sendTimeTriggeredBatchUpdate(timerId, executionStartTimestamp, executionExpirationTimestamp, batch);
     }
 
     @Override
-    public void cancelTimeTriggeredBatch(final long batchId) {
-        sender.sendTimeTriggeredBatchCancellation(batchId);
+    public void cancelTimeTriggeredBatch(final long timerId) {
+        sender.sendTimeTriggeredBatchCancellation(timerId);
     }
 
     @Override
@@ -246,20 +246,20 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
 
     private abstract class TimeTiggeredBatch extends AbstractBatch {
 
-        private final long batchId;
+        private final long timerId;
         private final Long executionStartTimestamp;
         private final Long executionExpirationTimestamp;
 
-        public TimeTiggeredBatch(final long batchId,
+        public TimeTiggeredBatch(final long timerId,
                                  final Long executionStartTimestamp,
                                  final Long executionExpirationTimestamp) {
-            this.batchId = batchId;
+            this.timerId = timerId;
             this.executionStartTimestamp = executionStartTimestamp;
             this.executionExpirationTimestamp = executionExpirationTimestamp;
         }
 
-        public long getBatchId() {
-            return this.batchId;
+        public long getTimerId() {
+            return this.timerId;
         }
 
         public Long getExecutionStartTimestamp() {
@@ -273,15 +273,15 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
 
     private final class CreateTimeTriggeredBatchImpl extends TimeTiggeredBatch {
 
-        public CreateTimeTriggeredBatchImpl(final long batchId,
+        public CreateTimeTriggeredBatchImpl(final long timerId,
                                             final long executionStartTimestamp,
                                             final long executionExpirationTimestamp) {
-            super(batchId, executionStartTimestamp, executionExpirationTimestamp);
+            super(timerId, executionStartTimestamp, executionExpirationTimestamp);
         }
 
         protected void sendBatch(List<OrderSpec> batch) {
             WebsocketUserStream.this.timeTriggeredBatch(
-                getBatchId(),
+                getTimerId(),
                 getExecutionStartTimestamp(),
                 getExecutionExpirationTimestamp(),
                 batch
@@ -291,15 +291,15 @@ public class WebsocketUserStream extends WebsocketStream<UserMessageReceiver> im
 
     private final class UpdateTimeTriggeredBatchImpl extends TimeTiggeredBatch {
 
-        public UpdateTimeTriggeredBatchImpl(final long batchId,
+        public UpdateTimeTriggeredBatchImpl(final long timerId,
                                             final Long executionStartTimestamp,
                                             final Long executionExpirationTimestamp) {
-            super(batchId, executionStartTimestamp, executionExpirationTimestamp);
+            super(timerId, executionStartTimestamp, executionExpirationTimestamp);
         }
 
         protected void sendBatch(List<OrderSpec> batch) {
             WebsocketUserStream.this.updateTimeTriggeredBatch(
-                getBatchId(),
+                getTimerId(),
                 getExecutionStartTimestamp(),
                 getExecutionExpirationTimestamp(),
                 batch
