@@ -100,7 +100,8 @@ public interface UserStream {
      *     all the carried order commands are processed, one by one, in the creation order.
      * </p>
      * <p>
-     *     Please refer to the API documentation for detailed explanation of creating timers.
+     *     Please refer to the API documentation for detailed explanation of creating timers
+     *     (<a href="https://quedex.net/doc/api/" target="_blank">https://quedex.net/doc/api/</a>).
      * </p>
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
@@ -121,7 +122,8 @@ public interface UserStream {
      *     all the carried order commands are processed, one by one, in the creation order.
      * </p>
      * <p>
-     *     Please refer to the API documentation for detailed explanation of creating timers.
+     *     Please refer to the API documentation for detailed explanation of creating timers
+     *     (<a href="https://quedex.net/doc/api/" target="_blank">https://quedex.net/doc/api/</a>).
      * </p>
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
@@ -149,7 +151,8 @@ public interface UserStream {
      *     Calling {@link Batch#send()} sends modified batch of {@link OrderSpec}s to the exchange.
      * </p>
      * <p>
-     *     Please refer to the API documentation for detailed explanation of updating timers.
+     *     Please refer to the API documentation for detailed explanation of updating timers
+     *     (<a href="https://quedex.net/doc/api/" target="_blank">https://quedex.net/doc/api/</a>).
      * </p>
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
@@ -172,7 +175,8 @@ public interface UserStream {
      *     Specified commands replace commands registered during the timer creation.
      * </p>
      * <p>
-     *     Please refer to the API documentation for detailed explanation of updating timers.
+     *     Please refer to the API documentation for detailed explanation of updating timers
+     *     (<a href="https://quedex.net/doc/api/" target="_blank">https://quedex.net/doc/api/</a>).
      * </p>
      * This method is asynchronous - the fact that it returned does not guarantee that the commands have been received
      * nor processed by the exchange.
