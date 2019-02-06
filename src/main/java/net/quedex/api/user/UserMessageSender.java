@@ -120,7 +120,7 @@ class UserMessageSender {
 
             addNonceAccountId(mainCommand);
 
-            mainCommand.set("new_command", createBatchNode(batch));
+            mainCommand.set("new_command", batch != null ? createBatchNode(batch) : null);
 
             return mainCommand;
         });
