@@ -365,6 +365,87 @@ public class UserMessageSenderTest {
     }
 
     @Test
+    public void sendTimeTriggeredBatchUpdateWithExecutionStartMovedOnly() throws Exception {
+        // given
+        final long timerId = 1L;
+        final long executionStartTimestamp = 200L;
+
+        // when
+        sender.sendTimeTriggeredBatchUpdate(timerId, executionStartTimestamp, null, null);
+
+        // then
+        verify(wsClient, timeout(100)).send(
+            "{" +
+                "\"type\":\"update_timer\"," +
+                "\"timer_id\":1," +
+                "\"new_execution_start_timestamp\":200," +
+                "\"new_execution_expiration_timestamp\":null," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5," +
+                "\"new_command\":null" +
+                "}"
+        );
+    }
+
+    @Test
+    public void sendTimeTriggeredBatchUpdateWithUpdatedCommandOnly() throws Exception {
+        // given
+        final long timerId = 1L;
+        final List<OrderSpec> batch = ImmutableList.of(
+            CancelAllOrdersSpec.INSTANCE,
+            new LimitOrderSpec(
+                888L,
+                512,
+                OrderSide.BUY,
+                1500,
+                BigDecimal.valueOf(1L, 8)
+            )
+        );
+
+        // when
+        sender.sendTimeTriggeredBatchUpdate(timerId, null, null, batch);
+
+        // then
+        verify(wsClient, timeout(100)).send(
+            "{" +
+                "\"type\":\"update_timer\"," +
+                "\"timer_id\":1," +
+                "\"new_execution_start_timestamp\":null," +
+                "\"new_execution_expiration_timestamp\":null," +
+                "\"account_id\":1234," +
+                "\"nonce\":1," +
+                "\"nonce_group\":5," +
+                "\"new_command\":{" +
+                "\"type\":\"batch\"," +
+                "\"account_id\":1234," +
+                "\"batch\":[" +
+                "{" +
+                "\"type\":\"cancel_all_orders\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":2," +
+                "\"nonce_group\":5" +
+                "}," +
+                "{" +
+                "\"client_order_id\":888," +
+                "\"instrument_id\":512," +
+                "\"side\":\"BUY\"," +
+                "\"quantity\":1500," +
+                "\"limit_price\":1E-8," +
+                "\"post_only\":false," +
+                "\"order_type\":\"LIMIT\"," +
+                "\"type\":\"place_order\"," +
+                "\"account_id\":1234," +
+                "\"nonce\":3," +
+                "\"nonce_group\":5" +
+                "}" +
+                "]" +
+                "}" +
+                "}"
+        );
+    }
+
+    @Test
     public void sendTimeTriggeredBatchCancellation() throws Exception {
         // given
         final long timerId = 1L;
