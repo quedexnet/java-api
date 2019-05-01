@@ -26,19 +26,19 @@ Include in your project as a Maven dependency:
 ## Using the API:
 
 To use the API you need to provide a configuration - the default way to do that is via a `.properties` file. An example
-may be found in [qdxConfig.properties.example][example-config] - rename this file to `qdxConfig.propertie`, place on 
+may be found in [qdxConfig.properties.example][example-config] - rename this file to `qdxConfig.propertie`, place on
 your classpath and fill in the following (the rest of the properties is done):
 * `net.quedex.client.api.accountId`
 * `net.quedex.client.api.userPrivateKey`
 
-You may find your account id and encrypted private key in our web application - on the trading dashboard select the 
-dropdown menu with your email address in the upper right corner and go to User Profile (equivalent to visiting 
-https://quedex.net/webapp/profile when logged in).
+You may find your account id and encrypted private key in our web application - on the trading dashboard select the
+dropdown menu with your email address in the upper right corner and go to User Profile (equivalent to visiting
+https://quedex.app/profile when logged in).
 
 Now you are ready to start hacking:
 
 ```java
-char[] pwd = ... // read private key passphrase 
+char[] pwd = ... // read private key passphrase
 Config qdxConfig = Config.fromResource(pwd); // initialise the config from qdxConfig.properties using one of the factory methods
 
 MarketStream marketStream = new WebsocketMarketStream(qdxConfig);
@@ -54,7 +54,7 @@ userStream.start();
 
 // receive tradable instruments
 marketStream.registerInstrumentsListener(instruments -> {
-    
+
     // register and subscribe other market stream listeners
     marketStream.registerQuotesListener(...).subscribe(instruments.keySet()); // to subscribe all instruments
     marketStream.register*(...).subscribe(...);
