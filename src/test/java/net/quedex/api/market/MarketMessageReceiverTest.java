@@ -92,7 +92,7 @@ public class MarketMessageReceiverTest {
 
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
-        verify(quotesListener).onQuotes(new Quotes(1, $("0.00142858"), 1, null, null, $("0.00166944"), 3, 2, 0));
+        verify(quotesListener).onQuotes(new Quotes(1, $("0.00142858"), 1, null, null, $("0.00166944"), 3, 2, 0, null, null, null));
     }
 
     @Test
