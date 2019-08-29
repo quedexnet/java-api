@@ -665,6 +665,34 @@ public class UserMessageReceiverTest {
         verify(streamFailureListener, never()).onStreamFailure(any());
     }
 
+    @Test
+    public void testOpenPositionForcefullyClosedProcessing() throws Exception {
+        // given
+        JsonNode openPositionForcefullyClosedJson = MAPPER.getNodeFactory().objectNode()
+            .put("type", "open_position_forcefully_closed")
+            .put("instrument_id", "77")
+            .put("side", "long")
+            .put("closed_quantity", 9)
+            .put("remaining_quantity", 91)
+            .put("close_price", "0.10000000")
+            .put("cause", "deleveraging");
+
+        // when
+        userMessageReceiver.registerOpenPositionListener(openPositionListener);
+        userMessageReceiver.processMessage(encryptToTrader(openPositionForcefullyClosedJson));
+
+        // then
+        verify(openPositionListener).onOpenPositionForcefullyClosed(new OpenPositionForcefullyClosed(
+            77,
+            OpenPosition.PositionSide.LONG,
+            9,
+            91,
+            $("0.10000000"),
+            OpenPositionForcefullyClosed.Cause.DELEVERAGING
+        ));
+        verify(streamFailureListener, never()).onStreamFailure(any());
+    }
+
     private String encryptToTrader(final Object object) throws Exception {
         JsonNode jsonContent = MAPPER.getNodeFactory().arrayNode()
             .add(MAPPER.valueToTree(object));
