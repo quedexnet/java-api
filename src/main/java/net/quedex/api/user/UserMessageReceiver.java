@@ -79,6 +79,9 @@ class UserMessageReceiver extends MessageReceiver {
                     case "open_position":
                         onOpenPosition(OBJECT_MAPPER.treeToValue(dataJson, OpenPosition.class));
                         break;
+                    case "open_position_forcefully_closed":
+                        onOpenPositionForcefullyClosed(OBJECT_MAPPER.treeToValue(dataJson, OpenPositionForcefullyClosed.class));
+                        break;
                     case "order_cancelled":
                         onOrderCancelled(OBJECT_MAPPER.treeToValue(dataJson, OrderCancelled.class));
                         break;
@@ -178,6 +181,13 @@ class UserMessageReceiver extends MessageReceiver {
         OpenPositionListener openPositionListener = this.openPositionListener;
         if (openPositionListener != null) {
             openPositionListener.onOpenPosition(openPosition);
+        }
+    }
+
+    private void onOpenPositionForcefullyClosed(OpenPositionForcefullyClosed openPositionForcefullyClosed){
+        OpenPositionListener openPositionListener = this.openPositionListener;
+        if (openPositionForcefullyClosed != null) {
+            openPositionListener.onOpenPositionForcefullyClosed(openPositionForcefullyClosed);
         }
     }
 
