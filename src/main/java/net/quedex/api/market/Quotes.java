@@ -20,6 +20,9 @@ public class Quotes {
     private final Integer askQuantity;
     private final int volume;
     private final int openInterest;
+    private final BigDecimal tap;
+    private final BigDecimal lowerLimit;
+    private final BigDecimal upperLimit;
 
     @JsonCreator
     public Quotes(
@@ -31,7 +34,10 @@ public class Quotes {
             @JsonProperty("ask") BigDecimal ask,
             @JsonProperty("ask_quantity") Integer askQuantity,
             @JsonProperty("volume") int volume,
-            @JsonProperty("open_interest") int openInterest
+            @JsonProperty("open_interest") int openInterest,
+            @JsonProperty("tap") BigDecimal tap,
+            @JsonProperty("lower_limit") BigDecimal lowerLimit,
+            @JsonProperty("upper_limit") BigDecimal upperLimit
     ) {
         checkArgument(last.compareTo(BigDecimal.ZERO) > 0, "last=%s <= 0", last);
         checkArgument(lastQuantity >= 0, "lastQuantity=%s < 0", lastQuantity); // may be 0 when reference trade
@@ -41,6 +47,9 @@ public class Quotes {
         checkArgument(ask == null || ask.compareTo(BigDecimal.ZERO) > 0, "ask=%s <= 0", ask);
         checkArgument(askQuantity == null || askQuantity > 0, "askQuantity=%s <= 0", askQuantity);
         checkArgument(openInterest >= 0, "openInterest=%s < 0", openInterest);
+        checkArgument(tap == null || tap.compareTo(BigDecimal.ZERO) > 0, "tap=%s <= 0", tap);
+        checkArgument(lowerLimit == null || lowerLimit.compareTo(BigDecimal.ZERO) > 0, "lowerLimit=%s <= 0", lowerLimit);
+        checkArgument(upperLimit == null || upperLimit.compareTo(BigDecimal.ZERO) > 0, "upperLimit=%s <= 0", upperLimit);
         this.instrumentId = instrumentId;
         this.last = last;
         this.lastQuantity = lastQuantity;
@@ -50,6 +59,9 @@ public class Quotes {
         this.askQuantity = askQuantity;
         this.volume = volume;
         this.openInterest = openInterest;
+        this.tap = tap;
+        this.lowerLimit = lowerLimit;
+        this.upperLimit = upperLimit;
     }
 
     public int getInstrumentId() {
@@ -86,6 +98,18 @@ public class Quotes {
         return openInterest;
     }
 
+    public BigDecimal getTap() {
+        return tap;
+    }
+
+    public BigDecimal getLowerLimit() {
+        return lowerLimit;
+    }
+
+    public BigDecimal getUpperLimit() {
+        return upperLimit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -99,12 +123,28 @@ public class Quotes {
                 Objects.equal(bid, quotes.bid) &&
                 Objects.equal(bidQuantity, quotes.bidQuantity) &&
                 Objects.equal(ask, quotes.ask) &&
-                Objects.equal(askQuantity, quotes.askQuantity);
+                Objects.equal(askQuantity, quotes.askQuantity) &&
+                Objects.equal(tap, quotes.tap) &&
+                Objects.equal(lowerLimit, quotes.lowerLimit) &&
+                Objects.equal(upperLimit, quotes.upperLimit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(instrumentId, last, lastQuantity, bid, bidQuantity, ask, askQuantity, volume, openInterest);
+        return Objects.hashCode(
+            instrumentId,
+            last,
+            lastQuantity,
+            bid,
+            bidQuantity,
+            ask,
+            askQuantity,
+            volume,
+            openInterest,
+            tap,
+            lowerLimit,
+            upperLimit
+        );
     }
 
     @Override
@@ -119,6 +159,9 @@ public class Quotes {
                 .add("askQuantity", askQuantity)
                 .add("volume", volume)
                 .add("openInterest", openInterest)
+                .add("tap", tap)
+                .add("lowerLimit", lowerLimit)
+                .add("upperLimit", upperLimit)
                 .toString();
     }
 }
