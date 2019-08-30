@@ -36,6 +36,8 @@ public interface MarketStream {
 
     Registration registerQuotesListener(QuotesListener quotesListener);
 
+    void registerSpotDataListener(SpotDataListener spotDataListener);
+
     void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener);
 
     void stop() throws CommunicationException;

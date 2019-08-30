@@ -42,6 +42,11 @@ public class WebsocketMarketStream extends WebsocketStream<MarketMessageReceiver
     }
 
     @Override
+    public void registerSpotDataListener(final SpotDataListener spotDataListener) {
+        messageReceiver.registerSpotDataListener(spotDataListener);
+    }
+
+    @Override
     public void registerAndSubscribeSessionStateListener(SessionStateListener sessionStateListener) {
         messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
     }
