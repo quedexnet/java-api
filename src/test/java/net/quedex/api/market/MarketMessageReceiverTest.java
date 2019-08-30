@@ -3,9 +3,11 @@ package net.quedex.api.market;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.quedex.api.common.CommunicationException;
 import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.pgp.BcPublicKey;
+import net.quedex.api.user.AccountState;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -35,6 +37,7 @@ public class MarketMessageReceiverTest {
     @Mock private TradeListener tradeListener;
     @Mock private StreamFailureListener streamFailureListener;
     @Mock private InstrumentsListener instrumentsListener;
+    @Mock private SpotDataListener spotDataListener;
 
     private MarketMessageReceiver messageReceiver;
 
@@ -184,6 +187,38 @@ public class MarketMessageReceiverTest {
             new BigDecimal("0.04000000"),
             new BigDecimal("0.03000000"),
             null
+        ));
+    }
+
+    @Test
+    public void testSpotDataProcessing() throws Exception {
+
+        // given
+        messageReceiver.registerSpotDataListener(spotDataListener);
+
+        // when
+        messageReceiver.processMessage(Fixtures.SPOT_DATA_STR);
+
+        // then
+        verify(streamFailureListener, never()).onStreamFailure(any());
+
+        verify(spotDataListener).onSpotData(new SpotDataWrapper(
+            ImmutableMap.of(
+                "USD",
+                new SpotDataWrapper.SpotData(
+                    new BigDecimal("0.00010469"),
+                    new BigDecimal("-0.00000004"),
+                    new BigDecimal("0.00010446"),
+                    new BigDecimal("0.00000001"),
+                    ImmutableList.of("Kraken","itBit","Gemini"),
+                    ImmutableMap.of(
+                        "Kraken", new BigDecimal("0.00010467"),
+                        "itBit", new BigDecimal("0.00010469"),
+                        "Gemini", new BigDecimal("0.00010470")
+                    )
+                )
+            ),
+            1567163785913L
         ));
     }
 

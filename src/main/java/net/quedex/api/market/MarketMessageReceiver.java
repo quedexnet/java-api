@@ -43,6 +43,10 @@ class MarketMessageReceiver extends MessageReceiver {
     private final Object sessionStateMonitor = new Object();
     private SessionState sessionStateCached;
 
+    private volatile SpotDataListener spotDataListener;
+    private final Object spotDataMonitor = new Object();
+    private SpotDataWrapper spotDataWrapperCached;
+
     MarketMessageReceiver(BcPublicKey qdxPublicKey) {
         super(LOGGER);
         this.bcSignatureVerifier = new BcSignatureVerifier(qdxPublicKey);
@@ -104,6 +108,16 @@ class MarketMessageReceiver extends MessageReceiver {
         }
     }
 
+    void registerSpotDataListener(SpotDataListener spotDataListener) {
+        this.spotDataListener = spotDataListener;
+        synchronized (spotDataMonitor) {
+            SpotDataWrapper spotDataWrapperCached = this.spotDataWrapperCached;
+            if (spotDataListener != null && this.spotDataWrapperCached != null) {
+                spotDataListener.onSpotData(spotDataWrapperCached);
+            }
+        }
+    }
+
     @Override
     protected void processData(String data) throws IOException, PGPExceptionBase {
         LOGGER.trace("processData({})", data);
@@ -126,6 +140,9 @@ class MarketMessageReceiver extends MessageReceiver {
                 break;
             case "instrument_data":
                 onInstrumentData(OBJECT_MAPPER.treeToValue(dataJson.get("data"), InstrumentsMap.class));
+                break;
+            case "spot_data":
+                onSpotDataWrapper(OBJECT_MAPPER.treeToValue(dataJson, SpotDataWrapper.class));
             default:
                 // no-op
                 break;
@@ -178,6 +195,16 @@ class MarketMessageReceiver extends MessageReceiver {
             SessionStateListener sessionStateListener = this.sessionStateListener;
             if (sessionStateListener != null) {
                 sessionStateListener.onSessionState(sessionState);
+            }
+        }
+    }
+
+    private void onSpotDataWrapper(SpotDataWrapper spotDataWrapper) {
+        synchronized (spotDataMonitor) {
+            spotDataWrapperCached = spotDataWrapper;
+            SpotDataListener spotDataListener = this.spotDataListener;
+            if (spotDataListener != null) {
+                spotDataListener.onSpotData(spotDataWrapper);
             }
         }
     }
