@@ -92,7 +92,7 @@ Pull requests containing bugfixes are very welcome!
 
 ## License
 
-Copyright &copy; 2019 Quedex Ltd. API is released under [Apache License Version 2.0](LICENSE).
+Copyright &copy; 2017-2019 Quedex Ltd. API is released under [Apache License Version 2.0](LICENSE).
 
 [inverse-notation-docs]: https://quedex.net/doc/inverse_notation
 [faq-session-schedule]: https://quedex.net/faq#session_schedule
