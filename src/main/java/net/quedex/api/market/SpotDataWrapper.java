@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SpotDataWrapper {
 
-    // maps from underlying symbol to SpotDataWrapper.
+    // maps from underlying symbol to SpotData
     private final @JsonProperty("spot_data") Map<String, SpotData> spotData;
     private final @JsonProperty("update_time") long timestamp;
 
