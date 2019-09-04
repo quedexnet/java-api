@@ -143,6 +143,7 @@ class MarketMessageReceiver extends MessageReceiver {
                 break;
             case "spot_data":
                 onSpotDataWrapper(OBJECT_MAPPER.treeToValue(dataJson, SpotDataWrapper.class));
+                break;
             default:
                 // no-op
                 break;
