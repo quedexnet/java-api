@@ -1,6 +1,7 @@
 package net.quedex.api.market;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import net.quedex.api.common.ListenerException;
 import net.quedex.api.common.MessageReceiver;
 import net.quedex.api.pgp.BcPublicKey;
 import net.quedex.api.pgp.BcSignatureVerifier;
@@ -57,7 +58,9 @@ class MarketMessageReceiver extends MessageReceiver {
         synchronized (instrumentsMonitor) {
             Map<Integer, Instrument> instrumentsCached = this.instrumentsCached;
             if (instrumentsListener != null && instrumentsCached != null) {
-                instrumentsListener.onInstruments(instrumentsCached);
+                runListenerAndPassExceptionsToFailureListener(() ->
+                    instrumentsListener.onInstruments(instrumentsCached)
+                );
             }
         }
     }
@@ -68,7 +71,9 @@ class MarketMessageReceiver extends MessageReceiver {
             @Override
             void onSubscribe(OrderBook element) {
                 if (orderBookListener != null) {
-                    orderBookListener.onOrderBook(element);
+                    runListenerAndPassExceptionsToFailureListener(() ->
+                        orderBookListener.onOrderBook(element)
+                    );
                 }
             }
         };
@@ -80,7 +85,9 @@ class MarketMessageReceiver extends MessageReceiver {
             @Override
             void onSubscribe(Trade element) {
                 if (tradeListener != null) {
-                    tradeListener.onTrade(element);
+                    runListenerAndPassExceptionsToFailureListener(() ->
+                        tradeListener.onTrade(element)
+                    );
                 }
             }
         };
@@ -92,7 +99,9 @@ class MarketMessageReceiver extends MessageReceiver {
             @Override
             void onSubscribe(Quotes element) {
                 if (quotesListener != null) {
-                    quotesListener.onQuotes(element);
+                    runListenerAndPassExceptionsToFailureListener(() ->
+                        quotesListener.onQuotes(element)
+                    );
                 }
             }
         };
@@ -103,7 +112,9 @@ class MarketMessageReceiver extends MessageReceiver {
         synchronized (sessionStateMonitor) {
             SessionState sessionStateCached = this.sessionStateCached;
             if (sessionStateListener != null && sessionStateCached != null) {
-                sessionStateListener.onSessionState(sessionStateCached);
+                runListenerAndPassExceptionsToFailureListener(() ->
+                    sessionStateListener.onSessionState(sessionStateCached)
+                );
             }
         }
     }
@@ -113,13 +124,15 @@ class MarketMessageReceiver extends MessageReceiver {
         synchronized (spotDataMonitor) {
             SpotDataWrapper spotDataWrapperCached = this.spotDataWrapperCached;
             if (spotDataListener != null && this.spotDataWrapperCached != null) {
-                spotDataListener.onSpotData(spotDataWrapperCached);
+                runListenerAndPassExceptionsToFailureListener(() ->
+                    spotDataListener.onSpotData(spotDataWrapperCached)
+                );
             }
         }
     }
 
     @Override
-    protected void processData(String data) throws IOException, PGPExceptionBase {
+    protected void processData(String data) throws IOException, PGPExceptionBase, ListenerException {
         LOGGER.trace("processData({})", data);
 
         String verified = bcSignatureVerifier.verifySignature(data);
@@ -150,62 +163,62 @@ class MarketMessageReceiver extends MessageReceiver {
         }
     }
 
-    private void onInstrumentData(Map<Integer, Instrument> instruments) {
+    private void onInstrumentData(Map<Integer, Instrument> instruments) throws ListenerException {
         synchronized (instrumentsMonitor) {
             instrumentsCached = instruments;
             InstrumentsListener instrumentsListener = this.instrumentsListener;
             if (instrumentsListener != null) {
-                instrumentsListener.onInstruments(instruments);
+                runListener(() -> instrumentsListener.onInstruments(instruments));
             }
         }
     }
 
-    private void onOrderBook(OrderBook orderBook) {
+    private void onOrderBook(OrderBook orderBook) throws ListenerException {
         synchronized (orderBookCache) {
             orderBookCache.put(orderBook.getInstrumentId(), orderBook);
             OrderBookListener orderBookListener = this.orderBookListener;
             if (orderBookListener != null && orderBookSubscriptions.contains(orderBook.getInstrumentId())) {
-                orderBookListener.onOrderBook(orderBook);
+                runListener(() -> orderBookListener.onOrderBook(orderBook));
             }
         }
     }
 
-    private void onQuotes(Quotes quotes) {
+    private void onQuotes(Quotes quotes) throws ListenerException {
         synchronized (quotesCache) {
             quotesCache.put(quotes.getInstrumentId(), quotes);
             QuotesListener quotesListener = this.quotesListener;
             if (quotesListener != null && quotesSubscriptions.contains(quotes.getInstrumentId())) {
-                quotesListener.onQuotes(quotes);
+                runListener(() -> quotesListener.onQuotes(quotes));
             }
         }
     }
 
-    private void onTrade(Trade trade) {
+    private void onTrade(Trade trade) throws ListenerException {
         synchronized (tradeCache) {
             tradeCache.put(trade.getInstrumentId(), trade);
             TradeListener tradeListener = this.tradeListener;
             if (tradeListener != null && tradeSubscriptions.contains(trade.getInstrumentId())) {
-                tradeListener.onTrade(trade);
+                runListener(() -> tradeListener.onTrade(trade));
             }
         }
     }
 
-    private void onSessionState(SessionState sessionState) {
+    private void onSessionState(SessionState sessionState) throws ListenerException {
         synchronized (sessionStateMonitor) {
             sessionStateCached = sessionState;
             SessionStateListener sessionStateListener = this.sessionStateListener;
             if (sessionStateListener != null) {
-                sessionStateListener.onSessionState(sessionState);
+                runListener(() -> sessionStateListener.onSessionState(sessionState));
             }
         }
     }
 
-    private void onSpotDataWrapper(SpotDataWrapper spotDataWrapper) {
+    private void onSpotDataWrapper(SpotDataWrapper spotDataWrapper) throws ListenerException {
         synchronized (spotDataMonitor) {
             spotDataWrapperCached = spotDataWrapper;
             SpotDataListener spotDataListener = this.spotDataListener;
             if (spotDataListener != null) {
-                spotDataListener.onSpotData(spotDataWrapper);
+                runListener(() -> spotDataListener.onSpotData(spotDataWrapper));
             }
         }
     }
