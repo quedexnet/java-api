@@ -2,6 +2,7 @@ package net.quedex.api.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import net.quedex.api.common.CommunicationException;
+import net.quedex.api.common.ListenerException;
 import net.quedex.api.common.MessageReceiver;
 import net.quedex.api.pgp.BcDecryptor;
 import net.quedex.api.pgp.BcPrivateKey;
@@ -63,7 +64,7 @@ class UserMessageReceiver extends MessageReceiver {
     }
 
     @Override
-    protected void processData(String data) throws IOException, PGPExceptionBase {
+    protected void processData(String data) throws IOException, PGPExceptionBase, ListenerException {
 
         String decrypted = decryptor.decrypt(data);
 
@@ -170,192 +171,192 @@ class UserMessageReceiver extends MessageReceiver {
         }
     }
 
-    private void onAccountState(AccountState accountState) {
+    private void onAccountState(AccountState accountState) throws ListenerException {
         AccountStateListener accountStateListener = this.accountStateListener;
         if (accountStateListener != null) {
-            accountStateListener.onAccountState(accountState);
+            runListener(() -> accountStateListener.onAccountState(accountState));
         }
     }
 
-    private void onOpenPosition(OpenPosition openPosition) {
+    private void onOpenPosition(OpenPosition openPosition) throws ListenerException {
         OpenPositionListener openPositionListener = this.openPositionListener;
         if (openPositionListener != null) {
-            openPositionListener.onOpenPosition(openPosition);
+            runListener(() -> openPositionListener.onOpenPosition(openPosition));
         }
     }
 
-    private void onOpenPositionForcefullyClosed(OpenPositionForcefullyClosed openPositionForcefullyClosed){
+    private void onOpenPositionForcefullyClosed(OpenPositionForcefullyClosed openPositionForcefullyClosed) throws ListenerException {
         OpenPositionListener openPositionListener = this.openPositionListener;
         if (openPositionForcefullyClosed != null) {
-            openPositionListener.onOpenPositionForcefullyClosed(openPositionForcefullyClosed);
+            runListener(() -> openPositionListener.onOpenPositionForcefullyClosed(openPositionForcefullyClosed));
         }
     }
 
-    private void onOrderCancelled(OrderCancelled orderCancelled) {
+    private void onOrderCancelled(OrderCancelled orderCancelled) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderCancelled(orderCancelled);
+            runListener(() -> orderListener.onOrderCancelled(orderCancelled));
         }
     }
 
-    private void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled) {
+    private void onOrderForcefullyCancelled(OrderForcefullyCancelled orderForcefullyCancelled) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderForcefullyCancelled(orderForcefullyCancelled);
+            runListener(() -> orderListener.onOrderForcefullyCancelled(orderForcefullyCancelled));
         }
     }
 
-    private void onOrderCancelFailed(OrderCancelFailed orderCancelFailed) {
+    private void onOrderCancelFailed(OrderCancelFailed orderCancelFailed) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderCancelFailed(orderCancelFailed);
+            runListener(() -> orderListener.onOrderCancelFailed(orderCancelFailed));
         }
     }
 
-    private void onAllOrdersCanceled() {
+    private void onAllOrdersCanceled() throws ListenerException {
         final OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onAllOrdersCancelled();
+            runListener(() -> orderListener.onAllOrdersCancelled());
         }
     }
 
-    private void onCancelAllOrdersFailed(final CancelAllOrdersFailed cancelAllOrdersFailed) {
+    private void onCancelAllOrdersFailed(final CancelAllOrdersFailed cancelAllOrdersFailed) throws ListenerException {
         final OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onCancelAllOrdersFailed(cancelAllOrdersFailed);
+            runListener(() -> orderListener.onCancelAllOrdersFailed(cancelAllOrdersFailed));
         }
     }
 
-    private void onOrderFilled(OrderFilled orderFilled) {
+    private void onOrderFilled(OrderFilled orderFilled) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderFilled(orderFilled);
+            runListener(() -> orderListener.onOrderFilled(orderFilled));
         }
     }
 
-    private void onOrderModificationFailed(OrderModificationFailed orderModificationFailed) {
+    private void onOrderModificationFailed(OrderModificationFailed orderModificationFailed) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderModificationFailed(orderModificationFailed);
+            runListener(() -> orderListener.onOrderModificationFailed(orderModificationFailed));
         }
     }
 
-    private void onOrderModified(OrderModified orderModified) {
+    private void onOrderModified(OrderModified orderModified) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderModified(orderModified);
+            runListener(() -> orderListener.onOrderModified(orderModified));
         }
     }
 
-    private void onOrderPlaced(OrderPlaced orderPlaced) {
+    private void onOrderPlaced(OrderPlaced orderPlaced) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderPlaced(orderPlaced);
+            runListener(() -> orderListener.onOrderPlaced(orderPlaced));
         }
     }
 
-    private void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed) {
+    private void onOrderPlaceFailed(OrderPlaceFailed orderPlaceFailed) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onOrderPlaceFailed(orderPlaceFailed);
+            runListener(() -> orderListener.onOrderPlaceFailed(orderPlaceFailed));
         }
     }
 
-    private void onLiquidationOrderPlaced(LiquidationOrderPlaced liquidationOrderPlaced) {
+    private void onLiquidationOrderPlaced(LiquidationOrderPlaced liquidationOrderPlaced) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onLiquidationOrderPlaced(liquidationOrderPlaced);
+            runListener(() -> orderListener.onLiquidationOrderPlaced(liquidationOrderPlaced));
         }
     }
 
-    private void onLiquidationOrderCancelled(LiquidationOrderCancelled liquidationOrderCancelled) {
+    private void onLiquidationOrderCancelled(LiquidationOrderCancelled liquidationOrderCancelled) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onLiquidationOrderCancelled(liquidationOrderCancelled);
+            runListener(() -> orderListener.onLiquidationOrderCancelled(liquidationOrderCancelled));
         }
     }
 
-    private void onLiquidationOrderFilled(LiquidationOrderFilled liquidationOrderFilled) {
+    private void onLiquidationOrderFilled(LiquidationOrderFilled liquidationOrderFilled) throws ListenerException {
         OrderListener orderListener = this.orderListener;
         if (orderListener != null) {
-            orderListener.onLiquidationOrderFilled(liquidationOrderFilled);
+            runListener(() -> orderListener.onLiquidationOrderFilled(liquidationOrderFilled));
         }
     }
 
-    private void onInternalTransferExecuted(InternalTransferExecuted internalTransferExecuted) {
+    private void onInternalTransferExecuted(InternalTransferExecuted internalTransferExecuted) throws ListenerException {
         InternalTransferListener listener = internalTransferListener;
         if (listener != null) {
-            listener.onInternalTransferExecuted(internalTransferExecuted);
+            runListener(() -> listener.onInternalTransferExecuted(internalTransferExecuted));
         }
     }
 
-    private void onInternalTransferRejected(InternalTransferRejected internalTransferRejected) {
+    private void onInternalTransferRejected(InternalTransferRejected internalTransferRejected) throws ListenerException {
         InternalTransferListener listener = internalTransferListener;
         if (listener != null) {
-            listener.onInternalTransferRejected(internalTransferRejected);
+            runListener(() -> listener.onInternalTransferRejected(internalTransferRejected));
         }
     }
 
-    private void onInternalTransferReceived(InternalTransferReceived internalTransferReceived) {
+    private void onInternalTransferReceived(InternalTransferReceived internalTransferReceived) throws ListenerException {
         InternalTransferListener listener = internalTransferListener;
         if (listener != null) {
-            listener.onInternalTransferReceived(internalTransferReceived);
+            runListener(() -> listener.onInternalTransferReceived(internalTransferReceived));
         }
     }
 
-    private void onTimerAdded(TimerAdded timerAdded) {
+    private void onTimerAdded(TimerAdded timerAdded) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerAdded(timerAdded);
+            runListener(() -> listener.onTimerAdded(timerAdded));
         }
     }
 
-    private void onTimerRejected(TimerRejected timerRejected) {
+    private void onTimerRejected(TimerRejected timerRejected) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerRejected(timerRejected);
+            runListener(() -> listener.onTimerRejected(timerRejected));
         }
     }
 
-    private void onTimerExpired(TimerExpired timerExpired) {
+    private void onTimerExpired(TimerExpired timerExpired) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerExpired(timerExpired);
+            runListener(() -> listener.onTimerExpired(timerExpired));
         }
     }
 
-    private void onTimerTriggered(TimerTriggered timerTriggered) {
+    private void onTimerTriggered(TimerTriggered timerTriggered) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerTriggered(timerTriggered);
+            runListener(() -> listener.onTimerTriggered(timerTriggered));
         }
     }
 
-    private void onTimerUpdated(TimerUpdated timeTriggeredBatchTriggered) {
+    private void onTimerUpdated(TimerUpdated timeTriggeredBatchTriggered) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerUpdated(timeTriggeredBatchTriggered);
+            runListener(() -> listener.onTimerUpdated(timeTriggeredBatchTriggered));
         }
     }
 
-    private void onTimerUpdateFailed(TimerUpdateFailed timerUpdateFailed) {
+    private void onTimerUpdateFailed(TimerUpdateFailed timerUpdateFailed) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerUpdateFailed(timerUpdateFailed);
+            runListener(() -> listener.onTimerUpdateFailed(timerUpdateFailed));
         }
     }
 
-    private void onTimerCancelled(TimerCancelled timerCancelled) {
+    private void onTimerCancelled(TimerCancelled timerCancelled) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerCancelled(timerCancelled);
+            runListener(() -> listener.onTimerCancelled(timerCancelled));
         }
     }
 
-    private void onTimerCanelFailed(TimerCancelFailed timerCancelFailed) {
+    private void onTimerCanelFailed(TimerCancelFailed timerCancelFailed) throws ListenerException {
         TimerListener listener = timerListener;
         if (listener != null) {
-            listener.onTimerCancelFailed(timerCancelFailed);
+            runListener(() -> listener.onTimerCancelFailed(timerCancelFailed));
         }
     }
 

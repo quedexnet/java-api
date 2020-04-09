@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.quedex.api.common.CommunicationException;
+import net.quedex.api.common.ListenerException;
 import net.quedex.api.common.StreamFailureListener;
 import net.quedex.api.pgp.BcPublicKey;
-import net.quedex.api.user.AccountState;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -84,6 +85,42 @@ public class MarketMessageReceiverTest {
     }
 
     @Test
+    public void testErrorListenerIsCalledWhenOrderBookListenerThrowsOnSubscribe() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.ORDER_BOOK_STR);
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(orderBookListener).onOrderBook(any());
+        reg.subscribe(1);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenOrderBookListenerThrows() {
+
+        // given
+        Registration reg = messageReceiver.registerOrderBookListener(orderBookListener);
+
+        // when
+        reg.subscribe(1);
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(orderBookListener).onOrderBook(any());
+        messageReceiver.processMessage(Fixtures.ORDER_BOOK_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
     public void testQuotesProcessing() throws Exception {
 
         // given
@@ -111,6 +148,42 @@ public class MarketMessageReceiverTest {
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(quotesListener, never()).onQuotes(any());
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenQuotesListenerThrowsOnSubscribe() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.QUOTES_STR);
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(quotesListener).onQuotes(any());
+        reg.subscribe(1);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenQuotesListenerThrows() {
+
+        // given
+        Registration reg = messageReceiver.registerQuotesListener(quotesListener);
+
+        // when
+        reg.subscribe(1);
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(quotesListener).onQuotes(any());
+        messageReceiver.processMessage(Fixtures.QUOTES_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
     }
 
     @Test
@@ -146,6 +219,42 @@ public class MarketMessageReceiverTest {
     }
 
     @Test
+    public void testErrorListenerIsCalledWhenTradeListenerThrowsOnSubscribe() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.TRADE_STR);
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(tradeListener).onTrade(any());
+        reg.subscribe(1);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenTradeListenerThrows() {
+
+        // given
+        Registration reg = messageReceiver.registerTradeListener(tradeListener);
+
+        // when
+        reg.subscribe(1);
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(tradeListener).onTrade(any());
+        messageReceiver.processMessage(Fixtures.TRADE_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
     public void testSessionStateProcessing() throws Exception {
 
         // when
@@ -155,6 +264,40 @@ public class MarketMessageReceiverTest {
         // then
         verify(streamFailureListener, never()).onStreamFailure(any());
         verify(sessionStateListener).onSessionState(SessionState.AUCTION);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenStateListenerThrowsOnRegistration() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.SESSION_STATE_STR);
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(sessionStateListener).onSessionState(any());
+
+        // when
+        messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenStateListenerThrows() {
+
+        // given
+        messageReceiver.registerAndSubscribeSessionStateListener(sessionStateListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(sessionStateListener).onSessionState(any());
+        messageReceiver.processMessage(Fixtures.SESSION_STATE_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
     }
 
     @Test
@@ -191,6 +334,41 @@ public class MarketMessageReceiverTest {
     }
 
     @Test
+    public void testErrorListenerIsCalledWhenInstrumentDataListenerThrowsOnRegistration() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.INSTRUMENT_DATA_STR);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(instrumentsListener).onInstruments(any());
+        messageReceiver.registerInstrumentsListener(instrumentsListener);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenInstrumentDataListenerThrows() {
+
+        // given
+        messageReceiver.registerInstrumentsListener(instrumentsListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(instrumentsListener).onInstruments(any());
+
+        messageReceiver.processMessage(Fixtures.INSTRUMENT_DATA_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
     public void testSpotDataProcessing() throws Exception {
 
         // given
@@ -220,6 +398,40 @@ public class MarketMessageReceiverTest {
             ),
             1567163785913L
         ));
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenSpotDataListenerThrowsOnRegistration() {
+
+        // given
+        messageReceiver.processMessage(Fixtures.SPOT_DATA_STR);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(spotDataListener).onSpotData(any());
+        messageReceiver.registerSpotDataListener(spotDataListener);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
+    }
+
+    @Test
+    public void testErrorListenerIsCalledWhenSpotDataListenerThrows() {
+
+        // given
+        messageReceiver.registerSpotDataListener(spotDataListener);
+
+        // when
+        final Exception exception = new RuntimeException("Fatal");
+        doThrow(exception).when(spotDataListener).onSpotData(any());
+        messageReceiver.processMessage(Fixtures.SPOT_DATA_STR);
+
+        // then
+        final ArgumentCaptor<ListenerException> captor = ArgumentCaptor.forClass(ListenerException.class);
+        verify(streamFailureListener).onStreamFailure(captor.capture());
+        assertThat(captor.getValue().getCause()).isEqualTo(exception);
     }
 
     @Test

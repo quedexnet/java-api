@@ -23,7 +23,7 @@ public abstract class MessageReceiver {
         this.logger = checkNotNull(logger, "null logger");
     }
 
-    protected abstract void processData(String data) throws IOException, PGPExceptionBase;
+    protected abstract void processData(String data) throws IOException, PGPExceptionBase, ListenerException;
 
     public final void processMessage(String message) {
 
@@ -50,6 +50,8 @@ public abstract class MessageReceiver {
             onError(new CommunicationException("PGP error on message=" + message, e));
         } catch (RuntimeException e) {
             onError(new CommunicationException("Error processing message=" + message, e));
+        } catch (ListenerException e) {
+            onError(e);
         }
     }
 
@@ -72,5 +74,21 @@ public abstract class MessageReceiver {
 
     public final void registerStreamFailureListener(StreamFailureListener streamFailureListener) {
         this.streamFailureListener = streamFailureListener;
+    }
+
+    protected void runListener(final Runnable listenerUpdate) throws ListenerException {
+        try {
+            listenerUpdate.run();
+        } catch (final RuntimeException exception) {
+            throw new ListenerException("Listener failed to process data", exception);
+        }
+    }
+
+    protected void runListenerAndPassExceptionsToFailureListener(final Runnable listenerUpdate) {
+        try {
+            listenerUpdate.run();
+        } catch (final RuntimeException exception) {
+            onError(new ListenerException("Listener failed to process data", exception));
+        }
     }
 }
