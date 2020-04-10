@@ -76,7 +76,7 @@ public abstract class MessageReceiver {
         this.streamFailureListener = streamFailureListener;
     }
 
-    protected void runListener(final Runnable listenerUpdate) throws ListenerException {
+    protected void runListener(Runnable listenerUpdate) throws ListenerException {
         try {
             listenerUpdate.run();
         } catch (final RuntimeException exception) {
@@ -84,7 +84,7 @@ public abstract class MessageReceiver {
         }
     }
 
-    protected void runListenerAndPassExceptionsToFailureListener(final Runnable listenerUpdate) {
+    protected void runListenerAndPassExceptionsToFailureListener(Runnable listenerUpdate) {
         try {
             listenerUpdate.run();
         } catch (final RuntimeException exception) {
