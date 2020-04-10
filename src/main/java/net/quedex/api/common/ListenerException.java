@@ -1,5 +1,9 @@
 package net.quedex.api.common;
 
+/**
+ * Indicates problems with listener implementation provided by user. Listener failed to handle incoming data and threw
+ * an exception. No listener should throw any exceptions.
+ */
 public class ListenerException extends Exception {
 
     public ListenerException() {
